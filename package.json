@@ -1,5 +1,5 @@
 {
-  "name": "@alcorexchange/alcor-swap-sdk",
+  "name": "@phasolka0/alcor-swap-sdk",
   "version": "1.0.5",
   "description": "",
   "main": "build/index.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alcorexchange/alcor-v2-sdk"
+    "url": "git+https://github.com/Phasolka0/alcor-v2-sdk"
   },
   "keywords": [
     "alcor",
