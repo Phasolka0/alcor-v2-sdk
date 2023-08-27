@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -100,27 +91,25 @@ class Pool {
      * @returns The output amount and the pool with updated state
      */
     getOutputAmount(inputAmount, sqrtPriceLimitX64) {
-        return __awaiter(this, void 0, void 0, function* () {
-            (0, tiny_invariant_1.default)(this.involvesToken(inputAmount.currency), "TOKEN");
-            const zeroForOne = inputAmount.currency.equals(this.tokenA);
-            const { amountCalculated: outputAmount, sqrtPriceX64, liquidity, tickCurrent, } = yield this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
-            const outputToken = zeroForOne ? this.tokenB : this.tokenA;
-            return [
-                fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE)),
-                new Pool({
-                    id: this.id,
-                    tokenA: this.tokenA,
-                    tokenB: this.tokenB,
-                    fee: this.fee,
-                    sqrtPriceX64,
-                    liquidity,
-                    tickCurrent,
-                    ticks: this.tickDataProvider,
-                    feeGrowthGlobalAX64: this.feeGrowthGlobalAX64,
-                    feeGrowthGlobalBX64: this.feeGrowthGlobalBX64,
-                })
-            ];
-        });
+        (0, tiny_invariant_1.default)(this.involvesToken(inputAmount.currency), "TOKEN");
+        const zeroForOne = inputAmount.currency.equals(this.tokenA);
+        const { amountCalculated: outputAmount, sqrtPriceX64, liquidity, tickCurrent, } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
+        const outputToken = zeroForOne ? this.tokenB : this.tokenA;
+        return [
+            fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE)),
+            new Pool({
+                id: this.id,
+                tokenA: this.tokenA,
+                tokenB: this.tokenB,
+                fee: this.fee,
+                sqrtPriceX64,
+                liquidity,
+                tickCurrent,
+                ticks: this.tickDataProvider,
+                feeGrowthGlobalAX64: this.feeGrowthGlobalAX64,
+                feeGrowthGlobalBX64: this.feeGrowthGlobalBX64,
+            })
+        ];
     }
     /**
      * Given an input amount of a token, return the computed output amount, and a pool with state updated after the trade
@@ -129,13 +118,11 @@ class Pool {
      * @returns The output amount and the pool with updated state
      */
     getOutputAmountOptimized(inputAmount, sqrtPriceLimitX64) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const zeroForOne = inputAmount.currency.equals(this.tokenA);
-            const { amountCalculated: outputAmount } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
-            const outputToken = zeroForOne ? this.tokenB : this.tokenA;
-            console.log(outputToken);
-            return fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE));
-        });
+        const zeroForOne = inputAmount.currency.equals(this.tokenA);
+        const { amountCalculated: outputAmount } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
+        const outputToken = zeroForOne ? this.tokenB : this.tokenA;
+        console.log(outputToken);
+        return fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE));
     }
     /**
      * Given a desired output amount of a token, return the computed input amount and a pool with state updated after the trade
@@ -144,26 +131,24 @@ class Pool {
      * @returns The input amount and the pool with updated state
      */
     getInputAmount(outputAmount, sqrtPriceLimitX64) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const zeroForOne = outputAmount.currency.equals(this.tokenB);
-            const { amountCalculated: inputAmount, sqrtPriceX64, liquidity, tickCurrent, } = yield this.swap(zeroForOne, jsbi_1.default.multiply(outputAmount.quotient, internalConstants_2.NEGATIVE_ONE), sqrtPriceLimitX64);
-            const inputToken = zeroForOne ? this.tokenA : this.tokenB;
-            return [
-                fractions_1.CurrencyAmount.fromRawAmount(inputToken, inputAmount),
-                new Pool({
-                    id: this.id,
-                    tokenA: this.tokenA,
-                    tokenB: this.tokenB,
-                    fee: this.fee,
-                    sqrtPriceX64,
-                    liquidity,
-                    tickCurrent,
-                    ticks: this.tickDataProvider,
-                    feeGrowthGlobalAX64: this.feeGrowthGlobalAX64,
-                    feeGrowthGlobalBX64: this.feeGrowthGlobalBX64,
-                }),
-            ];
-        });
+        const zeroForOne = outputAmount.currency.equals(this.tokenB);
+        const { amountCalculated: inputAmount, sqrtPriceX64, liquidity, tickCurrent, } = this.swap(zeroForOne, jsbi_1.default.multiply(outputAmount.quotient, internalConstants_2.NEGATIVE_ONE), sqrtPriceLimitX64);
+        const inputToken = zeroForOne ? this.tokenA : this.tokenB;
+        return [
+            fractions_1.CurrencyAmount.fromRawAmount(inputToken, inputAmount),
+            new Pool({
+                id: this.id,
+                tokenA: this.tokenA,
+                tokenB: this.tokenB,
+                fee: this.fee,
+                sqrtPriceX64,
+                liquidity,
+                tickCurrent,
+                ticks: this.tickDataProvider,
+                feeGrowthGlobalAX64: this.feeGrowthGlobalAX64,
+                feeGrowthGlobalBX64: this.feeGrowthGlobalBX64,
+            }),
+        ];
     }
     /**
      * Executes a swap
