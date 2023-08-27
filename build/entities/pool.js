@@ -121,7 +121,6 @@ class Pool {
         const zeroForOne = inputAmount.currency.equals(this.tokenA);
         const { amountCalculated: outputAmount } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
         const outputToken = zeroForOne ? this.tokenB : this.tokenA;
-        console.log(outputToken);
         return fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE));
     }
     /**
