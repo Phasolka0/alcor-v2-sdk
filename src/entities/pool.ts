@@ -218,7 +218,6 @@ export class Pool {
       amountCalculated: outputAmount
     } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
     const outputToken = zeroForOne ? this.tokenB : this.tokenA;
-    console.log(outputToken)
     return CurrencyAmount.fromRawAmount(
           outputToken,
           JSBI.multiply(outputAmount, NEGATIVE_ONE)
