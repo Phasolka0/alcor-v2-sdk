@@ -264,6 +264,21 @@ export class Pool {
       }),
     ];
   }
+  public getInputAmountOptimized(
+      outputAmount: CurrencyAmount<Token>,
+      sqrtPriceLimitX64?: JSBI
+  ): CurrencyAmount<Token> {
+    const zeroForOne = outputAmount.currency.equals(this.tokenB);
+    const {
+      amountCalculated: inputAmount
+    } = this.swap(
+        zeroForOne,
+        JSBI.multiply(outputAmount.quotient, NEGATIVE_ONE),
+        sqrtPriceLimitX64
+    );
+    const inputToken = zeroForOne ? this.tokenA : this.tokenB;
+    return CurrencyAmount.fromRawAmount(inputToken, inputAmount);
+  }
 
   /**
    * Executes a swap
