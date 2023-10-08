@@ -32,7 +32,7 @@
   "devDependencies": {
     "@types/big.js": "^4.0.5",
     "@types/jest": "^29.2.6",
-    "@types/node": "^18.18.4",
+
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@typescript-eslint/parser": "^5.48.2",
     "eslint": "^8.32.0",
@@ -61,6 +61,7 @@
     "node-fetch": "2",
     "tiny-invariant": "^1.1.0",
     "tiny-warning": "^1.0.3",
-    "toformat": "^2.0.0"
+    "toformat": "^2.0.0",
+    "@types/node": "^18.18.4"
   }
 }
