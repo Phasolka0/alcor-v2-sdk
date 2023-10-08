@@ -6,7 +6,6 @@
   "scripts": {
     "start:dev": "npx nodemon",
     "build": "rimraf ./build && tsc",
-    "postinstall": "npm run build",
     "start": "npm run build && node build/index.js",
     "lint": "eslint . --ext .ts",
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
