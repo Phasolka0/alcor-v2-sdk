@@ -234,6 +234,7 @@ export class Pool {
     const cacheKey = `${inputAmount.currency.symbol}-${inputAmount.numerator.toString()}-${inputAmount.denominator.toString()}`;
 
     const fromCache = this.cache.get(cacheKey)
+    console.log(fromCache)
     if (fromCache) {
       console.log('fromCache')
       return fromCache
