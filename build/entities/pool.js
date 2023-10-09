@@ -33,6 +33,8 @@ class Pool {
      * @param ticks The current state of the pool ticks or a data provider that can return tick data
      */
     constructor({ id, tokenA, tokenB, fee, sqrtPriceX64, liquidity, tickCurrent, ticks = NO_TICK_DATA_PROVIDER_DEFAULT, feeGrowthGlobalAX64 = 0, feeGrowthGlobalBX64 = 0, }) {
+        this.cache = new Map();
+        this.cacheSizeLimit = 100000;
         (0, tiny_invariant_1.default)(Number.isInteger(fee) && fee < 1000000, "FEE");
         const tickCurrentSqrtRatioX64 = utils_1.TickMath.getSqrtRatioAtTick(tickCurrent);
         const nextTickSqrtRatioX64 = utils_1.TickMath.getSqrtRatioAtTick(tickCurrent + 1);
@@ -122,6 +124,20 @@ class Pool {
         const { amountCalculated: outputAmount } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
         const outputToken = zeroForOne ? this.tokenB : this.tokenA;
         return fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE));
+    }
+    getOutputAmountOptimizedWithCache(inputAmount, sqrtPriceLimitX64) {
+        const fromCache = this.cache.get(inputAmount);
+        if (fromCache) {
+            return fromCache;
+        }
+        const zeroForOne = inputAmount.currency.equals(this.tokenA);
+        const { amountCalculated: outputAmount } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
+        const outputToken = zeroForOne ? this.tokenB : this.tokenA;
+        const result = fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE));
+        if (this.cache.size < this.cacheSizeLimit) {
+            this.cache.set(inputAmount, outputAmount);
+        }
+        return result;
     }
     /**
      * Given a desired output amount of a token, return the computed input amount and a pool with state updated after the trade

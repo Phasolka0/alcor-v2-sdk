@@ -519,7 +519,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
       let amountOut: CurrencyAmount<Token>
       try {
-        amountOut = pool.getOutputAmountOptimized(amountIn)
+        amountOut = pool.getOutputAmountOptimizedWithCache(amountIn)
       } catch (error: any) {
         // input too low
         if (error.isInsufficientInputAmountError) {
