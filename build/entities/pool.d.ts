@@ -32,6 +32,8 @@ export declare class Pool {
     readonly tickDataProvider: TickDataProvider;
     private _tokenAPrice?;
     private _tokenBPrice?;
+    private cache;
+    private cacheSizeLimit;
     /**
      * Construct a pool
      * @param tokenA One of the tokens in the pool
@@ -77,6 +79,7 @@ export declare class Pool {
      * @returns The output amount and the pool with updated state
      */
     getOutputAmountOptimized(inputAmount: CurrencyAmount<Token>, sqrtPriceLimitX64?: JSBI): CurrencyAmount<Token>;
+    getOutputAmountOptimizedWithCache(inputAmount: CurrencyAmount<Token>, sqrtPriceLimitX64?: JSBI): CurrencyAmount<Token>;
     /**
      * Given a desired output amount of a token, return the computed input amount and a pool with state updated after the trade
      * @param outputAmount the output amount for which to quote the input amount

@@ -60,6 +60,9 @@ export class Pool {
   private _tokenAPrice?: Price<Token, Token>;
   private _tokenBPrice?: Price<Token, Token>;
 
+  private cache = new Map()
+  private cacheSizeLimit = 100000
+
   /**
    * Construct a pool
    * @param tokenA One of the tokens in the pool
@@ -223,6 +226,29 @@ export class Pool {
           JSBI.multiply(outputAmount, NEGATIVE_ONE)
       )
     ;
+  }
+  public getOutputAmountOptimizedWithCache(
+      inputAmount: CurrencyAmount<Token>,
+      sqrtPriceLimitX64?: JSBI
+  ): CurrencyAmount<Token> {
+    const fromCache = this.cache.get(inputAmount)
+    if (fromCache) {
+      return fromCache
+    }
+    const zeroForOne = inputAmount.currency.equals(this.tokenA);
+
+    const {
+      amountCalculated: outputAmount
+    } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
+    const outputToken = zeroForOne ? this.tokenB : this.tokenA;
+    const result = CurrencyAmount.fromRawAmount(
+        outputToken,
+        JSBI.multiply(outputAmount, NEGATIVE_ONE)
+    )
+    if (this.cache.size < this.cacheSizeLimit) {
+      this.cache.set(inputAmount, outputAmount)
+    }
+    return result;
   }
 
   /**
