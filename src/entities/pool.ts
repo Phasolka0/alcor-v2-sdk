@@ -231,7 +231,9 @@ export class Pool {
       inputAmount: CurrencyAmount<Token>,
       sqrtPriceLimitX64?: JSBI
   ): CurrencyAmount<Token> {
-    const fromCache = this.cache.get(inputAmount)
+    const cacheKey = `${inputAmount.currency.symbol}-${inputAmount.numerator.toString()}-${inputAmount.denominator.toString()}`;
+
+    const fromCache = this.cache.get(cacheKey)
     if (fromCache) {
       return fromCache
     }
@@ -246,7 +248,7 @@ export class Pool {
         JSBI.multiply(outputAmount, NEGATIVE_ONE)
     )
     if (this.cache.size < this.cacheSizeLimit) {
-      this.cache.set(inputAmount, outputAmount)
+      this.cache.set(cacheKey, outputAmount)
     }
     return result;
   }
