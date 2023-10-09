@@ -231,8 +231,9 @@ export class Pool {
       inputAmount: CurrencyAmount<Token>,
       sqrtPriceLimitX64?: JSBI
   ): CurrencyAmount<Token> {
+    console.log('getOutputAmountOptimizedWithCache')
     const cacheKey = `${inputAmount.currency.symbol}-${inputAmount.numerator.toString()}-${inputAmount.denominator.toString()}`;
-
+    console.log(cacheKey)
     const fromCache = this.cache.get(cacheKey)
     console.log(fromCache)
     if (fromCache) {
