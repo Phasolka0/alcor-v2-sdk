@@ -133,11 +133,8 @@ class Pool {
      */
     getOutputAmountOptimizedWithCache(inputAmount, sqrtPriceLimitX64) {
         const cacheKey = `${inputAmount.currency.symbol}-${inputAmount.numerator.toString()}-${inputAmount.denominator.toString()}`;
-        console.log(cacheKey);
         const fromCache = this.cache.get(cacheKey);
-        console.log(fromCache);
         if (fromCache) {
-            console.log('fromCache');
             return fromCache;
         }
         const zeroForOne = inputAmount.currency.equals(this.tokenA);

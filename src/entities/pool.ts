@@ -238,11 +238,8 @@ export class Pool {
       sqrtPriceLimitX64?: JSBI
   ): CurrencyAmount<Token> {
     const cacheKey = `${inputAmount.currency.symbol}-${inputAmount.numerator.toString()}-${inputAmount.denominator.toString()}`;
-    console.log(cacheKey)
     const fromCache = this.cache.get(cacheKey)
-    console.log(fromCache)
     if (fromCache) {
-      console.log('fromCache')
       return fromCache
     }
     const zeroForOne = inputAmount.currency.equals(this.tokenA);
