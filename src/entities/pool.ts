@@ -256,7 +256,7 @@ export class Pool {
         JSBI.multiply(outputAmount, NEGATIVE_ONE)
     )
     if (this.cache.size < this.cacheSizeLimit) {
-      this.cache.set(cacheKey, outputAmount)
+      this.cache.set(cacheKey, result)
     }
     return result;
   }

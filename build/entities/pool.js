@@ -145,7 +145,7 @@ class Pool {
         const outputToken = zeroForOne ? this.tokenB : this.tokenA;
         const result = fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE));
         if (this.cache.size < this.cacheSizeLimit) {
-            this.cache.set(cacheKey, outputAmount);
+            this.cache.set(cacheKey, result);
         }
         return result;
     }
