@@ -235,6 +235,7 @@ export class Pool {
 
     const fromCache = this.cache.get(cacheKey)
     if (fromCache) {
+      console.log('fromCache')
       return fromCache
     }
     const zeroForOne = inputAmount.currency.equals(this.tokenA);
