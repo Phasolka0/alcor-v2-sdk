@@ -22,6 +22,8 @@ const NO_TICK_DATA_PROVIDER_DEFAULT = new tickDataProvider_1.NoTickDataProvider(
  * Represents a V3 pool
  */
 class Pool {
+    // private cache = new Map()
+    // private cacheSizeLimit = 100000
     /**
      * Construct a pool
      * @param tokenA One of the tokens in the pool
@@ -33,8 +35,6 @@ class Pool {
      * @param ticks The current state of the pool ticks or a data provider that can return tick data
      */
     constructor({ id, tokenA, tokenB, fee, sqrtPriceX64, liquidity, tickCurrent, ticks = NO_TICK_DATA_PROVIDER_DEFAULT, feeGrowthGlobalAX64 = 0, feeGrowthGlobalBX64 = 0, }) {
-        this.cache = new Map();
-        this.cacheSizeLimit = 100000;
         (0, tiny_invariant_1.default)(Number.isInteger(fee) && fee < 1000000, "FEE");
         const tickCurrentSqrtRatioX64 = utils_1.TickMath.getSqrtRatioAtTick(tickCurrent);
         const nextTickSqrtRatioX64 = utils_1.TickMath.getSqrtRatioAtTick(tickCurrent + 1);
@@ -125,33 +125,36 @@ class Pool {
         const outputToken = zeroForOne ? this.tokenB : this.tokenA;
         return fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE));
     }
-    /**
-     * Given an input amount of a token, return the computed output amount, and a pool with state updated after the trade
-     * @param inputAmount The input amount for which to quote the output amount
-     * @param sqrtPriceLimitX64 The Q64.96 sqrt price limit
-     * @returns The output amount and the pool with updated state
-     */
-    getOutputAmountOptimizedWithCache(inputAmount, sqrtPriceLimitX64) {
-        const cacheKey = `${inputAmount.currency.symbol}-${inputAmount.numerator.toString()}-${inputAmount.denominator.toString()}`;
-        const fromCache = this.cache.get(cacheKey);
-        if (fromCache) {
-            return fromCache;
-        }
-        const zeroForOne = inputAmount.currency.equals(this.tokenA);
-        const { amountCalculated: outputAmount } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
-        const outputToken = zeroForOne ? this.tokenB : this.tokenA;
-        const result = fractions_1.CurrencyAmount.fromRawAmount(outputToken, jsbi_1.default.multiply(outputAmount, internalConstants_2.NEGATIVE_ONE));
-        if (this.cache.size < this.cacheSizeLimit) {
-            this.cache.set(cacheKey, result);
-        }
-        return result;
-    }
-    /**
-     * Given an input amount of a token, return the computed output amount, and a pool with state updated after the trade
-     * @param inputAmount The input amount for which to quote the output amount
-     * @param sqrtPriceLimitX64 The Q64.96 sqrt price limit
-     * @returns The output amount and the pool with updated state
-     */
+    // /**
+    //  * Given an input amount of a token, return the computed output amount, and a pool with state updated after the trade
+    //  * @param inputAmount The input amount for which to quote the output amount
+    //  * @param sqrtPriceLimitX64 The Q64.96 sqrt price limit
+    //  * @returns The output amount and the pool with updated state
+    //  */
+    // public getOutputAmountOptimizedWithCache(
+    //     inputAmount: CurrencyAmount<Token>,
+    //     sqrtPriceLimitX64?: JSBI
+    // ): CurrencyAmount<Token> {
+    //   const cacheKey = `${inputAmount.currency.symbol}-${inputAmount.numerator.toString()}-${inputAmount.denominator.toString()}`;
+    //   const fromCache = this.cache.get(cacheKey)
+    //   if (fromCache) {
+    //     return fromCache
+    //   }
+    //   const zeroForOne = inputAmount.currency.equals(this.tokenA);
+    //
+    //   const {
+    //     amountCalculated: outputAmount
+    //   } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
+    //   const outputToken = zeroForOne ? this.tokenB : this.tokenA;
+    //   const result = CurrencyAmount.fromRawAmount(
+    //       outputToken,
+    //       JSBI.multiply(outputAmount, NEGATIVE_ONE)
+    //   )
+    //   if (this.cache.size < this.cacheSizeLimit) {
+    //     this.cache.set(cacheKey, result)
+    //   }
+    //   return result;
+    // }
     getInputAmount(outputAmount, sqrtPriceLimitX64) {
         const zeroForOne = outputAmount.currency.equals(this.tokenB);
         const { amountCalculated: inputAmount, sqrtPriceX64, liquidity, tickCurrent, } = this.swap(zeroForOne, jsbi_1.default.multiply(outputAmount.quotient, internalConstants_2.NEGATIVE_ONE), sqrtPriceLimitX64);
@@ -178,6 +181,12 @@ class Pool {
         const inputToken = zeroForOne ? this.tokenA : this.tokenB;
         return fractions_1.CurrencyAmount.fromRawAmount(inputToken, inputAmount);
     }
+    /**
+     * Given an input amount of a token, return the computed output amount, and a pool with state updated after the trade
+     * @param inputAmount The input amount for which to quote the output amount
+     * @param sqrtPriceLimitX64 The Q64.96 sqrt price limit
+     * @returns The output amount and the pool with updated state
+     */
     /**
      * Executes a swap
      * @param zeroForOne Whether the amount in is tokenA or tokenB

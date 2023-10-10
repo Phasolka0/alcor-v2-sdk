@@ -32,8 +32,6 @@ export declare class Pool {
     readonly tickDataProvider: TickDataProvider;
     private _tokenAPrice?;
     private _tokenBPrice?;
-    private cache;
-    private cacheSizeLimit;
     /**
      * Construct a pool
      * @param tokenA One of the tokens in the pool
@@ -79,21 +77,14 @@ export declare class Pool {
      * @returns The output amount and the pool with updated state
      */
     getOutputAmountOptimized(inputAmount: CurrencyAmount<Token>, sqrtPriceLimitX64?: JSBI): CurrencyAmount<Token>;
-    /**
-     * Given an input amount of a token, return the computed output amount, and a pool with state updated after the trade
-     * @param inputAmount The input amount for which to quote the output amount
-     * @param sqrtPriceLimitX64 The Q64.96 sqrt price limit
-     * @returns The output amount and the pool with updated state
-     */
-    getOutputAmountOptimizedWithCache(inputAmount: CurrencyAmount<Token>, sqrtPriceLimitX64?: JSBI): CurrencyAmount<Token>;
-    /**
-     * Given an input amount of a token, return the computed output amount, and a pool with state updated after the trade
-     * @param inputAmount The input amount for which to quote the output amount
-     * @param sqrtPriceLimitX64 The Q64.96 sqrt price limit
-     * @returns The output amount and the pool with updated state
-     */
     getInputAmount(outputAmount: CurrencyAmount<Token>, sqrtPriceLimitX64?: JSBI): [CurrencyAmount<Token>, Pool];
     getInputAmountOptimized(outputAmount: CurrencyAmount<Token>, sqrtPriceLimitX64?: JSBI): CurrencyAmount<Token>;
+    /**
+     * Given an input amount of a token, return the computed output amount, and a pool with state updated after the trade
+     * @param inputAmount The input amount for which to quote the output amount
+     * @param sqrtPriceLimitX64 The Q64.96 sqrt price limit
+     * @returns The output amount and the pool with updated state
+     */
     /**
      * Executes a swap
      * @param zeroForOne Whether the amount in is tokenA or tokenB

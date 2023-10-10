@@ -368,7 +368,7 @@ class Trade {
                 continue;
             let amountOut;
             try {
-                amountOut = pool.getOutputAmountOptimizedWithCache(amountIn);
+                amountOut = pool.getOutputAmountOptimized(amountIn);
             }
             catch (error) {
                 // input too low
