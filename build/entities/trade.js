@@ -481,6 +481,7 @@ class Trade {
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             const bestTrades = [];
             const serializationStart = performance.now();
+            const serializeArray = [];
             for (const route of routes) {
                 // smartCalculatePool.addTask({route,
                 //   currencyAmountIn,
@@ -492,11 +493,16 @@ class Trade {
                 // )
                 const routeSerialized = route_1.Route.serialize(route);
                 const amountSerialized = fractions_1.CurrencyAmount.serialize(currencyAmountIn);
-                const routeDeserialized = route_1.Route.deserialize(routeSerialized);
-                const amountDeserialized = fractions_1.CurrencyAmount.deserialize(amountSerialized);
+                serializeArray.push({ routeSerialized, amountSerialized });
                 //console.log(isEqual(route, routeDeserialized), isEqual(amount, amountDeserialized))
             }
-            console.log('serialization + deserialization time', performance.now() - serializationStart);
+            console.log('serialization time', performance.now() - serializationStart);
+            const deserializationStart = performance.now();
+            for (const object of serializeArray) {
+                const routeDeserialized = route_1.Route.deserialize(object.routeSerialized);
+                const amountDeserialized = fractions_1.CurrencyAmount.deserialize(object.amountSerialized);
+            }
+            console.log('deserialization time', performance.now() - deserializationStart);
             //const results = await smartCalculatePool.waitForWorkersAndReturnResult()
             // for (const trade of results) {
             //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
