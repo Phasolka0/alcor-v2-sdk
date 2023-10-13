@@ -379,7 +379,11 @@ class Trade {
             }
             // we have arrived at the output token, so this is the final trade of one of the paths
             if (amountOut.currency && amountOut.currency.equals(tokenOut)) {
-                (0, utils_1.sortedInsert)(bestTrades, Trade.fromRoute(new route_1.Route([...currentPools, pool], currencyAmountIn.currency, currencyOut), currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT), maxNumResults, tradeComparator);
+                const trade = Trade.fromRoute(new route_1.Route([...currentPools, pool], currencyAmountIn.currency, currencyOut), currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+                //FIX hotfix, i do not really sure about it
+                if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
+                    continue;
+                (0, utils_1.sortedInsert)(bestTrades, trade, maxNumResults, tradeComparator);
             }
             else if (maxHops > 1 && pools.length > 1) {
                 const poolsExcludingThisPool = pools.slice(0, i).concat(pools.slice(i + 1, pools.length));
@@ -436,7 +440,7 @@ class Trade {
             if (amountIn.currency.equals(tokenIn)) {
                 const trade = Trade.fromRoute(new route_1.Route([pool, ...currentPools], currencyIn, currencyAmountOut.currency), currencyAmountOut, internalConstants_1.TradeType.EXACT_OUTPUT);
                 // FIX hotfix, i do not really sure about it
-                if (!trade.inputAmount.greaterThan(0) || trade.priceImpact.lessThan(0))
+                if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
                     continue;
                 //
                 (0, utils_1.sortedInsert)(bestTrades, trade, maxNumResults, tradeComparator);
@@ -451,6 +455,32 @@ class Trade {
             }
         }
         return bestTrades;
+    }
+    static bestTradeExactIn2(routes, pools, currencyAmountIn, maxNumResults = 3) {
+        return __awaiter(this, void 0, void 0, function* () {
+            (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
+            const bestTrades = [];
+            for (const route of routes) {
+                const trade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+                if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
+                    continue;
+                (0, utils_1.sortedInsert)(bestTrades, trade, maxNumResults, tradeComparator);
+            }
+            return bestTrades;
+        });
+    }
+    static bestTradeExactIn3(routes, pools, currencyAmountIn, maxNumResults = 3) {
+        return __awaiter(this, void 0, void 0, function* () {
+            (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
+            const bestTrades = [];
+            for (const route of routes) {
+                const trade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+                if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
+                    continue;
+                (0, utils_1.sortedInsert)(bestTrades, trade, maxNumResults, tradeComparator);
+            }
+            return bestTrades;
+        });
     }
 }
 exports.Trade = Trade;

@@ -664,7 +664,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
 
     for (const route of routes) {
-      const trade = await Trade.fromRoute(
+      const trade = Trade.fromRoute(
         route,
         currencyAmountIn,
         TradeType.EXACT_INPUT
@@ -677,6 +677,36 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         trade,
         maxNumResults,
         tradeComparator
+      )
+    }
+
+    return bestTrades
+  }
+
+  public static async bestTradeExactIn3<TInput extends Currency, TOutput extends Currency>(
+      routes: Route<TInput, TOutput>[],
+      pools: Pool[],
+      currencyAmountIn: CurrencyAmount<TInput>,
+      maxNumResults = 3,
+  ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]> {
+    invariant(pools.length > 0, 'POOLS')
+
+    const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
+
+    for (const route of routes) {
+      const trade = Trade.fromRoute(
+          route,
+          currencyAmountIn,
+          TradeType.EXACT_INPUT
+      )
+
+      if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+
+      sortedInsert(
+          bestTrades,
+          trade,
+          maxNumResults,
+          tradeComparator
       )
     }
 

@@ -15,10 +15,9 @@ class Token extends baseCurrency_1.BaseCurrency {
      * @param contract {@link BaseCurrency#contract}
      * @param decimals {@link BaseCurrency#decimals}
      * @param symbol {@link BaseCurrency#symbol}
-     * @param id {@link BaseCurrency#id}
      */
-    constructor(contract, decimals, symbol, id) {
-        super(contract, decimals, symbol, id);
+    constructor(contract, decimals, symbol) {
+        super(contract, decimals, symbol);
     }
     get name() {
         console.warn('Token.name is deprecated, use token.id');

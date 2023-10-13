@@ -28,3 +28,4 @@ __exportStar(require("./tickList"), exports);
 __exportStar(require("./priceTickConversions"), exports);
 __exportStar(require("./sqrtPriceMath"), exports);
 __exportStar(require("./sortedInsert"), exports);
+__exportStar(require("./computeAllRoutes"), exports);

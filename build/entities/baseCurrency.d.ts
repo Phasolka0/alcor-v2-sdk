@@ -15,10 +15,7 @@ export declare abstract class BaseCurrency {
      * The symbol of the currency, i.e. a short textual non-unique identifier
      */
     readonly symbol: string;
-    /**
-     * The id of the currency(<symbol-contract>), i.e. eos-eosio.token
-     */
-    readonly id?: string;
+    readonly id: string;
     /**
      * Constructs an instance of the base class `BaseCurrency`.
      * @param chainId the chain ID on which this currency resides
@@ -26,7 +23,7 @@ export declare abstract class BaseCurrency {
      * @param symbol symbol of the currency
      * @param name of the currency
      */
-    protected constructor(contract: string, decimals: number, symbol: string, id?: string);
+    protected constructor(contract: string, decimals: number, symbol: string);
     /**
      * Returns whether this currency is functionally equivalent to the other currency
      * @param other the other currency

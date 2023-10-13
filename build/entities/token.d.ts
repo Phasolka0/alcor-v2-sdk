@@ -7,9 +7,8 @@ export declare class Token extends BaseCurrency {
      * @param contract {@link BaseCurrency#contract}
      * @param decimals {@link BaseCurrency#decimals}
      * @param symbol {@link BaseCurrency#symbol}
-     * @param id {@link BaseCurrency#id}
      */
-    constructor(contract: string, decimals: number, symbol: string, id?: string);
+    constructor(contract: string, decimals: number, symbol: string);
     get name(): string;
     /**
      * Returns true if the two tokens are equivalent, i.e. have the same contract and symbol.
