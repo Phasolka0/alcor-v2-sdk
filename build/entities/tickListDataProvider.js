@@ -22,9 +22,7 @@ class TickListDataProvider {
     }
     static serialize(ticks) {
         const serializedTicks = ticks.map((tick) => tick_1.Tick.serialize(tick));
-        return JSON.stringify({
-            ticks: serializedTicks
-        });
+        return JSON.stringify(serializedTicks);
     }
     static deserialize(ticksString) {
         console.log(ticksString);

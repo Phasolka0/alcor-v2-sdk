@@ -40,9 +40,7 @@ export class TickListDataProvider implements TickDataProvider {
 
   static serialize(ticks: Tick[]): string {
     const serializedTicks = ticks.map((tick) => Tick.serialize(tick));
-    return JSON.stringify({
-      ticks: serializedTicks
-    });
+    return JSON.stringify(serializedTicks);
   }
 
   static deserialize(ticksString: string): TickListDataProvider {
