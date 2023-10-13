@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.computeAllRoutes = void 0;
+exports.computeAllRoutesFromMap = exports.computeAllRoutes = void 0;
 const entities_1 = require("../entities");
 function computeAllRoutes(tokenIn, tokenOut, pools, maxHops) {
     const poolsUsed = Array(pools.length).fill(false);
@@ -37,3 +37,32 @@ function computeAllRoutes(tokenIn, tokenOut, pools, maxHops) {
     return routes;
 }
 exports.computeAllRoutes = computeAllRoutes;
+function computeAllRoutesFromMap(tokenIn, tokenOut, poolMap, maxHops) {
+    const routes = [];
+    const computeRoutes = (tokenIn, tokenOut, currentRoute, _previousTokenOut) => {
+        if (currentRoute.length > maxHops) {
+            return;
+        }
+        if (currentRoute.length > 0 &&
+            currentRoute[currentRoute.length - 1].involvesToken(tokenOut)) {
+            routes.push(new entities_1.Route([...currentRoute], tokenIn, tokenOut));
+            return;
+        }
+        const previousTokenOut = _previousTokenOut ? _previousTokenOut : tokenIn;
+        const relevantPools = poolMap[previousTokenOut.id] || [];
+        relevantPools.forEach((curPool) => {
+            if (currentRoute.includes(curPool)) {
+                return;
+            }
+            const currentTokenOut = curPool.tokenA.equals(previousTokenOut)
+                ? curPool.tokenB
+                : curPool.tokenA;
+            currentRoute.push(curPool);
+            computeRoutes(tokenIn, tokenOut, currentRoute, currentTokenOut);
+            currentRoute.pop();
+        });
+    };
+    computeRoutes(tokenIn, tokenOut, []);
+    return routes;
+}
+exports.computeAllRoutesFromMap = computeAllRoutesFromMap;

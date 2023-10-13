@@ -703,6 +703,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
     const serializationStart = performance.now()
     const serializeArray: any[] = []
+    console.log(routes.length)
     for (const route of routes) {
       // smartCalculatePool.addTask({route,
       //   currencyAmountIn,
@@ -723,12 +724,16 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
       //console.log(isEqual(route, routeDeserialized), isEqual(amount, amountDeserialized))
     }
+    console.log(serializeArray[0])
     console.log('serialization time', performance.now() - serializationStart)
     const deserializationStart = performance.now()
+    const deserializeArray: any[] = []
     for (const object of serializeArray) {
       const routeDeserialized = Route.deserialize(object.routeSerialized)
       const amountDeserialized = CurrencyAmount.deserialize(object.amountSerialized)
+      deserializeArray.push({routeDeserialized, amountDeserialized})
     }
+    console.log(deserializeArray[0])
     console.log('deserialization time', performance.now() - deserializationStart)
     //const results = await smartCalculatePool.waitForWorkersAndReturnResult()
 

@@ -62,3 +62,57 @@ export function computeAllRoutes(
 
   return routes;
 }
+
+export function computeAllRoutesFromMap(
+    tokenIn: Token,
+    tokenOut: Token,
+    poolMap: { [tokenId: string]: Pool[] },
+    maxHops: number
+): Route<Token , Token>[] {
+  const routes: Route<Token, Token>[] = [];
+
+  const computeRoutes = (
+      tokenIn: Token,
+      tokenOut: Token,
+      currentRoute: Pool[],
+      _previousTokenOut?: Token
+  ) => {
+    if (currentRoute.length > maxHops) {
+      return;
+    }
+
+    if (
+        currentRoute.length > 0 &&
+        currentRoute[currentRoute.length - 1]!.involvesToken(tokenOut)
+    ) {
+      routes.push(new Route([...currentRoute], tokenIn, tokenOut));
+      return;
+    }
+
+    const previousTokenOut = _previousTokenOut ? _previousTokenOut : tokenIn;
+    const relevantPools = poolMap[previousTokenOut.id] || [];
+
+    relevantPools.forEach((curPool) => {
+      if (currentRoute.includes(curPool)) {
+        return;
+      }
+
+      const currentTokenOut = curPool.tokenA.equals(previousTokenOut)
+          ? curPool.tokenB
+          : curPool.tokenA;
+
+      currentRoute.push(curPool);
+      computeRoutes(
+          tokenIn,
+          tokenOut,
+          currentRoute,
+          currentTokenOut
+      );
+      currentRoute.pop();
+    });
+  };
+
+  computeRoutes(tokenIn, tokenOut, []);
+
+  return routes;
+}
