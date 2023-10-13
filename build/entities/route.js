@@ -72,8 +72,8 @@ class Route {
         return JSON.stringify({
             pools: route.pools.map(pool => pool_1.Pool.serialize(pool)),
             //tokenPath: route.tokenPath.map(token => Token.serialize(token)),
-            input: route.input.serialize(),
-            output: route.output.serialize(),
+            input: token_1.Token.serialize(route.input),
+            output: token_1.Token.serialize(route.output),
             _midPrice: route._midPrice,
         });
     }

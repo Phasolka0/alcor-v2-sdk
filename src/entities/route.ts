@@ -86,8 +86,8 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
         return JSON.stringify({
             pools: route.pools.map(pool => Pool.serialize(pool)), // предполагается, что у Pool тоже есть метод serialize
             //tokenPath: route.tokenPath.map(token => Token.serialize(token)),
-            input: route.input.serialize(),
-            output: route.output.serialize(),
+            input: Token.serialize(route.input),
+            output: Token.serialize(route.output),
             _midPrice: route._midPrice,
         });
     }
