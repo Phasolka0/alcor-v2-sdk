@@ -694,35 +694,48 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       pools: Pool[],
       currencyAmountIn: CurrencyAmount<TInput>,
       maxNumResults = 3,
-      smartCalculatePool:any
+      //smartCalculatePool: any
   ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]> {
     if (!this.workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
 
     invariant(pools.length > 0, 'POOLS')
 
     const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
-
+    const serializationStart = performance.now()
     for (const route of routes) {
-      smartCalculatePool.addTask({route,
-        currencyAmountIn,
-        tradeType: TradeType.EXACT_INPUT})
+      // smartCalculatePool.addTask({route,
+      //   currencyAmountIn,
+      //   tradeType: TradeType.EXACT_INPUT})
+
+
       // const trade = Trade.fromRoute(
       //     route,
       //     currencyAmountIn,
       //     TradeType.EXACT_INPUT
       // )
-    }
-    const results = await smartCalculatePool.waitForWorkersAndReturnResult()
-    for (const trade of results) {
-      if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
 
-      sortedInsert(
-          bestTrades,
-          trade,
-          maxNumResults,
-          tradeComparator
-      )
+      const routeSerialized = Route.serialize(route)
+      const amountSerialized = CurrencyAmount.serialize(currencyAmountIn)
+
+      const routeDeserialized = Route.deserialize(routeSerialized)
+      const amountDeserialized = CurrencyAmount.deserialize(amountSerialized)
+
+      //console.log(isEqual(route, routeDeserialized), isEqual(amount, amountDeserialized))
     }
+    console.log('serialization + deserialization time', performance.now() - serializationStart)
+
+    //const results = await smartCalculatePool.waitForWorkersAndReturnResult()
+
+    // for (const trade of results) {
+    //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+    //
+    //   sortedInsert(
+    //       bestTrades,
+    //       trade,
+    //       maxNumResults,
+    //       tradeComparator
+    //   )
+    // }
 
     return bestTrades
   }

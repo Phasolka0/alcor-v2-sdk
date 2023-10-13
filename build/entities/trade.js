@@ -475,28 +475,40 @@ class Trade {
             this.workerPool = yield WorkerPool_1.WorkerPool.create(threadsCount);
         });
     }
-    static bestTradeExactIn3(routes, pools, currencyAmountIn, maxNumResults = 3, smartCalculatePool) {
+    static bestTradeExactIn3(routes, pools, currencyAmountIn, maxNumResults = 3) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.workerPool)
                 return this.bestTradeExactIn2(routes, pools, currencyAmountIn);
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             const bestTrades = [];
+            const serializationStart = performance.now();
             for (const route of routes) {
-                smartCalculatePool.addTask({ route,
-                    currencyAmountIn,
-                    tradeType: internalConstants_1.TradeType.EXACT_INPUT });
+                // smartCalculatePool.addTask({route,
+                //   currencyAmountIn,
+                //   tradeType: TradeType.EXACT_INPUT})
                 // const trade = Trade.fromRoute(
                 //     route,
                 //     currencyAmountIn,
                 //     TradeType.EXACT_INPUT
                 // )
+                const routeSerialized = route_1.Route.serialize(route);
+                const amountSerialized = fractions_1.CurrencyAmount.serialize(currencyAmountIn);
+                const routeDeserialized = route_1.Route.deserialize(routeSerialized);
+                const amountDeserialized = fractions_1.CurrencyAmount.deserialize(amountSerialized);
+                //console.log(isEqual(route, routeDeserialized), isEqual(amount, amountDeserialized))
             }
-            const results = yield smartCalculatePool.waitForWorkersAndReturnResult();
-            for (const trade of results) {
-                if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
-                    continue;
-                (0, utils_1.sortedInsert)(bestTrades, trade, maxNumResults, tradeComparator);
-            }
+            console.log('serialization + deserialization time', performance.now() - serializationStart);
+            //const results = await smartCalculatePool.waitForWorkersAndReturnResult()
+            // for (const trade of results) {
+            //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+            //
+            //   sortedInsert(
+            //       bestTrades,
+            //       trade,
+            //       maxNumResults,
+            //       tradeComparator
+            //   )
+            // }
             return bestTrades;
         });
     }
