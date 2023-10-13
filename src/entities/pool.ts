@@ -505,4 +505,27 @@ export class Pool {
       ticks: TickListDataProvider.deserialize(parsedData.tickDataProvider)
     });
   }
+  public equals(other: Pool): boolean {
+    // Сравниваем id пулов
+    if (this.id !== other.id) return false;
+
+    // Сравниваем fee
+    if (this.fee !== other.fee) return false;
+
+    // Сравниваем sqrtPriceX64
+    if (!JSBI.equal(this.sqrtPriceX64, other.sqrtPriceX64)) return false;
+
+    // Сравниваем liquidity
+    if (!JSBI.equal(this.liquidity, other.liquidity)) return false;
+
+    // Сравниваем tickCurrent
+    if (this.tickCurrent !== other.tickCurrent) return false;
+
+    // Сравниваем токены (предполагается, что у Token есть метод equals)
+    if (!this.tokenA.equals(other.tokenA) || !this.tokenB.equals(other.tokenB)) return false;
+
+    // Если все проверки прошли, объекты считаются равными
+    return true;
+  }
+
 }

@@ -99,4 +99,16 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
         const output = Token.deserialize(obj.output);
         return new Route(pools, input, output);
     }
+    public equals(other: Route<Currency, Currency>): boolean {
+        // Сравниваем длины массивов пулов
+        if (this.pools.length !== other.pools.length) return false;
+
+        // Сравниваем пулы по одному (предполагается, что у Pool есть метод equals)
+        for (let i = 0; i < this.pools.length; i++) {
+            if (!this.pools[i].equals(other.pools[i])) return false;
+        }
+
+        // Сравниваем входные и выходные токены (предполагается, что у Token есть метод equals)
+        return this.input.equals(other.input) && this.output.equals(other.output);
+    }
 }

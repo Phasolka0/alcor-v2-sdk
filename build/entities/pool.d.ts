@@ -100,4 +100,5 @@ export declare class Pool {
     get tickSpacing(): number;
     static serialize(pool: Pool): string;
     static deserialize(data: string): Pool;
+    equals(other: Pool): boolean;
 }
