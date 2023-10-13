@@ -7,6 +7,7 @@ import { Token } from './token'
 import { ONE, ZERO, TradeType } from '../internalConstants'
 import { Pool } from './pool'
 import { Route } from './route'
+import {WorkerPool} from "../workers/WorkerPool";
 
 /**
  * Trades comparator, an extension of the input output comparator that also considers other dimensions of the trade in ranking them
@@ -67,6 +68,8 @@ export interface BestTradeOptions {
  * @template TTradeType The trade type, either exact input or exact output
  */
 export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType> {
+
+  static workerPool: WorkerPool
   /**
    * @deprecated Deprecated in favor of 'swaps' property. If the trade consists of multiple routes
    * this will return an error.
@@ -682,24 +685,35 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
     return bestTrades
   }
+  public static async initWorkerPool(threadsCount = 16) {
+    this.workerPool = await WorkerPool.create(threadsCount)
+  }
 
   public static async bestTradeExactIn3<TInput extends Currency, TOutput extends Currency>(
       routes: Route<TInput, TOutput>[],
       pools: Pool[],
       currencyAmountIn: CurrencyAmount<TInput>,
       maxNumResults = 3,
+      smartCalculatePool:any
   ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]> {
+    if (!this.workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
+
     invariant(pools.length > 0, 'POOLS')
 
     const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
 
     for (const route of routes) {
-      const trade = Trade.fromRoute(
-          route,
-          currencyAmountIn,
-          TradeType.EXACT_INPUT
-      )
-
+      smartCalculatePool.addTask({route,
+        currencyAmountIn,
+        tradeType: TradeType.EXACT_INPUT})
+      // const trade = Trade.fromRoute(
+      //     route,
+      //     currencyAmountIn,
+      //     TradeType.EXACT_INPUT
+      // )
+    }
+    const results = await smartCalculatePool.waitForWorkersAndReturnResult()
+    for (const trade of results) {
       if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
 
       sortedInsert(

@@ -9,7 +9,9 @@ const tick_1 = require("./tick");
 class TickListDataProvider {
     constructor(ticks, tickSpacing) {
         const ticksMapped = ticks.map((t) => t instanceof tick_1.Tick ? t : new tick_1.Tick(t));
-        utils_1.TickList.validateList(ticksMapped, tickSpacing);
+        if (tickSpacing) {
+            utils_1.TickList.validateList(ticksMapped, tickSpacing);
+        }
         this.ticks = ticksMapped;
     }
     getTick(tick) {
@@ -17,6 +19,16 @@ class TickListDataProvider {
     }
     nextInitializedTickWithinOneWord(tick, lte, tickSpacing) {
         return utils_1.TickList.nextInitializedTickWithinOneWord(this.ticks, tick, lte, tickSpacing);
+    }
+    static serialize(ticks) {
+        const serializedTicks = ticks.map((tick) => tick_1.Tick.serialize(tick));
+        return JSON.stringify({
+            ticks: serializedTicks
+        });
+    }
+    static deserialize(ticksString) {
+        const ticks = JSON.parse(ticksString);
+        return ticks.map(tick_1.Tick.deserialize);
     }
 }
 exports.TickListDataProvider = TickListDataProvider;

@@ -18,6 +18,7 @@ const fractions_1 = require("./fractions");
 const utils_1 = require("../utils");
 const internalConstants_1 = require("../internalConstants");
 const route_1 = require("./route");
+const WorkerPool_1 = require("../workers/WorkerPool");
 /**
  * Trades comparator, an extension of the input output comparator that also considers other dimensions of the trade in ranking them
  * @template TInput The input token, either Ether or an ERC-20
@@ -469,12 +470,29 @@ class Trade {
             return bestTrades;
         });
     }
-    static bestTradeExactIn3(routes, pools, currencyAmountIn, maxNumResults = 3) {
+    static initWorkerPool(threadsCount = 16) {
         return __awaiter(this, void 0, void 0, function* () {
+            this.workerPool = yield WorkerPool_1.WorkerPool.create(threadsCount);
+        });
+    }
+    static bestTradeExactIn3(routes, pools, currencyAmountIn, maxNumResults = 3, smartCalculatePool) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.workerPool)
+                return this.bestTradeExactIn2(routes, pools, currencyAmountIn);
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             const bestTrades = [];
             for (const route of routes) {
-                const trade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+                smartCalculatePool.addTask({ route,
+                    currencyAmountIn,
+                    tradeType: internalConstants_1.TradeType.EXACT_INPUT });
+                // const trade = Trade.fromRoute(
+                //     route,
+                //     currencyAmountIn,
+                //     TradeType.EXACT_INPUT
+                // )
+            }
+            const results = yield smartCalculatePool.waitForWorkersAndReturnResult();
+            for (const trade of results) {
                 if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
                     continue;
                 (0, utils_1.sortedInsert)(bestTrades, trade, maxNumResults, tradeComparator);

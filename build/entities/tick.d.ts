@@ -20,4 +20,6 @@ export declare class Tick {
     readonly secondsOutside: JSBI;
     readonly secondsPerLiquidityOutsideX64: JSBI;
     constructor({ id, liquidityGross, liquidityNet, feeGrowthOutsideAX64, feeGrowthOutsideBX64, tickCumulativeOutside, secondsOutside, secondsPerLiquidityOutsideX64, }: TickConstructorArgs);
+    static serialize(tick: Tick): string;
+    static deserialize(data: string): Tick;
 }

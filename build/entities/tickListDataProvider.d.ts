@@ -5,7 +5,9 @@ import { TickDataProvider } from "./tickDataProvider";
  */
 export declare class TickListDataProvider implements TickDataProvider {
     private ticks;
-    constructor(ticks: (Tick | TickConstructorArgs)[], tickSpacing: number);
+    constructor(ticks: (Tick | TickConstructorArgs)[], tickSpacing?: number);
     getTick(tick: number): Tick;
     nextInitializedTickWithinOneWord(tick: number, lte: boolean, tickSpacing: number): [number, boolean];
+    static serialize(ticks: Tick[]): string;
+    static deserialize(ticksString: string): TickListDataProvider;
 }

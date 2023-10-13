@@ -24,4 +24,6 @@ export declare class Route<TInput extends Currency, TOutput extends Currency> {
      * Returns the mid price of the route
      */
     get midPrice(): Price<TInput, TOutput>;
+    static serialize(route: Route<any, any>): string;
+    static deserialize(jsonStr: string): Route<Token, Token>;
 }

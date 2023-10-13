@@ -97,4 +97,6 @@ export declare class Pool {
      */
     private swap;
     get tickSpacing(): number;
+    static serialize(pool: Pool): string;
+    static deserialize(data: string): Pool;
 }

@@ -45,4 +45,32 @@ export class Tick {
     this.secondsOutside = JSBI.BigInt(secondsOutside);
     this.secondsPerLiquidityOutsideX64 = JSBI.BigInt(secondsPerLiquidityOutsideX64);
   }
+
+  static serialize(tick: Tick): string {
+    return JSON.stringify({
+      id: tick.id,
+      liquidityGross: tick.liquidityGross.toString(),
+      liquidityNet: tick.liquidityNet.toString(),
+      feeGrowthOutsideAX64: tick.feeGrowthOutsideAX64.toString(),
+      feeGrowthOutsideBX64: tick.feeGrowthOutsideBX64.toString(),
+      tickCumulativeOutside: tick.tickCumulativeOutside.toString(),
+      secondsOutside: tick.secondsOutside.toString(),
+      secondsPerLiquidityOutsideX64: tick.secondsPerLiquidityOutsideX64.toString(),
+    });
+  }
+
+
+  static deserialize(data: string): Tick {
+    const parsedData = JSON.parse(data);
+    return new Tick({
+      id: parsedData.id,
+      liquidityGross: JSBI.BigInt(parsedData.liquidityGross),
+      liquidityNet: JSBI.BigInt(parsedData.liquidityNet),
+      feeGrowthOutsideAX64: JSBI.BigInt(parsedData.feeGrowthOutsideAX64),
+      feeGrowthOutsideBX64: JSBI.BigInt(parsedData.feeGrowthOutsideBX64),
+      tickCumulativeOutside: JSBI.BigInt(parsedData.tickCumulativeOutside),
+      secondsOutside: JSBI.BigInt(parsedData.secondsOutside),
+      secondsPerLiquidityOutsideX64: JSBI.BigInt(parsedData.secondsPerLiquidityOutsideX64),
+    });
+  }
 }

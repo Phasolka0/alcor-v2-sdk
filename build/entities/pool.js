@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Pool = void 0;
 const fractions_1 = require("./fractions");
+const token_1 = require("./token");
 const internalConstants_1 = require("../internalConstants");
 const jsbi_1 = __importDefault(require("jsbi"));
 const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
@@ -278,6 +279,35 @@ class Pool {
     }
     get tickSpacing() {
         return internalConstants_1.TICK_SPACINGS[this.fee];
+    }
+    static serialize(pool) {
+        return JSON.stringify({
+            id: pool.id,
+            tokenA: token_1.Token.serialize(pool.tokenA),
+            tokenB: token_1.Token.serialize(pool.tokenB),
+            fee: pool.fee,
+            sqrtPriceX64: pool.sqrtPriceX64.toString(),
+            liquidity: pool.liquidity.toString(),
+            tickCurrent: pool.tickCurrent,
+            feeGrowthGlobalAX64: pool.feeGrowthGlobalAX64.toString(),
+            feeGrowthGlobalBX64: pool.feeGrowthGlobalBX64.toString(),
+            tickDataProvider: tickListDataProvider_1.TickListDataProvider.serialize(pool.tickDataProvider.ticks)
+        });
+    }
+    static deserialize(data) {
+        const parsedData = JSON.parse(data);
+        return new Pool({
+            id: parsedData.id,
+            tokenA: token_1.Token.deserialize(parsedData.tokenA),
+            tokenB: token_1.Token.deserialize(parsedData.tokenB),
+            fee: parsedData.fee,
+            sqrtPriceX64: jsbi_1.default.BigInt(parsedData.sqrtPriceX64),
+            liquidity: jsbi_1.default.BigInt(parsedData.liquidity),
+            tickCurrent: parsedData.tickCurrent,
+            feeGrowthGlobalAX64: jsbi_1.default.BigInt(parsedData.feeGrowthGlobalAX64),
+            feeGrowthGlobalBX64: jsbi_1.default.BigInt(parsedData.feeGrowthGlobalBX64),
+            ticks: tickListDataProvider_1.TickListDataProvider.deserialize(parsedData.tickDataProvider)
+        });
     }
 }
 exports.Pool = Pool;

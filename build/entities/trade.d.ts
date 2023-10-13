@@ -3,6 +3,7 @@ import { Percent, Price, CurrencyAmount } from './fractions';
 import { TradeType } from '../internalConstants';
 import { Pool } from './pool';
 import { Route } from './route';
+import { WorkerPool } from "../workers/WorkerPool";
 /**
  * Trades comparator, an extension of the input output comparator that also considers other dimensions of the trade in ranking them
  * @template TInput The input token, either Ether or an ERC-20
@@ -30,6 +31,7 @@ export interface BestTradeOptions {
  * @template TTradeType The trade type, either exact input or exact output
  */
 export declare class Trade<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType> {
+    static workerPool: WorkerPool;
     /**
      * @deprecated Deprecated in favor of 'swaps' property. If the trade consists of multiple routes
      * this will return an error.
@@ -220,5 +222,6 @@ export declare class Trade<TInput extends Currency, TOutput extends Currency, TT
      */
     static bestTradeExactOut<TInput extends Currency, TOutput extends Currency>(pools: Pool[], currencyIn: TInput, currencyAmountOut: CurrencyAmount<TOutput>, { maxNumResults, maxHops }?: BestTradeOptions, currentPools?: Pool[], nextAmountOut?: CurrencyAmount<Currency>, bestTrades?: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[]): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[];
     static bestTradeExactIn2<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>, maxNumResults?: number): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]>;
-    static bestTradeExactIn3<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>, maxNumResults?: number): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]>;
+    static initWorkerPool(threadsCount?: number): Promise<void>;
+    static bestTradeExactIn3<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>, maxNumResults: number | undefined, smartCalculatePool: any): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]>;
 }

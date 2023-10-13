@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Route = void 0;
 const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
 const fractions_1 = require("./fractions");
+const token_1 = require("./token");
+const pool_1 = require("./pool");
 /**
  * Represents a list of pools through which a swap can occur
  * @template TInput The input token
@@ -65,6 +67,23 @@ class Route {
                 price: this.pools[0].tokenBPrice
             }).price;
         return (this._midPrice = new fractions_1.Price(this.input, this.output, price.denominator, price.numerator));
+    }
+    static serialize(route) {
+        return JSON.stringify({
+            pools: route.pools.map(pool => pool_1.Pool.serialize(pool)),
+            //tokenPath: route.tokenPath.map(token => Token.serialize(token)),
+            input: route.input.serialize(),
+            output: route.output.serialize(),
+            _midPrice: route._midPrice,
+        });
+    }
+    static deserialize(jsonStr) {
+        const obj = JSON.parse(jsonStr);
+        const pools = obj.pools.map(pool => pool_1.Pool.deserialize(pool)); // предполагается, что у Pool тоже есть метод deserialize
+        //const tokenPath = obj.tokenPath.map(token => Token.deserialize(token));
+        const input = token_1.Token.deserialize(obj.input);
+        const output = token_1.Token.deserialize(obj.output);
+        return new Route(pools, input, output);
     }
 }
 exports.Route = Route;
