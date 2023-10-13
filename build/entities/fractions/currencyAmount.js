@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CurrencyAmount = void 0;
 const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
 const jsbi_1 = __importDefault(require("jsbi"));
+const token_1 = require("../token");
 const fraction_1 = require("./fraction");
 const big_js_1 = __importDefault(require("big.js"));
 const toformat_1 = __importDefault(require("toformat"));
@@ -75,6 +76,20 @@ class CurrencyAmount extends fraction_1.Fraction {
     }
     toExtendedAsset(...args) {
         return `${this.toFixed(...args)} ${this.currency.symbol}@${this.currency.contract}`;
+    }
+    static serialize(amount) {
+        return JSON.stringify({
+            currency: token_1.Token.serialize(amount.currency),
+            numerator: amount.numerator.toString(),
+            denominator: amount.denominator.toString(),
+        });
+    }
+    static deserialize(data) {
+        const parsedData = JSON.parse(data);
+        const currency = token_1.Token.deserialize(parsedData.currency);
+        const numerator = jsbi_1.default.BigInt(parsedData.numerator);
+        const denominator = jsbi_1.default.BigInt(parsedData.denominator);
+        return new CurrencyAmount(currency, numerator, denominator);
     }
 }
 exports.CurrencyAmount = CurrencyAmount;

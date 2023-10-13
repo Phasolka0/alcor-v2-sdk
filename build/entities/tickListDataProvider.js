@@ -25,7 +25,6 @@ class TickListDataProvider {
         return JSON.stringify(serializedTicks);
     }
     static deserialize(ticksString) {
-        console.log(ticksString);
         const ticks = JSON.parse(ticksString);
         return ticks.map(tick_1.Tick.deserialize);
     }

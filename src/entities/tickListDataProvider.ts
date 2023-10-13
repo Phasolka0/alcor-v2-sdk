@@ -44,7 +44,6 @@ export class TickListDataProvider implements TickDataProvider {
   }
 
   static deserialize(ticksString: string): TickListDataProvider {
-    console.log(ticksString)
     const ticks = JSON.parse(ticksString);
     return ticks.map(Tick.deserialize);
   }

@@ -126,4 +126,20 @@ export class CurrencyAmount<T extends Currency> extends Fraction {
   public toExtendedAsset(...args): string {
     return `${this.toFixed(...args)} ${this.currency.symbol}@${this.currency.contract}`
   }
+
+  static serialize<T extends Currency>(amount: CurrencyAmount<T>): string {
+    return JSON.stringify({
+      currency: Token.serialize(amount.currency),
+      numerator: amount.numerator.toString(),
+      denominator: amount.denominator.toString(),
+    });
+  }
+
+  static deserialize(data: string) {
+    const parsedData = JSON.parse(data);
+    const currency = Token.deserialize(parsedData.currency);
+    const numerator = JSBI.BigInt(parsedData.numerator);
+    const denominator = JSBI.BigInt(parsedData.denominator);
+    return new CurrencyAmount(currency, numerator, denominator);
+  }
 }

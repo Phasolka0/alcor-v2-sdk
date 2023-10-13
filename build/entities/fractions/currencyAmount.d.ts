@@ -1,5 +1,6 @@
 import JSBI from "jsbi";
 import { Currency } from "../currency";
+import { Token } from "../token";
 import { Fraction } from "./fraction";
 import { BigintIsh, Rounding } from "../../internalConstants";
 export declare class CurrencyAmount<T extends Currency> extends Fraction {
@@ -28,4 +29,6 @@ export declare class CurrencyAmount<T extends Currency> extends Fraction {
     toExact(format?: object): string;
     toAsset(...args: any[]): string;
     toExtendedAsset(...args: any[]): string;
+    static serialize<T extends Currency>(amount: CurrencyAmount<T>): string;
+    static deserialize(data: string): CurrencyAmount<Token>;
 }
