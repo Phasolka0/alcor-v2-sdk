@@ -477,8 +477,7 @@ class Trade {
     }
     static bestTradeExactIn3(routes, pools, currencyAmountIn, maxNumResults = 3) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!this.workerPool)
-                return this.bestTradeExactIn2(routes, pools, currencyAmountIn);
+            //if (!this.workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             const bestTrades = [];
             const serializationStart = performance.now();

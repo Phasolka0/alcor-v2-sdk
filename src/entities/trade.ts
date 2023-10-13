@@ -696,7 +696,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       maxNumResults = 3,
       //smartCalculatePool: any
   ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]> {
-    if (!this.workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
+    //if (!this.workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
 
     invariant(pools.length > 0, 'POOLS')
 
