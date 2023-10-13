@@ -39,7 +39,7 @@ function computeAllRoutes(tokenIn, tokenOut, pools, maxHops) {
 exports.computeAllRoutes = computeAllRoutes;
 function computeAllRoutesFromMap(tokenIn, tokenOut, poolMap, maxHops) {
     const routes = [];
-    const computeRoutes = (tokenIn, tokenOut, currentRoute, _previousTokenOut) => {
+    const computeRoutes = (tokenIn, tokenOut, currentRoute, visitedPools, _previousTokenOut) => {
         if (currentRoute.length > maxHops) {
             return;
         }
@@ -51,18 +51,20 @@ function computeAllRoutesFromMap(tokenIn, tokenOut, poolMap, maxHops) {
         const previousTokenOut = _previousTokenOut ? _previousTokenOut : tokenIn;
         const relevantPools = poolMap[previousTokenOut.id] || [];
         relevantPools.forEach((curPool) => {
-            if (currentRoute.includes(curPool)) {
+            if (visitedPools.has(curPool)) {
                 return;
             }
             const currentTokenOut = curPool.tokenA.equals(previousTokenOut)
                 ? curPool.tokenB
                 : curPool.tokenA;
             currentRoute.push(curPool);
-            computeRoutes(tokenIn, tokenOut, currentRoute, currentTokenOut);
+            visitedPools.add(curPool);
+            computeRoutes(tokenIn, tokenOut, currentRoute, visitedPools, currentTokenOut);
+            visitedPools.delete(curPool);
             currentRoute.pop();
         });
     };
-    computeRoutes(tokenIn, tokenOut, []);
+    computeRoutes(tokenIn, tokenOut, [], new Set());
     return routes;
 }
 exports.computeAllRoutesFromMap = computeAllRoutesFromMap;

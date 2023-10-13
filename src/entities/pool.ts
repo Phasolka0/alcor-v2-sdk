@@ -23,7 +23,7 @@ export interface PoolConstructorArgs {
   feeGrowthGlobalBX64: BigintIsh,
   ticks:
     | TickDataProvider
-    | (Tick | TickConstructorArgs)[]
+    | (Tick | TickConstructorArgs)[];
 }
 
 interface StepComputations {
@@ -56,6 +56,7 @@ export class Pool {
   public readonly feeGrowthGlobalAX64: JSBI;
   public readonly feeGrowthGlobalBX64: JSBI;
   public readonly tickDataProvider:  TickDataProvider
+  public serialized = ''
 
   private _tokenAPrice?: Price<Token, Token>;
   private _tokenBPrice?: Price<Token, Token>;
@@ -473,7 +474,8 @@ export class Pool {
   }
 
   static serialize(pool: Pool): string {
-    return JSON.stringify({
+    if (pool.serialized) return pool.serialized
+    pool.serialized = JSON.stringify({
       id: pool.id,
       tokenA: Token.serialize(pool.tokenA),
       tokenB: Token.serialize(pool.tokenB),
@@ -485,6 +487,7 @@ export class Pool {
       feeGrowthGlobalBX64: pool.feeGrowthGlobalBX64.toString(),
       tickDataProvider: TickListDataProvider.serialize((pool.tickDataProvider as TickListDataProvider).ticks)
     });
+    return pool.serialized
   }
 
   static deserialize(data: string): Pool {

@@ -30,6 +30,7 @@ export declare class Pool {
     readonly feeGrowthGlobalAX64: JSBI;
     readonly feeGrowthGlobalBX64: JSBI;
     readonly tickDataProvider: TickDataProvider;
+    serialized: string;
     private _tokenAPrice?;
     private _tokenBPrice?;
     /**

@@ -36,6 +36,7 @@ class Pool {
      * @param ticks The current state of the pool ticks or a data provider that can return tick data
      */
     constructor({ id, tokenA, tokenB, fee, sqrtPriceX64, liquidity, tickCurrent, ticks = NO_TICK_DATA_PROVIDER_DEFAULT, feeGrowthGlobalAX64 = 0, feeGrowthGlobalBX64 = 0, }) {
+        this.serialized = '';
         (0, tiny_invariant_1.default)(Number.isInteger(fee) && fee < 1000000, "FEE");
         const tickCurrentSqrtRatioX64 = utils_1.TickMath.getSqrtRatioAtTick(tickCurrent);
         const nextTickSqrtRatioX64 = utils_1.TickMath.getSqrtRatioAtTick(tickCurrent + 1);
@@ -281,7 +282,9 @@ class Pool {
         return internalConstants_1.TICK_SPACINGS[this.fee];
     }
     static serialize(pool) {
-        return JSON.stringify({
+        if (pool.serialized)
+            return pool.serialized;
+        pool.serialized = JSON.stringify({
             id: pool.id,
             tokenA: token_1.Token.serialize(pool.tokenA),
             tokenB: token_1.Token.serialize(pool.tokenB),
@@ -293,6 +296,7 @@ class Pool {
             feeGrowthGlobalBX64: pool.feeGrowthGlobalBX64.toString(),
             tickDataProvider: tickListDataProvider_1.TickListDataProvider.serialize(pool.tickDataProvider.ticks)
         });
+        return pool.serialized;
     }
     static deserialize(data) {
         const parsedData = JSON.parse(data);
