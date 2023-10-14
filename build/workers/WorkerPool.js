@@ -107,16 +107,17 @@ class WorkerPool {
                     result = yield worker.workerInstance.fromRoute(taskOptions);
                 }
                 else {
-                    for (let pool of taskOptions.route.pools) {
+                    for (let i = 0; i < taskOptions.route.pools.length; i++) {
+                        const pool = taskOptions.route.pools[i];
                         if (worker.hasThisPoolCached(pool)) {
                             console.log('hasThisPoolCached', pool.id);
-                            pool = pool.id;
+                            taskOptions.route.pools[i] = pool.id;
                         }
                         else {
                             const buffer = entities_1.Pool.toBuffer(pool);
                             const bufferHash = pool.bufferHash;
                             worker.addBufferHash(pool);
-                            pool = { buffer, bufferHash };
+                            taskOptions.route.pools[i] = { buffer, bufferHash };
                         }
                     }
                     taskOptions.route = entities_1.Route.toBuffer(taskOptions.route);

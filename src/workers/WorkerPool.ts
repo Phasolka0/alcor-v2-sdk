@@ -121,17 +121,19 @@ export class WorkerPool {
             if (Buffer.isBuffer(taskOptions)) {
                 result = await worker.workerInstance.fromRoute(taskOptions)
             } else {
-                for (let pool of taskOptions.route.pools) {
+                for (let i = 0; i < taskOptions.route.pools.length; i++) {
+                    const pool = taskOptions.route.pools[i];
                     if (worker.hasThisPoolCached(pool)) {
-                        console.log('hasThisPoolCached', pool.id)
-                        pool = pool.id
+                        console.log('hasThisPoolCached', pool.id);
+                        taskOptions.route.pools[i] = pool.id;
                     } else {
-                        const buffer = Pool.toBuffer(pool)
-                        const bufferHash = pool.bufferHash
-                        worker.addBufferHash(pool)
-                        pool = {buffer, bufferHash}
+                        const buffer = Pool.toBuffer(pool);
+                        const bufferHash = pool.bufferHash;
+                        worker.addBufferHash(pool);
+                        taskOptions.route.pools[i] = {buffer, bufferHash};
                     }
                 }
+
                 taskOptions.route = Route.toBuffer(taskOptions.route)
                 const taskBuffer= msgpack.encode(taskOptions)
                 result = await worker.workerInstance.fromRoute(taskBuffer)
