@@ -83,23 +83,36 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
     return (this._midPrice = new Price(this.input, this.output, price.denominator, price.numerator))
   }
 
-    static toJSON(route: Route<Currency, Currency>) {
+    static toJSON(route: Route<Currency, Currency>, lightWeightVersion = false) {
         return {
-            pools: route.pools.map(pool => Pool.toBuffer(pool)),
+            pools: route.pools.map(pool => {
+                if (lightWeightVersion) {
+                    return pool.id
+                } else {
+                    return Pool.toBuffer(pool)
+                }
+
+            }),
             input: Token.toJSON(route.input),
             output: Token.toJSON(route.output),
             _midPrice: route._midPrice,
         }
     }
     static fromJSON(json: any) {
-        const pools = json.pools.map(pool => Pool.fromBuffer(pool));
+        const pools = json.pools.map(pool => {
+            if (typeof pool === 'number') {
+                return Pool.fromId(pool)
+            } else {
+                return Pool.fromBuffer(pool)
+            }
+        });
         const input = Token.fromJSON(json.input);
         const output = Token.fromJSON(json.output);
         return new Route(pools, input, output);
     }
 
-    static toBuffer(route: Route<Currency, Currency>) {
-      const json = this.toJSON(route);
+    static toBuffer(route: Route<Currency, Currency>, lightWeightVersion = false) {
+      const json = this.toJSON(route, lightWeightVersion);
       return msgpack.encode(json);
     }
     static fromBuffer(buffer: Buffer) {

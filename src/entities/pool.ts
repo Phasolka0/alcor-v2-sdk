@@ -67,6 +67,8 @@ export class Pool {
   private _tokenAPrice?: Price<Token, Token>;
   private _tokenBPrice?: Price<Token, Token>;
 
+  public static idToPoolsMap: Map<number, Pool> = new Map()
+
   // private cache = new Map()
   // private cacheSizeLimit = 100000
 
@@ -539,6 +541,11 @@ export class Pool {
       ticks: TickListDataProvider.fromJSON(json.tickDataProvider)
     })
     this.hashToPoolMap.set(bufferHash, pool)
+    return pool;
+  }
+  static fromId(id: number): Pool {
+    const pool = Pool.idToPoolsMap.get(id)
+    if (!pool) throw new Error('pool does not exist in idToPoolsMap')
     return pool;
   }
 

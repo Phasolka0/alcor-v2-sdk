@@ -37,6 +37,7 @@ export declare class Pool {
     static hashToPoolMap: Map<string, Pool>;
     private _tokenAPrice?;
     private _tokenBPrice?;
+    static idToPoolsMap: Map<number, Pool>;
     /**
      * Construct a pool
      * @param tokenA One of the tokens in the pool
@@ -106,6 +107,7 @@ export declare class Pool {
     static fromJSON(json: any): Pool;
     static toBuffer(pool: Pool): Buffer;
     static fromBuffer(buffer: Buffer): Pool;
+    static fromId(id: number): Pool;
     static createHash(buffer: Buffer, pool?: Pool): string;
     static hashEquals(pool: Pool, hash: string): boolean;
     equals(other: Pool): boolean;

@@ -342,6 +342,12 @@ class Pool {
         this.hashToPoolMap.set(bufferHash, pool);
         return pool;
     }
+    static fromId(id) {
+        const pool = Pool.idToPoolsMap.get(id);
+        if (!pool)
+            throw new Error('pool does not exist in idToPoolsMap');
+        return pool;
+    }
     static createHash(buffer, pool) {
         const hash = crypto_1.default.createHash('sha256');
         hash.update(buffer);
@@ -379,3 +385,4 @@ class Pool {
 }
 exports.Pool = Pool;
 Pool.hashToPoolMap = new Map();
+Pool.idToPoolsMap = new Map();

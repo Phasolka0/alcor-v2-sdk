@@ -25,8 +25,8 @@ export declare class Route<TInput extends Currency, TOutput extends Currency> {
      * Returns the mid price of the route
      */
     get midPrice(): Price<TInput, TOutput>;
-    static toJSON(route: Route<Currency, Currency>): {
-        pools: Buffer[];
+    static toJSON(route: Route<Currency, Currency>, lightWeightVersion?: boolean): {
+        pools: (number | Buffer)[];
         input: {
             contract: string;
             decimals: number;
@@ -40,7 +40,7 @@ export declare class Route<TInput extends Currency, TOutput extends Currency> {
         _midPrice: Price<Token, Token> | null;
     };
     static fromJSON(json: any): Route<Token, Token>;
-    static toBuffer(route: Route<Currency, Currency>): Buffer;
+    static toBuffer(route: Route<Currency, Currency>, lightWeightVersion?: boolean): Buffer;
     static fromBuffer(buffer: Buffer): Route<Token, Token>;
     equals(other: Route<Currency, Currency>): boolean;
 }

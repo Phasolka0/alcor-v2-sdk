@@ -525,7 +525,7 @@ class Trade {
             //console.log('routesCount:', routes.length)
             for (const route of routes) {
                 const optionsJSON = {
-                    route: route_1.Route.toBuffer(route),
+                    route: route_1.Route.toBuffer(route, true),
                     amount: amountInBuffer,
                     tradeType: tradeTypeBuffer
                 };

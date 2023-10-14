@@ -58,7 +58,7 @@ class WorkerPool {
             yield Promise.all(this.workers.map((worker) => __awaiter(this, void 0, void 0, function* () {
                 yield worker.workerInstance.loadPools(allPoolsBuffer);
             })));
-            console.log(pools.length, 'updated for', Date.now() - startTime, 'ms');
+            console.log('Workers pools updated for', Date.now() - startTime);
         });
     }
     waitForWorkersAndReturnResult() {

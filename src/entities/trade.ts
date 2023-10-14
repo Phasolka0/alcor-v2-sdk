@@ -782,7 +782,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     //console.log('routesCount:', routes.length)
     for (const route of routes) {
       const optionsJSON = {
-        route: Route.toBuffer(route),
+        route: Route.toBuffer(route, true),
         amount: amountInBuffer,
         tradeType: tradeTypeBuffer
       }

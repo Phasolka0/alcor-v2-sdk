@@ -75,7 +75,7 @@ export class WorkerPool {
         await Promise.all(this.workers.map(async worker => {
             await worker.workerInstance.loadPools(allPoolsBuffer)
         }))
-        console.log(pools.length, 'updated for', Date.now() - startTime, 'ms')
+        console.log('Workers pools updated for', Date.now() - startTime)
     }
 
     async waitForWorkersAndReturnResult() {

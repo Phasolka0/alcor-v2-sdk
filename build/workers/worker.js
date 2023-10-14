@@ -9,17 +9,22 @@ const threads_1 = require("threads");
 const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
 const idToPool = new Map();
 function fromRoute(optionsBuffer) {
-    const optionsJSON = msgpack_lite_1.default.decode(optionsBuffer);
-    const route = entities_1.Route.fromBuffer(optionsJSON.route);
-    const amount = entities_1.CurrencyAmount.fromBuffer(optionsJSON.amount);
-    const tradeType = msgpack_lite_1.default.decode(optionsJSON.tradeType);
-    //console.log({route, amount, tradeType});
-    const { inputAmount, outputAmount } = entities_1.Trade.fromRouteForWorkers(route, amount, tradeType);
-    const resultJson = {
-        inputAmount: entities_1.CurrencyAmount.toBuffer(inputAmount),
-        outputAmount: entities_1.CurrencyAmount.toBuffer(outputAmount)
-    };
-    return msgpack_lite_1.default.encode(resultJson);
+    try {
+        const optionsJSON = msgpack_lite_1.default.decode(optionsBuffer);
+        const route = entities_1.Route.fromBuffer(optionsJSON.route);
+        const amount = entities_1.CurrencyAmount.fromBuffer(optionsJSON.amount);
+        const tradeType = msgpack_lite_1.default.decode(optionsJSON.tradeType);
+        //console.log({route, amount, tradeType});
+        const { inputAmount, outputAmount } = entities_1.Trade.fromRouteForWorkers(route, amount, tradeType);
+        const resultJson = {
+            inputAmount: entities_1.CurrencyAmount.toBuffer(inputAmount),
+            outputAmount: entities_1.CurrencyAmount.toBuffer(outputAmount)
+        };
+        return msgpack_lite_1.default.encode(resultJson);
+    }
+    catch (e) {
+        console.log(e);
+    }
 }
 function loadPools(poolsBuffer) {
     const poolsArray = msgpack_lite_1.default.decode(poolsBuffer);

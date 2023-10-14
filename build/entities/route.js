@@ -69,22 +69,36 @@ class Route {
             }).price;
         return (this._midPrice = new fractions_1.Price(this.input, this.output, price.denominator, price.numerator));
     }
-    static toJSON(route) {
+    static toJSON(route, lightWeightVersion = false) {
         return {
-            pools: route.pools.map(pool => pool_1.Pool.toBuffer(pool)),
+            pools: route.pools.map(pool => {
+                if (lightWeightVersion) {
+                    return pool.id;
+                }
+                else {
+                    return pool_1.Pool.toBuffer(pool);
+                }
+            }),
             input: token_1.Token.toJSON(route.input),
             output: token_1.Token.toJSON(route.output),
             _midPrice: route._midPrice,
         };
     }
     static fromJSON(json) {
-        const pools = json.pools.map(pool => pool_1.Pool.fromBuffer(pool));
+        const pools = json.pools.map(pool => {
+            if (typeof pool === 'number') {
+                return pool_1.Pool.fromId(pool);
+            }
+            else {
+                return pool_1.Pool.fromBuffer(pool);
+            }
+        });
         const input = token_1.Token.fromJSON(json.input);
         const output = token_1.Token.fromJSON(json.output);
         return new Route(pools, input, output);
     }
-    static toBuffer(route) {
-        const json = this.toJSON(route);
+    static toBuffer(route, lightWeightVersion = false) {
+        const json = this.toJSON(route, lightWeightVersion);
         return msgpack_lite_1.default.encode(json);
     }
     static fromBuffer(buffer) {
