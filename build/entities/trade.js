@@ -488,9 +488,6 @@ class Trade {
             const serializeArray = [];
             console.log(routes.length);
             for (const route of routes) {
-                // workerPool.addTask({route,
-                //   currencyAmountIn,
-                //   tradeType: TradeType.EXACT_INPUT})
                 // const trade = Trade.fromRoute(
                 //     route,
                 //     currencyAmountIn,
@@ -500,19 +497,20 @@ class Trade {
                 const amountJSON = fractions_1.CurrencyAmount.toJSON(currencyAmountIn);
                 const optionsJSON = { routeJSON, amountJSON };
                 const optionsBuffer = msgpack_lite_1.default.encode(optionsJSON);
-                serializeArray.push(optionsBuffer);
+                workerPool.addTask(optionsBuffer);
+                //serializeArray.push(optionsBuffer)
             }
             console.log('serialization time', performance.now() - serializationStart);
-            const deserializationStart = performance.now();
-            let i = 0;
-            for (const buffer of serializeArray) {
-                const optionsJSON = msgpack_lite_1.default.decode(buffer);
-                const route = route_1.Route.fromJSON(optionsJSON.routeJSON);
-                const amount = fractions_1.CurrencyAmount.fromJSON(optionsJSON.amountJSON);
-                const originalRoute = routes[i];
-                i++;
-            }
-            console.log('deserialization time', performance.now() - deserializationStart);
+            // const deserializationStart = performance.now()
+            // let i = 0
+            // for (const buffer of serializeArray) {
+            //   const optionsJSON = msgpack.decode(buffer)
+            //   const route = Route.fromJSON(optionsJSON.routeJSON)
+            //   const amount = CurrencyAmount.fromJSON(optionsJSON.amountJSON)
+            //   const originalRoute = routes[i]
+            //   i++
+            // }
+            // console.log('deserialization time', performance.now() - deserializationStart)
             //const results = await WorkerPool.waitForWorkersAndReturnResult()
             // for (const trade of results) {
             //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue

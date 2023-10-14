@@ -10,6 +10,7 @@ import { ONE, ZERO, TradeType } from '../internalConstants'
 import { Pool } from './pool'
 import { Route } from './route'
 import {WorkerPool} from "../workers/WorkerPool";
+import * as buffer from "buffer";
 
 /**
  * Trades comparator, an extension of the input output comparator that also considers other dimensions of the trade in ranking them
@@ -705,12 +706,10 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
     const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
     const serializationStart = performance.now()
-    const serializeArray: any[] = []
+    const serializeArray: Buffer[] = []
     console.log(routes.length)
     for (const route of routes) {
-      // workerPool.addTask({route,
-      //   currencyAmountIn,
-      //   tradeType: TradeType.EXACT_INPUT})
+
 
 
       // const trade = Trade.fromRoute(
@@ -724,19 +723,20 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       const optionsJSON = {routeJSON, amountJSON}
       const optionsBuffer = msgpack.encode(optionsJSON);
 
-      serializeArray.push(optionsBuffer)
+      workerPool.addTask(optionsBuffer)
+      //serializeArray.push(optionsBuffer)
     }
     console.log('serialization time', performance.now() - serializationStart)
-    const deserializationStart = performance.now()
-    let i = 0
-    for (const buffer of serializeArray) {
-      const optionsJSON = msgpack.decode(buffer)
-      const route = Route.fromJSON(optionsJSON.routeJSON)
-      const amount = CurrencyAmount.fromJSON(optionsJSON.amountJSON)
-      const originalRoute = routes[i]
-      i++
-    }
-    console.log('deserialization time', performance.now() - deserializationStart)
+    // const deserializationStart = performance.now()
+    // let i = 0
+    // for (const buffer of serializeArray) {
+    //   const optionsJSON = msgpack.decode(buffer)
+    //   const route = Route.fromJSON(optionsJSON.routeJSON)
+    //   const amount = CurrencyAmount.fromJSON(optionsJSON.amountJSON)
+    //   const originalRoute = routes[i]
+    //   i++
+    // }
+    // console.log('deserialization time', performance.now() - deserializationStart)
 
     //const results = await WorkerPool.waitForWorkersAndReturnResult()
 
