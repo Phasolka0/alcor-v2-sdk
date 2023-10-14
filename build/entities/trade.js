@@ -514,16 +514,11 @@ class Trade {
             console.log('workers', performance.now() - workersStart);
             console.log(results[0]);
             console.log(Trade.fromRoute(routes[0], currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT));
-            // for (const trade of results) {
-            //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
-            //
-            //   sortedInsert(
-            //       bestTrades,
-            //       trade,
-            //       maxNumResults,
-            //       tradeComparator
-            //   )
-            // }
+            for (const trade of results) {
+                //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+                (0, utils_1.sortedInsert)(bestTrades, trade, maxNumResults, tradeComparator);
+            }
+            console.log(bestTrades[0]);
             return bestTrades;
         });
     }

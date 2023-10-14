@@ -747,16 +747,17 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         TradeType.EXACT_INPUT
     ))
 
-    // for (const trade of results) {
-    //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
-    //
-    //   sortedInsert(
-    //       bestTrades,
-    //       trade,
-    //       maxNumResults,
-    //       tradeComparator
-    //   )
-    // }
+    for (const trade of results) {
+      //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+
+      sortedInsert(
+          bestTrades,
+          trade,
+          maxNumResults,
+          tradeComparator
+      )
+    }
+    console.log(bestTrades[0])
 
     return bestTrades
   }

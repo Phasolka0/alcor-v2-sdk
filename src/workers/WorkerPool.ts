@@ -83,7 +83,7 @@ export class WorkerPool {
             const taskOptions = this.tokenToTasks.get(token)
             if (!taskOptions) break
             this.tokenToTasks.delete(token)
-            console.log(taskOptions)
+            //console.log(taskOptions)
             const result = await worker.workerInstance.fromRoute(taskOptions)
             if (result) {
                 this.resultsArray.push(result)

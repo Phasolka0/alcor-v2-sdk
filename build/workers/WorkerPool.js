@@ -63,7 +63,7 @@ class WorkerPool {
                 if (!taskOptions)
                     break;
                 this.tokenToTasks.delete(token);
-                console.log(taskOptions);
+                //console.log(taskOptions)
                 const result = yield worker.workerInstance.fromRoute(taskOptions);
                 if (result) {
                     this.resultsArray.push(result);
