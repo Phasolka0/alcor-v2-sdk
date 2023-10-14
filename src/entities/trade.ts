@@ -816,6 +816,8 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     //     TradeType.EXACT_INPUT
     // ))
 
+    const bestResult: any = {}
+
     for (const [index, value] of results) {
       const route = routes[index]
       const controlTrade= Trade.fromRoute(
@@ -824,11 +826,19 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
           TradeType.EXACT_INPUT
       )
       //console.log(controlTrade)
-      console.log('mine:')
-      console.log(value)
-      console.log('control:')
-      console.log({inputAmount: controlTrade.inputAmount, outputAmount: controlTrade.outputAmount})
-      if (index > 3) break
+      // console.log('mine:')
+      // console.log(value)
+      // console.log('control:')
+      // console.log({inputAmount: controlTrade.inputAmount, outputAmount: controlTrade.outputAmount})
+      if (!bestResult) {
+        bestResult.amounts = value
+        bestResult.routeId = index
+      }
+      if (bestResult.amounts.outputAmount.lessThan(value.outputAmount)) {
+        bestResult.amounts = value
+        bestResult.routeId = index
+      }
+      //if (index > 3) break
 
       // if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
       //
@@ -839,7 +849,8 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       //     tradeComparator
       // )
     }
-    //console.log(bestTrades[0])
+    bestResult.route = routes[bestResult.routeId]
+    console.log(bestResult)
 
     return bestTrades
   }
