@@ -69,12 +69,12 @@ export class WorkerPool {
     addTask(taskOptions: any) {
         this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
     }
-    updatePools(pools: Pool[]) {
+    async updatePools(pools: Pool[]) {
         const startTime = Date.now()
         const allPoolsBuffer = msgpack.encode(pools.map(pool => Pool.toBuffer(pool)))
-        this.workers.forEach(worker => {
-            worker.workerInstance.loadPools(allPoolsBuffer)
-        })
+        await Promise.all(this.workers.map(async worker => {
+            await worker.workerInstance.loadPools(allPoolsBuffer)
+        }))
         console.log(pools.length, 'updated for', Date.now() - startTime, 'ms')
     }
 

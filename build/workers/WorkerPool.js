@@ -52,12 +52,14 @@ class WorkerPool {
         this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
     }
     updatePools(pools) {
-        const startTime = Date.now();
-        const allPoolsBuffer = msgpack_lite_1.default.encode(pools.map(pool => entities_1.Pool.toBuffer(pool)));
-        this.workers.forEach(worker => {
-            worker.workerInstance.loadPools(allPoolsBuffer);
+        return __awaiter(this, void 0, void 0, function* () {
+            const startTime = Date.now();
+            const allPoolsBuffer = msgpack_lite_1.default.encode(pools.map(pool => entities_1.Pool.toBuffer(pool)));
+            yield Promise.all(this.workers.map((worker) => __awaiter(this, void 0, void 0, function* () {
+                yield worker.workerInstance.loadPools(allPoolsBuffer);
+            })));
+            console.log(pools.length, 'updated for', Date.now() - startTime, 'ms');
         });
-        console.log(pools.length, 'updated for', Date.now() - startTime, 'ms');
     }
     waitForWorkersAndReturnResult() {
         return __awaiter(this, void 0, void 0, function* () {
