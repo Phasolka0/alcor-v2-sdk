@@ -56,7 +56,7 @@ export class Pool {
   public readonly feeGrowthGlobalAX64: JSBI;
   public readonly feeGrowthGlobalBX64: JSBI;
   public readonly tickDataProvider:  TickDataProvider
-  public json = {}
+  public json: any
 
   private _tokenAPrice?: Price<Token, Token>;
   private _tokenBPrice?: Price<Token, Token>;
