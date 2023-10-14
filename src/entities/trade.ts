@@ -734,13 +734,6 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       const route = Route.fromJSON(optionsJSON.routeJSON)
       const amount = CurrencyAmount.fromJSON(optionsJSON.amountJSON)
       const originalRoute = routes[i]
-      console.log(isEqual(originalRoute, route), isEqual(currencyAmountIn, amount))
-      if (!isEqual(originalRoute, route)) {
-        console.log('original:')
-        console.log(originalRoute)
-        console.log('restored:')
-        console.log(route)
-      }
       i++
     }
     console.log('deserialization time', performance.now() - deserializationStart)

@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Trade = exports.tradeComparator = void 0;
 const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
 const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
-const lodash_1 = require("lodash");
 const fractions_1 = require("./fractions");
 const utils_1 = require("../utils");
 const internalConstants_1 = require("../internalConstants");
@@ -511,13 +510,6 @@ class Trade {
                 const route = route_1.Route.fromJSON(optionsJSON.routeJSON);
                 const amount = fractions_1.CurrencyAmount.fromJSON(optionsJSON.amountJSON);
                 const originalRoute = routes[i];
-                console.log((0, lodash_1.isEqual)(originalRoute, route), (0, lodash_1.isEqual)(currencyAmountIn, amount));
-                if (!(0, lodash_1.isEqual)(originalRoute, route)) {
-                    console.log('original:');
-                    console.log(originalRoute);
-                    console.log('restored:');
-                    console.log(route);
-                }
                 i++;
             }
             console.log('deserialization time', performance.now() - deserializationStart);
