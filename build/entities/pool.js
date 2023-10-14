@@ -15,6 +15,7 @@ const swapMath_1 = require("../utils/swapMath");
 const utils_1 = require("../utils");
 const tickDataProvider_1 = require("./tickDataProvider");
 const tickListDataProvider_1 = require("./tickListDataProvider");
+const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
 /**
  * By default, pools will not allow operations that require ticks.
  */
@@ -298,6 +299,28 @@ class Pool {
         return pool.json;
     }
     static fromJSON(json) {
+        return new Pool({
+            id: json.id,
+            tokenA: token_1.Token.fromJSON(json.tokenA),
+            tokenB: token_1.Token.fromJSON(json.tokenB),
+            fee: json.fee,
+            sqrtPriceX64: jsbi_1.default.BigInt(json.sqrtPriceX64),
+            liquidity: jsbi_1.default.BigInt(json.liquidity),
+            tickCurrent: json.tickCurrent,
+            feeGrowthGlobalAX64: jsbi_1.default.BigInt(json.feeGrowthGlobalAX64),
+            feeGrowthGlobalBX64: jsbi_1.default.BigInt(json.feeGrowthGlobalBX64),
+            ticks: tickListDataProvider_1.TickListDataProvider.fromJSON(json.tickDataProvider)
+        });
+    }
+    static toBuffer(pool) {
+        if (pool.buffer)
+            return pool.buffer;
+        const json = Pool.toJSON(pool);
+        pool.buffer = msgpack_lite_1.default.encode(json);
+        return pool.buffer;
+    }
+    static fromBuffer(buffer) {
+        const json = msgpack_lite_1.default.decode(buffer);
         return new Pool({
             id: json.id,
             tokenA: token_1.Token.fromJSON(json.tokenA),

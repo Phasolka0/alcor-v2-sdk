@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Currency } from './currency';
 import { Price } from './fractions';
 import { Token } from './token';
@@ -39,5 +40,7 @@ export declare class Route<TInput extends Currency, TOutput extends Currency> {
         _midPrice: Price<Token, Token> | null;
     };
     static fromJSON(json: any): Route<Token, Token>;
+    static toBuffer(route: Route<Currency, Currency>): Buffer;
+    static fromBuffer(buffer: Buffer): Route<Token, Token>;
     equals(other: Route<Currency, Currency>): boolean;
 }

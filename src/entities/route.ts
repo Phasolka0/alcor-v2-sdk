@@ -5,6 +5,7 @@ import { Price } from './fractions'
 import { Token } from './token'
 
 import { Pool } from './pool'
+import msgpack from "msgpack-lite";
 
 /**
  * Represents a list of pools through which a swap can occur
@@ -96,6 +97,17 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
         const output = Token.fromJSON(json.output);
         return new Route(pools, input, output);
     }
+
+    static toBuffer(route: Route<Currency, Currency>) {
+      const json = this.toJSON(route);
+      return msgpack.encode(json);
+    }
+    static fromBuffer(buffer: Buffer) {
+        const json = msgpack.decode(buffer);
+        return this.fromJSON(json);
+    }
+
+
     public equals(other: Route<Currency, Currency>): boolean {
         // Сравниваем длины массивов пулов
         if (this.pools.length !== other.pools.length) return false;

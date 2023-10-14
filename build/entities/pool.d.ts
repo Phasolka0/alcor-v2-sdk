@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { CurrencyAmount, Price } from "./fractions";
 import { Token } from "./token";
 import { BigintIsh, FeeAmount } from "../internalConstants";
@@ -30,7 +31,8 @@ export declare class Pool {
     readonly feeGrowthGlobalAX64: JSBI;
     readonly feeGrowthGlobalBX64: JSBI;
     readonly tickDataProvider: TickDataProvider;
-    json: any;
+    json?: any;
+    buffer?: Buffer;
     private _tokenAPrice?;
     private _tokenBPrice?;
     /**
@@ -100,5 +102,7 @@ export declare class Pool {
     get tickSpacing(): number;
     static toJSON(pool: Pool): object;
     static fromJSON(json: any): Pool;
+    static toBuffer(pool: Pool): Buffer;
+    static fromBuffer(buffer: Buffer): Pool;
     equals(other: Pool): boolean;
 }

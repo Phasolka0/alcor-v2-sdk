@@ -8,6 +8,7 @@ const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
 const fractions_1 = require("./fractions");
 const token_1 = require("./token");
 const pool_1 = require("./pool");
+const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
 /**
  * Represents a list of pools through which a swap can occur
  * @template TInput The input token
@@ -81,6 +82,14 @@ class Route {
         const input = token_1.Token.fromJSON(json.input);
         const output = token_1.Token.fromJSON(json.output);
         return new Route(pools, input, output);
+    }
+    static toBuffer(route) {
+        const json = this.toJSON(route);
+        return msgpack_lite_1.default.encode(json);
+    }
+    static fromBuffer(buffer) {
+        const json = msgpack_lite_1.default.decode(buffer);
+        return this.fromJSON(json);
     }
     equals(other) {
         // Сравниваем длины массивов пулов

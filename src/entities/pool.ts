@@ -10,6 +10,7 @@ import { TickMath } from "../utils";
 import { Tick, TickConstructorArgs } from "./tick";
 import { NoTickDataProvider, TickDataProvider } from "./tickDataProvider";
 import { TickListDataProvider } from "./tickListDataProvider";
+import msgpack from "msgpack-lite";
 
 export interface PoolConstructorArgs {
   id: number,
@@ -56,7 +57,8 @@ export class Pool {
   public readonly feeGrowthGlobalAX64: JSBI;
   public readonly feeGrowthGlobalBX64: JSBI;
   public readonly tickDataProvider:  TickDataProvider
-  public json: any
+  public json?: any
+  public buffer?: Buffer
 
   private _tokenAPrice?: Price<Token, Token>;
   private _tokenBPrice?: Price<Token, Token>;
@@ -491,6 +493,28 @@ export class Pool {
   }
 
   static fromJSON(json: any): Pool {
+    return new Pool({
+      id: json.id,
+      tokenA: Token.fromJSON(json.tokenA),
+      tokenB: Token.fromJSON(json.tokenB),
+      fee: json.fee,
+      sqrtPriceX64: JSBI.BigInt(json.sqrtPriceX64),
+      liquidity: JSBI.BigInt(json.liquidity),
+      tickCurrent: json.tickCurrent,
+      feeGrowthGlobalAX64: JSBI.BigInt(json.feeGrowthGlobalAX64),
+      feeGrowthGlobalBX64: JSBI.BigInt(json.feeGrowthGlobalBX64),
+      ticks: TickListDataProvider.fromJSON(json.tickDataProvider)
+    });
+  }
+  static toBuffer(pool: Pool): Buffer {
+    if (pool.buffer) return pool.buffer
+    const json = Pool.toJSON(pool)
+    pool.buffer = msgpack.encode(json)
+    return pool.buffer
+  }
+
+  static fromBuffer(buffer: Buffer): Pool {
+    const json = msgpack.decode(buffer)
     return new Pool({
       id: json.id,
       tokenA: Token.fromJSON(json.tokenA),
