@@ -21,6 +21,10 @@ export declare class Token extends BaseCurrency {
      * @throws if the tokens have the same contract and symbol
      */
     sortsBefore(other: Token): boolean;
-    static serialize(token: Token): string;
+    static toJSON(token: Token): {
+        contract: string;
+        decimals: number;
+        symbol: string;
+    };
     static deserialize(jsonStr: string): Token;
 }

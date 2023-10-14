@@ -48,12 +48,12 @@ class Token extends baseCurrency_1.BaseCurrency {
             return (0, eos_common_1.name)(this.contract).raw().lt((0, eos_common_1.name)(other.contract).raw());
         }
     }
-    static serialize(token) {
-        return JSON.stringify({
+    static toJSON(token) {
+        return {
             contract: token.contract,
             decimals: token.decimals,
             symbol: token.symbol,
-        });
+        };
     }
     static deserialize(jsonStr) {
         const obj = JSON.parse(jsonStr);

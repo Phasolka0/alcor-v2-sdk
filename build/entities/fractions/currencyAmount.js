@@ -77,12 +77,12 @@ class CurrencyAmount extends fraction_1.Fraction {
     toExtendedAsset(...args) {
         return `${this.toFixed(...args)} ${this.currency.symbol}@${this.currency.contract}`;
     }
-    static serialize(amount) {
-        return JSON.stringify({
-            currency: token_1.Token.serialize(amount.currency),
+    static toJSON(amount) {
+        return {
+            currency: token_1.Token.toJSON(amount.currency),
             numerator: amount.numerator.toString(),
             denominator: amount.denominator.toString(),
-        });
+        };
     }
     static deserialize(data) {
         const parsedData = JSON.parse(data);

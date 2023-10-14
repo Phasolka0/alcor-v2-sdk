@@ -56,7 +56,7 @@ export class Pool {
   public readonly feeGrowthGlobalAX64: JSBI;
   public readonly feeGrowthGlobalBX64: JSBI;
   public readonly tickDataProvider:  TickDataProvider
-  public serialized = ''
+  public json = {}
 
   private _tokenAPrice?: Price<Token, Token>;
   private _tokenBPrice?: Price<Token, Token>;
@@ -473,21 +473,21 @@ export class Pool {
     return TICK_SPACINGS[this.fee];
   }
 
-  static serialize(pool: Pool): string {
-    if (pool.serialized) return pool.serialized
-    pool.serialized = JSON.stringify({
+  static toJSON(pool: Pool): object {
+    if (pool.json) return pool.json
+    pool.json = {
       id: pool.id,
-      tokenA: Token.serialize(pool.tokenA),
-      tokenB: Token.serialize(pool.tokenB),
+      tokenA: Token.toJSON(pool.tokenA),
+      tokenB: Token.toJSON(pool.tokenB),
       fee: pool.fee,
       sqrtPriceX64: pool.sqrtPriceX64.toString(),
       liquidity: pool.liquidity.toString(),
       tickCurrent: pool.tickCurrent,
       feeGrowthGlobalAX64: pool.feeGrowthGlobalAX64.toString(),
       feeGrowthGlobalBX64: pool.feeGrowthGlobalBX64.toString(),
-      tickDataProvider: TickListDataProvider.serialize((pool.tickDataProvider as TickListDataProvider).ticks)
-    });
-    return pool.serialized
+      tickDataProvider: TickListDataProvider.toJSON((pool.tickDataProvider as TickListDataProvider).ticks)
+    }
+    return pool.json
   }
 
   static deserialize(data: string): Pool {

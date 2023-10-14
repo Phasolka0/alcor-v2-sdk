@@ -1,4 +1,5 @@
 import invariant from 'tiny-invariant'
+import msgpack from "msgpack-lite";
 
 import { Currency } from './currency'
 import { Fraction, Percent, Price, CurrencyAmount } from './fractions'
@@ -694,9 +695,9 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       pools: Pool[],
       currencyAmountIn: CurrencyAmount<TInput>,
       maxNumResults = 3,
-      //smartCalculatePool: any
   ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]> {
-    //if (!this.workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
+    const workerPool = this.workerPool
+    if (!workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
 
     invariant(pools.length > 0, 'POOLS')
 
@@ -705,7 +706,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     const serializeArray: any[] = []
     console.log(routes.length)
     for (const route of routes) {
-      // smartCalculatePool.addTask({route,
+      // workerPool.addTask({route,
       //   currencyAmountIn,
       //   tradeType: TradeType.EXACT_INPUT})
 
@@ -716,25 +717,21 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       //     TradeType.EXACT_INPUT
       // )
 
-      const routeSerialized = Route.serialize(route)
-      const amountSerialized = CurrencyAmount.serialize(currencyAmountIn)
-      serializeArray.push({routeSerialized, amountSerialized})
+      const routeJSON = Route.toJSON(route)
+      const amountJSON = CurrencyAmount.toJSON(currencyAmountIn)
+      const optionsJSON = {routeJSON, amountJSON}
+      const optionsBuffer = msgpack.encode(optionsJSON);
 
-
-
-      //console.log(isEqual(route, routeDeserialized), isEqual(amount, amountDeserialized))
+      serializeArray.push(optionsBuffer)
     }
-    console.log(serializeArray[0])
     console.log('serialization time', performance.now() - serializationStart)
-    const deserializationStart = performance.now()
-    const deserializeArray: any[] = []
-    for (const object of serializeArray) {
-      const routeDeserialized = Route.deserialize(object.routeSerialized)
-      const amountDeserialized = CurrencyAmount.deserialize(object.amountSerialized)
-      deserializeArray.push({routeDeserialized, amountDeserialized})
-    }
-    console.log(deserializeArray[0])
-    console.log('deserialization time', performance.now() - deserializationStart)
+    // const deserializationStart = performance.now()
+    // for (const object of serializeArray) {
+    //   const routeDeserialized = Route.deserialize(object.routeSerialized)
+    //   const amountDeserialized = CurrencyAmount.deserialize(object.amountSerialized)
+    // }
+    // console.log('deserialization time', performance.now() - deserializationStart)
+
     //const results = await smartCalculatePool.waitForWorkersAndReturnResult()
 
     // for (const trade of results) {

@@ -127,12 +127,12 @@ export class CurrencyAmount<T extends Currency> extends Fraction {
     return `${this.toFixed(...args)} ${this.currency.symbol}@${this.currency.contract}`
   }
 
-  static serialize<T extends Currency>(amount: CurrencyAmount<T>): string {
-    return JSON.stringify({
-      currency: Token.serialize(amount.currency),
+  static toJSON<T extends Currency>(amount: CurrencyAmount<T>): object {
+    return {
+      currency: Token.toJSON(amount.currency),
       numerator: amount.numerator.toString(),
       denominator: amount.denominator.toString(),
-    });
+    };
   }
 
   static deserialize(data: string) {

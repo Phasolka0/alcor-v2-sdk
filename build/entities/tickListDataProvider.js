@@ -20,9 +20,8 @@ class TickListDataProvider {
     nextInitializedTickWithinOneWord(tick, lte, tickSpacing) {
         return utils_1.TickList.nextInitializedTickWithinOneWord(this.ticks, tick, lte, tickSpacing);
     }
-    static serialize(ticks) {
-        const serializedTicks = ticks.map((tick) => tick_1.Tick.serialize(tick));
-        return JSON.stringify(serializedTicks);
+    static toJSON(ticks) {
+        return ticks.map((tick) => tick_1.Tick.toJSON(tick));
     }
     static deserialize(ticksString) {
         const ticks = JSON.parse(ticksString);

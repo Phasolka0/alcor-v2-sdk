@@ -68,14 +68,14 @@ class Route {
             }).price;
         return (this._midPrice = new fractions_1.Price(this.input, this.output, price.denominator, price.numerator));
     }
-    static serialize(route) {
-        return JSON.stringify({
-            pools: route.pools.map(pool => pool_1.Pool.serialize(pool)),
+    static toJSON(route) {
+        return {
+            pools: route.pools.map(pool => pool_1.Pool.toJSON(pool)),
             //tokenPath: route.tokenPath.map(token => Token.serialize(token)),
-            input: token_1.Token.serialize(route.input),
-            output: token_1.Token.serialize(route.output),
+            input: token_1.Token.toJSON(route.input),
+            output: token_1.Token.toJSON(route.output),
             _midPrice: route._midPrice,
-        });
+        };
     }
     static deserialize(jsonStr) {
         const obj = JSON.parse(jsonStr);

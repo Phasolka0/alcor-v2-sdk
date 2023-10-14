@@ -46,8 +46,8 @@ export class Tick {
     this.secondsPerLiquidityOutsideX64 = JSBI.BigInt(secondsPerLiquidityOutsideX64);
   }
 
-  static serialize(tick: Tick): string {
-    return JSON.stringify({
+  static toJSON(tick: Tick): object {
+    return {
       id: tick.id,
       liquidityGross: tick.liquidityGross.toString(),
       liquidityNet: tick.liquidityNet.toString(),
@@ -56,7 +56,7 @@ export class Tick {
       tickCumulativeOutside: tick.tickCumulativeOutside.toString(),
       secondsOutside: tick.secondsOutside.toString(),
       secondsPerLiquidityOutsideX64: tick.secondsPerLiquidityOutsideX64.toString(),
-    });
+    }
   }
 
 

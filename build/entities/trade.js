@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Trade = exports.tradeComparator = void 0;
 const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
+const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
 const fractions_1 = require("./fractions");
 const utils_1 = require("../utils");
 const internalConstants_1 = require("../internalConstants");
@@ -477,14 +478,16 @@ class Trade {
     }
     static bestTradeExactIn3(routes, pools, currencyAmountIn, maxNumResults = 3) {
         return __awaiter(this, void 0, void 0, function* () {
-            //if (!this.workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
+            const workerPool = this.workerPool;
+            if (!workerPool)
+                return this.bestTradeExactIn2(routes, pools, currencyAmountIn);
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             const bestTrades = [];
             const serializationStart = performance.now();
             const serializeArray = [];
             console.log(routes.length);
             for (const route of routes) {
-                // smartCalculatePool.addTask({route,
+                // workerPool.addTask({route,
                 //   currencyAmountIn,
                 //   tradeType: TradeType.EXACT_INPUT})
                 // const trade = Trade.fromRoute(
@@ -492,22 +495,19 @@ class Trade {
                 //     currencyAmountIn,
                 //     TradeType.EXACT_INPUT
                 // )
-                const routeSerialized = route_1.Route.serialize(route);
-                const amountSerialized = fractions_1.CurrencyAmount.serialize(currencyAmountIn);
-                serializeArray.push({ routeSerialized, amountSerialized });
-                //console.log(isEqual(route, routeDeserialized), isEqual(amount, amountDeserialized))
+                const routeJSON = route_1.Route.toJSON(route);
+                const amountJSON = fractions_1.CurrencyAmount.toJSON(currencyAmountIn);
+                const optionsJSON = { routeJSON, amountJSON };
+                const optionsBuffer = msgpack_lite_1.default.encode(optionsJSON);
+                serializeArray.push(optionsBuffer);
             }
-            console.log(serializeArray[0]);
             console.log('serialization time', performance.now() - serializationStart);
-            const deserializationStart = performance.now();
-            const deserializeArray = [];
-            for (const object of serializeArray) {
-                const routeDeserialized = route_1.Route.deserialize(object.routeSerialized);
-                const amountDeserialized = fractions_1.CurrencyAmount.deserialize(object.amountSerialized);
-                deserializeArray.push({ routeDeserialized, amountDeserialized });
-            }
-            console.log(deserializeArray[0]);
-            console.log('deserialization time', performance.now() - deserializationStart);
+            // const deserializationStart = performance.now()
+            // for (const object of serializeArray) {
+            //   const routeDeserialized = Route.deserialize(object.routeSerialized)
+            //   const amountDeserialized = CurrencyAmount.deserialize(object.amountSerialized)
+            // }
+            // console.log('deserialization time', performance.now() - deserializationStart)
             //const results = await smartCalculatePool.waitForWorkersAndReturnResult()
             // for (const trade of results) {
             //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue

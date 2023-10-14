@@ -19,8 +19,8 @@ class Tick {
         this.secondsOutside = jsbi_1.default.BigInt(secondsOutside);
         this.secondsPerLiquidityOutsideX64 = jsbi_1.default.BigInt(secondsPerLiquidityOutsideX64);
     }
-    static serialize(tick) {
-        return JSON.stringify({
+    static toJSON(tick) {
+        return {
             id: tick.id,
             liquidityGross: tick.liquidityGross.toString(),
             liquidityNet: tick.liquidityNet.toString(),
@@ -29,7 +29,7 @@ class Tick {
             tickCumulativeOutside: tick.tickCumulativeOutside.toString(),
             secondsOutside: tick.secondsOutside.toString(),
             secondsPerLiquidityOutsideX64: tick.secondsPerLiquidityOutsideX64.toString(),
-        });
+        };
     }
     static deserialize(data) {
         const parsedData = JSON.parse(data);

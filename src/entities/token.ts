@@ -52,12 +52,12 @@ export class Token extends BaseCurrency {
     }
   }
 
-  static serialize(token: Token) {
-    return JSON.stringify({
+  static toJSON(token: Token) {
+    return {
       contract: token.contract,
       decimals: token.decimals,
       symbol: token.symbol,
-    });
+    }
   }
   static deserialize(jsonStr: string) {
     const obj = JSON.parse(jsonStr);

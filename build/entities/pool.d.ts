@@ -30,7 +30,7 @@ export declare class Pool {
     readonly feeGrowthGlobalAX64: JSBI;
     readonly feeGrowthGlobalBX64: JSBI;
     readonly tickDataProvider: TickDataProvider;
-    serialized: string;
+    json: {};
     private _tokenAPrice?;
     private _tokenBPrice?;
     /**
@@ -98,7 +98,7 @@ export declare class Pool {
      */
     private swap;
     get tickSpacing(): number;
-    static serialize(pool: Pool): string;
+    static toJSON(pool: Pool): object;
     static deserialize(data: string): Pool;
     equals(other: Pool): boolean;
 }

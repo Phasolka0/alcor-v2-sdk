@@ -82,14 +82,14 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
     return (this._midPrice = new Price(this.input, this.output, price.denominator, price.numerator))
   }
 
-    static serialize(route: Route<any, any>) {
-        return JSON.stringify({
-            pools: route.pools.map(pool => Pool.serialize(pool)), // предполагается, что у Pool тоже есть метод serialize
+    static toJSON(route: Route<Currency, Currency>) {
+        return {
+            pools: route.pools.map(pool => Pool.toJSON(pool)), // предполагается, что у Pool тоже есть метод serialize
             //tokenPath: route.tokenPath.map(token => Token.serialize(token)),
-            input: Token.serialize(route.input),
-            output: Token.serialize(route.output),
+            input: Token.toJSON(route.input),
+            output: Token.toJSON(route.output),
             _midPrice: route._midPrice,
-        });
+        }
     }
     static deserialize(jsonStr: string) {
         const obj = JSON.parse(jsonStr);

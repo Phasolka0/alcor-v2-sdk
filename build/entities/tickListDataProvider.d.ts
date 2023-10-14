@@ -8,6 +8,6 @@ export declare class TickListDataProvider implements TickDataProvider {
     constructor(ticks: (Tick | TickConstructorArgs)[], tickSpacing?: number);
     getTick(tick: number): Tick;
     nextInitializedTickWithinOneWord(tick: number, lte: boolean, tickSpacing: number): [number, boolean];
-    static serialize(ticks: Tick[]): string;
+    static toJSON(ticks: Tick[]): object;
     static deserialize(ticksString: string): TickListDataProvider;
 }
