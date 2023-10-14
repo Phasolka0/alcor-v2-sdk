@@ -26,7 +26,7 @@ export declare class Route<TInput extends Currency, TOutput extends Currency> {
      */
     get midPrice(): Price<TInput, TOutput>;
     static toJSON(route: Route<Currency, Currency>): {
-        pools: object[];
+        pools: Buffer[];
         input: {
             contract: string;
             decimals: number;

@@ -71,14 +71,14 @@ class Route {
     }
     static toJSON(route) {
         return {
-            pools: route.pools.map(pool => pool_1.Pool.toJSON(pool)),
+            pools: route.pools.map(pool => pool_1.Pool.toBuffer(pool)),
             input: token_1.Token.toJSON(route.input),
             output: token_1.Token.toJSON(route.output),
             _midPrice: route._midPrice,
         };
     }
     static fromJSON(json) {
-        const pools = json.pools.map(pool => pool_1.Pool.fromJSON(pool));
+        const pools = json.pools.map(pool => pool_1.Pool.fromBuffer(pool));
         const input = token_1.Token.fromJSON(json.input);
         const output = token_1.Token.fromJSON(json.output);
         return new Route(pools, input, output);

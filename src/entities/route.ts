@@ -85,14 +85,14 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
 
     static toJSON(route: Route<Currency, Currency>) {
         return {
-            pools: route.pools.map(pool => Pool.toJSON(pool)),
+            pools: route.pools.map(pool => Pool.toBuffer(pool)),
             input: Token.toJSON(route.input),
             output: Token.toJSON(route.output),
             _midPrice: route._midPrice,
         }
     }
     static fromJSON(json: any) {
-        const pools = json.pools.map(pool => Pool.fromJSON(pool));
+        const pools = json.pools.map(pool => Pool.fromBuffer(pool));
         const input = Token.fromJSON(json.input);
         const output = Token.fromJSON(json.output);
         return new Route(pools, input, output);
