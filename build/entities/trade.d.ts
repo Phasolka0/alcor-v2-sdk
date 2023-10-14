@@ -1,5 +1,5 @@
 import { Currency } from './currency';
-import { Percent, Price, CurrencyAmount } from './fractions';
+import { CurrencyAmount, Percent, Price } from './fractions';
 import { TradeType } from '../internalConstants';
 import { Pool } from './pool';
 import { Route } from './route';
@@ -118,6 +118,7 @@ export declare class Trade<TInput extends Currency, TOutput extends Currency, TT
      * @returns The route
      */
     static fromRoute<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(route: Route<TInput, TOutput>, amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>, tradeType: TTradeType): Trade<TInput, TOutput, TTradeType>;
+    static fromRouteForWorkers<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(route: Route<TInput, TOutput>, amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>, tradeType: TTradeType): CurrencyAmount<TOutput>;
     /**
      * Constructs a trade from routes by simulating swaps
      *

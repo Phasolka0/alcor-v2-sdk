@@ -201,6 +201,32 @@ class Trade {
             tradeType
         });
     }
+    static fromRouteForWorkers(route, amount, tradeType) {
+        const amounts = new Array(route.tokenPath.length);
+        //let inputAmount: CurrencyAmount<TInput>
+        let outputAmount;
+        if (tradeType === internalConstants_1.TradeType.EXACT_INPUT) {
+            (0, tiny_invariant_1.default)(amount.currency.equals(route.input), 'INPUT');
+            amounts[0] = amount;
+            for (let i = 0; i < route.tokenPath.length - 1; i++) {
+                const pool = route.pools[i];
+                amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i]);
+            }
+            //inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator)
+            outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amounts[amounts.length - 1].numerator, amounts[amounts.length - 1].denominator);
+        }
+        else {
+            (0, tiny_invariant_1.default)(amount.currency.equals(route.output), 'OUTPUT');
+            amounts[amounts.length - 1] = amount;
+            for (let i = route.tokenPath.length - 1; i > 0; i--) {
+                const pool = route.pools[i - 1];
+                amounts[i - 1] = pool.getInputAmountOptimized(amounts[i]);
+            }
+            //inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator)
+            outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator);
+        }
+        return outputAmount;
+    }
     // static fromJSON(json: any) {
     //   const route = Route.fromJSON(json.route); // assuming Route has its own fromJSON method
     //   const inputAmount = CurrencyAmount.fromJSON(json.inputAmount); // same for CurrencyAmount
@@ -528,7 +554,8 @@ class Trade {
             for (const [index, value] of results) {
                 const route = routes[index];
                 const controlTrade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
-                console.log(controlTrade);
+                //console.log(controlTrade)
+                console.log(value, controlTrade.outputAmount);
                 // if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
                 //
                 // sortedInsert(

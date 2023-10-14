@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WorkerPool = exports.SmartWorker = void 0;
 const threads_1 = require("threads");
+const entities_1 = require("../entities");
 const threadsCount = 16;
 class SmartWorker {
     constructor(id, workerInstance) {
@@ -64,9 +65,9 @@ class WorkerPool {
                     break;
                 this.tokenToTasks.delete(token);
                 //console.log(taskOptions)
-                const result = yield worker.workerInstance.fromRoute(taskOptions);
-                if (result) {
-                    this.tokenToResults.set(token, result);
+                const amountOut = yield worker.workerInstance.fromRoute(taskOptions);
+                if (amountOut) {
+                    this.tokenToResults.set(token, entities_1.CurrencyAmount.fromBuffer(amountOut));
                 }
             }
         });

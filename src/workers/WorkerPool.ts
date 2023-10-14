@@ -1,4 +1,5 @@
 import {spawn, Worker} from 'threads';
+import {CurrencyAmount} from "../entities";
 const threadsCount = 16
 
 export class SmartWorker {
@@ -83,9 +84,9 @@ export class WorkerPool {
             if (!taskOptions) break
             this.tokenToTasks.delete(token)
             //console.log(taskOptions)
-            const result = await worker.workerInstance.fromRoute(taskOptions)
-            if (result) {
-                this.tokenToResults.set(token, result)
+            const amountOut = await worker.workerInstance.fromRoute(taskOptions)
+            if (amountOut) {
+                this.tokenToResults.set(token, CurrencyAmount.fromBuffer(amountOut))
             }
         }
     }

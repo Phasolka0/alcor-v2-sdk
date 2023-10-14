@@ -1,16 +1,14 @@
 import invariant from 'tiny-invariant'
 import msgpack from "msgpack-lite";
-import { isEqual } from 'lodash';
 
-import { Currency } from './currency'
-import { Fraction, Percent, Price, CurrencyAmount } from './fractions'
-import { sortedInsert } from '../utils'
-import { Token } from './token'
-import { ONE, ZERO, TradeType } from '../internalConstants'
-import { Pool } from './pool'
-import { Route } from './route'
+import {Currency} from './currency'
+import {CurrencyAmount, Fraction, Percent, Price} from './fractions'
+import {sortedInsert} from '../utils'
+import {Token} from './token'
+import {ONE, TradeType, ZERO} from '../internalConstants'
+import {Pool} from './pool'
+import {Route} from './route'
 import {WorkerPool} from "../workers/WorkerPool";
-import * as buffer from "buffer";
 
 /**
  * Trades comparator, an extension of the input output comparator that also considers other dimensions of the trade in ranking them
@@ -271,6 +269,40 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       routes: [{ inputAmount, outputAmount, route }],
       tradeType
     })
+  }
+  public static fromRouteForWorkers<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(
+      route: Route<TInput, TOutput>,
+      amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>,
+      tradeType: TTradeType
+  ): CurrencyAmount<TOutput> {
+    const amounts: CurrencyAmount<Token>[] = new Array(route.tokenPath.length)
+    //let inputAmount: CurrencyAmount<TInput>
+    let outputAmount: CurrencyAmount<TOutput>
+    if (tradeType === TradeType.EXACT_INPUT) {
+      invariant(amount.currency.equals(route.input), 'INPUT')
+      amounts[0] = amount
+      for (let i = 0; i < route.tokenPath.length - 1; i++) {
+        const pool = route.pools[i]
+        amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i])
+      }
+      //inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator)
+      outputAmount = CurrencyAmount.fromFractionalAmount(
+          route.output,
+          amounts[amounts.length - 1].numerator,
+          amounts[amounts.length - 1].denominator
+      )
+    } else {
+      invariant(amount.currency.equals(route.output), 'OUTPUT')
+      amounts[amounts.length - 1] = amount
+      for (let i = route.tokenPath.length - 1; i > 0; i--) {
+        const pool = route.pools[i - 1]
+        amounts[i - 1] = pool.getInputAmountOptimized(amounts[i])
+      }
+      //inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator)
+      outputAmount = CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator)
+    }
+
+    return outputAmount
   }
   // static fromJSON(json: any) {
   //   const route = Route.fromJSON(json.route); // assuming Route has its own fromJSON method
@@ -762,7 +794,8 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
           currencyAmountIn,
           TradeType.EXACT_INPUT
       )
-      console.log(controlTrade)
+      //console.log(controlTrade)
+      console.log(value, controlTrade.outputAmount)
 
       // if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
       //
