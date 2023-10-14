@@ -1,5 +1,5 @@
 import {spawn, Worker} from 'threads';
-import {CurrencyAmount} from "../entities";
+import {CurrencyAmount, Pool} from "../entities";
 import msgpack from "msgpack-lite";
 const threadsCount = 16
 
@@ -69,12 +69,18 @@ export class WorkerPool {
     addTask(taskOptions: any) {
         this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
     }
+    updatePools(pools: Pool[]) {
+        const startTime = Date.now()
+        const allPoolsBuffer = msgpack.encode(pools.map(pool => Pool.toBuffer(pool)))
+        this.workers.forEach(worker => {
+            worker.workerInstance.loadPools(allPoolsBuffer)
+        })
+        console.log(pools.length, 'updated for', Date.now() - startTime, 'ms')
+    }
 
     async waitForWorkersAndReturnResult() {
         this.tokenToResults = new Map()
         await Promise.all(this.workers.map(async worker => {
-            this.workerLoop(worker)
-            this.workerLoop(worker)
             await this.workerLoop(worker)
         }))
         return this.tokenToResults

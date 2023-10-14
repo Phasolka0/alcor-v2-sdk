@@ -1,6 +1,7 @@
-import {CurrencyAmount, Route, Trade} from "../entities";
+import {CurrencyAmount, Pool, Route, Trade} from "../entities";
 import {expose} from "threads";
 import msgpack from "msgpack-lite";
+const idToPool: Map<number, Pool> = new Map()
 
 
 function fromRoute(optionsBuffer: Buffer) {
@@ -15,10 +16,19 @@ function fromRoute(optionsBuffer: Buffer) {
             outputAmount: CurrencyAmount.toBuffer(outputAmount)}
       return msgpack.encode(resultJson)
 }
+function loadPools(poolsBuffer: Buffer) {
+      const poolsArray = msgpack.decode(poolsBuffer)
+      const pools: Pool[] = poolsArray.map((poolBuffer: Buffer) => Pool.fromBuffer(poolBuffer))
+      for (const pool of pools) {
+            idToPool.set(pool.id, pool)
+      }
+
+}
 
 
 
 export const WorkerExpose = {
-    fromRoute
+    fromRoute,
+      loadPools
 }
 expose(WorkerExpose)
