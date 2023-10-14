@@ -11,6 +11,7 @@ const fraction_1 = require("./fraction");
 const big_js_1 = __importDefault(require("big.js"));
 const toformat_1 = __importDefault(require("toformat"));
 const internalConstants_1 = require("../../internalConstants");
+const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
 const Big = (0, toformat_1.default)(big_js_1.default);
 class CurrencyAmount extends fraction_1.Fraction {
     /**
@@ -89,6 +90,18 @@ class CurrencyAmount extends fraction_1.Fraction {
         const numerator = jsbi_1.default.BigInt(json.numerator);
         const denominator = jsbi_1.default.BigInt(json.denominator);
         return new CurrencyAmount(currency, numerator, denominator);
+    }
+    static toBuffer(amount) {
+        const json = {
+            currency: token_1.Token.toJSON(amount.currency),
+            numerator: amount.numerator.toString(),
+            denominator: amount.denominator.toString(),
+        };
+        return msgpack_lite_1.default.encode(json);
+    }
+    static fromBuffer(buffer) {
+        const json = msgpack_lite_1.default.decode(buffer);
+        return this.fromJSON(json);
     }
 }
 exports.CurrencyAmount = CurrencyAmount;

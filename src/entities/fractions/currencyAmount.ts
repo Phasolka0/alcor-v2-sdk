@@ -6,6 +6,7 @@ import { Fraction } from "./fraction";
 import _Big from "big.js";
 import toFormat from "toformat";
 import { BigintIsh, Rounding, MaxUint256 } from "../../internalConstants";
+import msgpack from "msgpack-lite";
 
 const Big = toFormat(_Big);
 
@@ -140,5 +141,20 @@ export class CurrencyAmount<T extends Currency> extends Fraction {
     const numerator = JSBI.BigInt(json.numerator);
     const denominator = JSBI.BigInt(json.denominator);
     return new CurrencyAmount(currency, numerator, denominator);
+  }
+
+  static toBuffer<T extends Currency>(amount: CurrencyAmount<T>): object {
+    const json = {
+      currency: Token.toJSON(amount.currency),
+      numerator: amount.numerator.toString(),
+      denominator: amount.denominator.toString(),
+    }
+
+    return msgpack.encode(json);
+  }
+
+  static fromBuffer(buffer: Buffer) {
+    const json = msgpack.decode(buffer)
+    return this.fromJSON(json)
   }
 }

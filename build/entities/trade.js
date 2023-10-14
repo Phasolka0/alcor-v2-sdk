@@ -493,24 +493,19 @@ class Trade {
                 //     currencyAmountIn,
                 //     TradeType.EXACT_INPUT
                 // )
-                const routeJSON = route_1.Route.toJSON(route);
-                const amountJSON = fractions_1.CurrencyAmount.toJSON(currencyAmountIn);
-                const optionsJSON = { routeJSON, amountJSON };
+                const optionsJSON = { route: route_1.Route.toBuffer(route), amount: fractions_1.CurrencyAmount.toBuffer(currencyAmountIn) };
                 const optionsBuffer = msgpack_lite_1.default.encode(optionsJSON);
-                workerPool.addTask(optionsBuffer);
-                //serializeArray.push(optionsBuffer)
+                //workerPool.addTask(optionsBuffer)
+                serializeArray.push(optionsBuffer);
             }
             console.log('serialization time', performance.now() - serializationStart);
-            // const deserializationStart = performance.now()
-            // let i = 0
-            // for (const buffer of serializeArray) {
-            //   const optionsJSON = msgpack.decode(buffer)
-            //   const route = Route.fromJSON(optionsJSON.routeJSON)
-            //   const amount = CurrencyAmount.fromJSON(optionsJSON.amountJSON)
-            //   const originalRoute = routes[i]
-            //   i++
-            // }
-            // console.log('deserialization time', performance.now() - deserializationStart)
+            const deserializationStart = performance.now();
+            for (const buffer of serializeArray) {
+                const optionsJSON = msgpack_lite_1.default.decode(buffer);
+                const route = route_1.Route.fromBuffer(optionsJSON.route);
+                const amount = fractions_1.CurrencyAmount.fromBuffer(optionsJSON.amount);
+            }
+            console.log('deserialization time', performance.now() - deserializationStart);
             //const results = await WorkerPool.waitForWorkersAndReturnResult()
             // for (const trade of results) {
             //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue

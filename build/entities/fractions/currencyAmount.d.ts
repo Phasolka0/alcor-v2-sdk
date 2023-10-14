@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import JSBI from "jsbi";
 import { Currency } from "../currency";
 import { Token } from "../token";
@@ -31,4 +32,6 @@ export declare class CurrencyAmount<T extends Currency> extends Fraction {
     toExtendedAsset(...args: any[]): string;
     static toJSON<T extends Currency>(amount: CurrencyAmount<T>): object;
     static fromJSON(json: any): CurrencyAmount<Token>;
+    static toBuffer<T extends Currency>(amount: CurrencyAmount<T>): object;
+    static fromBuffer(buffer: Buffer): CurrencyAmount<Token>;
 }

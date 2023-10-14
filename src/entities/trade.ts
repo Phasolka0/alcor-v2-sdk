@@ -718,25 +718,20 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       //     TradeType.EXACT_INPUT
       // )
 
-      const routeJSON = Route.toJSON(route)
-      const amountJSON = CurrencyAmount.toJSON(currencyAmountIn)
-      const optionsJSON = {routeJSON, amountJSON}
+      const optionsJSON = {route: Route.toBuffer(route), amount: CurrencyAmount.toBuffer(currencyAmountIn)}
       const optionsBuffer = msgpack.encode(optionsJSON);
 
-      workerPool.addTask(optionsBuffer)
-      //serializeArray.push(optionsBuffer)
+      //workerPool.addTask(optionsBuffer)
+      serializeArray.push(optionsBuffer)
     }
     console.log('serialization time', performance.now() - serializationStart)
-    // const deserializationStart = performance.now()
-    // let i = 0
-    // for (const buffer of serializeArray) {
-    //   const optionsJSON = msgpack.decode(buffer)
-    //   const route = Route.fromJSON(optionsJSON.routeJSON)
-    //   const amount = CurrencyAmount.fromJSON(optionsJSON.amountJSON)
-    //   const originalRoute = routes[i]
-    //   i++
-    // }
-    // console.log('deserialization time', performance.now() - deserializationStart)
+    const deserializationStart = performance.now()
+    for (const buffer of serializeArray) {
+      const optionsJSON = msgpack.decode(buffer)
+      const route = Route.fromBuffer(optionsJSON.route)
+      const amount = CurrencyAmount.fromBuffer(optionsJSON.amount)
+    }
+    console.log('deserialization time', performance.now() - deserializationStart)
 
     //const results = await WorkerPool.waitForWorkersAndReturnResult()
 
