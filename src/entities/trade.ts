@@ -272,6 +272,18 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       tradeType
     })
   }
+  // static fromJSON(json: any) {
+  //   const route = Route.fromJSON(json.route); // assuming Route has its own fromJSON method
+  //   const inputAmount = CurrencyAmount.fromJSON(json.inputAmount); // same for CurrencyAmount
+  //   const outputAmount = CurrencyAmount.fromJSON(json.outputAmount); // same for CurrencyAmount
+  //
+  //   return new Trade({
+  //     route,
+  //     inputAmount,
+  //     outputAmount,
+  //     tradeType: parsed.tradeType
+  //   });
+  // }
 
   /**
    * Constructs a trade from routes by simulating swaps
@@ -713,11 +725,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
 
 
-      // const trade = Trade.fromRoute(
-      //     route,
-      //     currencyAmountIn,
-      //     TradeType.EXACT_INPUT
-      // )
+
 
       const optionsJSON = {
         route: Route.toBuffer(route),
@@ -740,24 +748,32 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
     const results = await workerPool.waitForWorkersAndReturnResult()
     console.log('workers', performance.now() - workersStart)
-    console.log(results[0])
-    console.log(Trade.fromRoute(
-        routes[0],
-        currencyAmountIn,
-        TradeType.EXACT_INPUT
-    ))
+    // console.log(results[0])
+    // console.log(Trade.fromRoute(
+    //     routes[0],
+    //     currencyAmountIn,
+    //     TradeType.EXACT_INPUT
+    // ))
 
-    for (const trade of results) {
-      //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
-
-      sortedInsert(
-          bestTrades,
-          trade,
-          maxNumResults,
-          tradeComparator
+    for (const [index, value] of results) {
+      const route = routes[index]
+      const controlTrade= Trade.fromRoute(
+          route,
+          currencyAmountIn,
+          TradeType.EXACT_INPUT
       )
+      console.log(controlTrade)
+
+      // if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+      //
+      // sortedInsert(
+      //     bestTrades,
+      //     trade,
+      //     maxNumResults,
+      //     tradeComparator
+      // )
     }
-    console.log(bestTrades[0])
+    //console.log(bestTrades[0])
 
     return bestTrades
   }

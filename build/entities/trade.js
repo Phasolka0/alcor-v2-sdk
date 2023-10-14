@@ -201,6 +201,18 @@ class Trade {
             tradeType
         });
     }
+    // static fromJSON(json: any) {
+    //   const route = Route.fromJSON(json.route); // assuming Route has its own fromJSON method
+    //   const inputAmount = CurrencyAmount.fromJSON(json.inputAmount); // same for CurrencyAmount
+    //   const outputAmount = CurrencyAmount.fromJSON(json.outputAmount); // same for CurrencyAmount
+    //
+    //   return new Trade({
+    //     route,
+    //     inputAmount,
+    //     outputAmount,
+    //     tradeType: parsed.tradeType
+    //   });
+    // }
     /**
      * Constructs a trade from routes by simulating swaps
      *
@@ -489,11 +501,6 @@ class Trade {
             const tradeTypeBuffer = msgpack_lite_1.default.encode(internalConstants_1.TradeType.EXACT_INPUT);
             console.log('routes:', routes.length);
             for (const route of routes) {
-                // const trade = Trade.fromRoute(
-                //     route,
-                //     currencyAmountIn,
-                //     TradeType.EXACT_INPUT
-                // )
                 const optionsJSON = {
                     route: route_1.Route.toBuffer(route),
                     amount: amountInBuffer,
@@ -512,13 +519,26 @@ class Trade {
             // }
             const results = yield workerPool.waitForWorkersAndReturnResult();
             console.log('workers', performance.now() - workersStart);
-            console.log(results[0]);
-            console.log(Trade.fromRoute(routes[0], currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT));
-            for (const trade of results) {
-                //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
-                (0, utils_1.sortedInsert)(bestTrades, trade, maxNumResults, tradeComparator);
+            // console.log(results[0])
+            // console.log(Trade.fromRoute(
+            //     routes[0],
+            //     currencyAmountIn,
+            //     TradeType.EXACT_INPUT
+            // ))
+            for (const [index, value] of results) {
+                const route = routes[index];
+                const controlTrade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+                console.log(controlTrade);
+                // if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+                //
+                // sortedInsert(
+                //     bestTrades,
+                //     trade,
+                //     maxNumResults,
+                //     tradeComparator
+                // )
             }
-            console.log(bestTrades[0]);
+            //console.log(bestTrades[0])
             return bestTrades;
         });
     }

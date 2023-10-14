@@ -29,10 +29,10 @@ class SmartWorker {
 exports.SmartWorker = SmartWorker;
 class WorkerPool {
     constructor() {
-        this.resultsArray = [];
+        this.tokenToResults = new Map();
+        this.tokenToTasks = new Map();
         this.initializedTokens = false;
         this.workers = [];
-        this.tokenToTasks = new Map();
         this.initializedTokens = false;
     }
     static create(threadsCount) {
@@ -48,11 +48,11 @@ class WorkerPool {
     }
     waitForWorkersAndReturnResult() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.resultsArray = [];
+            this.tokenToResults = new Map();
             yield Promise.all(this.workers.map((worker) => __awaiter(this, void 0, void 0, function* () {
                 yield this.workerLoop(worker);
             })));
-            return this.resultsArray;
+            return this.tokenToResults;
         });
     }
     workerLoop(worker) {
@@ -66,7 +66,7 @@ class WorkerPool {
                 //console.log(taskOptions)
                 const result = yield worker.workerInstance.fromRoute(taskOptions);
                 if (result) {
-                    this.resultsArray.push(result);
+                    this.tokenToResults.set(token, result);
                 }
             }
         });

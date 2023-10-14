@@ -48,12 +48,11 @@ export class SmartWorker {
 }
 
 export class WorkerPool {
-    resultsArray: Array<any> = []
-    tokenToTasks: Map<number, any>
+    tokenToResults: Map<number, any> = new Map()
+    tokenToTasks: Map<number, any> = new Map()
     initializedTokens = false
     workers: Array<SmartWorker> = []
     constructor() {
-        this.tokenToTasks = new Map()
         this.initializedTokens = false
     }
 
@@ -70,11 +69,11 @@ export class WorkerPool {
     }
 
     async waitForWorkersAndReturnResult() {
-        this.resultsArray = []
+        this.tokenToResults = new Map()
         await Promise.all(this.workers.map(async worker => {
             await this.workerLoop(worker)
         }))
-        return this.resultsArray
+        return this.tokenToResults
     }
 
     async workerLoop(worker: SmartWorker) {
@@ -86,7 +85,7 @@ export class WorkerPool {
             //console.log(taskOptions)
             const result = await worker.workerInstance.fromRoute(taskOptions)
             if (result) {
-                this.resultsArray.push(result)
+                this.tokenToResults.set(token, result)
             }
         }
     }
