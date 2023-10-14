@@ -731,10 +731,11 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     let i = 0
     for (const buffer of serializeArray) {
       const optionsJSON = msgpack.decode(buffer)
+      console.log(optionsJSON)
       const route = Route.fromJSON(optionsJSON.routeJSON)
       const amount = CurrencyAmount.fromJSON(optionsJSON.amountJSON)
       const originalRoute = routes[i]
-      console.log(isEqual(originalRoute, route))
+      console.log(isEqual(originalRoute, route), isEqual(currencyAmountIn, amount))
       i++
     }
     console.log('deserialization time', performance.now() - deserializationStart)
