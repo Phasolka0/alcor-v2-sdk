@@ -60,17 +60,16 @@ export class Tick {
   }
 
 
-  static deserialize(data: string): Tick {
-    const parsedData = JSON.parse(data);
+  static fromJSON(json: any): Tick {
     return new Tick({
-      id: parsedData.id,
-      liquidityGross: JSBI.BigInt(parsedData.liquidityGross),
-      liquidityNet: JSBI.BigInt(parsedData.liquidityNet),
-      feeGrowthOutsideAX64: JSBI.BigInt(parsedData.feeGrowthOutsideAX64),
-      feeGrowthOutsideBX64: JSBI.BigInt(parsedData.feeGrowthOutsideBX64),
-      tickCumulativeOutside: JSBI.BigInt(parsedData.tickCumulativeOutside),
-      secondsOutside: JSBI.BigInt(parsedData.secondsOutside),
-      secondsPerLiquidityOutsideX64: JSBI.BigInt(parsedData.secondsPerLiquidityOutsideX64),
+      id: json.id,
+      liquidityGross: JSBI.BigInt(json.liquidityGross),
+      liquidityNet: JSBI.BigInt(json.liquidityNet),
+      feeGrowthOutsideAX64: JSBI.BigInt(json.feeGrowthOutsideAX64),
+      feeGrowthOutsideBX64: JSBI.BigInt(json.feeGrowthOutsideBX64),
+      tickCumulativeOutside: JSBI.BigInt(json.tickCumulativeOutside),
+      secondsOutside: JSBI.BigInt(json.secondsOutside),
+      secondsPerLiquidityOutsideX64: JSBI.BigInt(json.secondsPerLiquidityOutsideX64),
     });
   }
 }

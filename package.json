@@ -31,6 +31,7 @@
   "devDependencies": {
     "@types/big.js": "^4.0.5",
     "@types/jest": "^29.2.6",
+    "@types/lodash": "^4.14.199",
     "@types/msgpack-lite": "^0.1.9",
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@typescript-eslint/parser": "^5.48.2",
@@ -58,6 +59,7 @@
     "eosjs": "^22.1.0",
     "eosjs-account-name": "2.3.0",
     "jsbi": "^4.3.0",
+    "lodash": "^4.17.21",
     "msgpack-lite": "^0.1.26",
     "node-fetch": "2",
     "threads": "^1.7.0",

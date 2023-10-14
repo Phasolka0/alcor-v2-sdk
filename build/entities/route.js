@@ -71,18 +71,15 @@ class Route {
     static toJSON(route) {
         return {
             pools: route.pools.map(pool => pool_1.Pool.toJSON(pool)),
-            //tokenPath: route.tokenPath.map(token => Token.serialize(token)),
             input: token_1.Token.toJSON(route.input),
             output: token_1.Token.toJSON(route.output),
             _midPrice: route._midPrice,
         };
     }
-    static deserialize(jsonStr) {
-        const obj = JSON.parse(jsonStr);
-        const pools = obj.pools.map(pool => pool_1.Pool.deserialize(pool)); // предполагается, что у Pool тоже есть метод deserialize
-        //const tokenPath = obj.tokenPath.map(token => Token.deserialize(token));
-        const input = token_1.Token.deserialize(obj.input);
-        const output = token_1.Token.deserialize(obj.output);
+    static fromJSON(json) {
+        const pools = json.pools.map(pool => pool_1.Pool.fromJSON(pool));
+        const input = token_1.Token.fromJSON(json.input);
+        const output = token_1.Token.fromJSON(json.output);
         return new Route(pools, input, output);
     }
     equals(other) {

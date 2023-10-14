@@ -30,5 +30,5 @@ export declare class CurrencyAmount<T extends Currency> extends Fraction {
     toAsset(...args: any[]): string;
     toExtendedAsset(...args: any[]): string;
     static toJSON<T extends Currency>(amount: CurrencyAmount<T>): object;
-    static deserialize(data: string): CurrencyAmount<Token>;
+    static fromJSON(json: any): CurrencyAmount<Token>;
 }

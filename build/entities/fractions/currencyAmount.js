@@ -84,11 +84,10 @@ class CurrencyAmount extends fraction_1.Fraction {
             denominator: amount.denominator.toString(),
         };
     }
-    static deserialize(data) {
-        const parsedData = JSON.parse(data);
-        const currency = token_1.Token.deserialize(parsedData.currency);
-        const numerator = jsbi_1.default.BigInt(parsedData.numerator);
-        const denominator = jsbi_1.default.BigInt(parsedData.denominator);
+    static fromJSON(json) {
+        const currency = token_1.Token.fromJSON(json.currency);
+        const numerator = jsbi_1.default.BigInt(json.numerator);
+        const denominator = jsbi_1.default.BigInt(json.denominator);
         return new CurrencyAmount(currency, numerator, denominator);
     }
 }

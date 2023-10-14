@@ -1,5 +1,6 @@
 import invariant from 'tiny-invariant'
 import msgpack from "msgpack-lite";
+import { isEqual } from 'lodash';
 
 import { Currency } from './currency'
 import { Fraction, Percent, Price, CurrencyAmount } from './fractions'
@@ -688,6 +689,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
   }
   public static async initWorkerPool(threadsCount = 16) {
     this.workerPool = await WorkerPool.create(threadsCount)
+    console.log('Pool started with', threadsCount, 'workers')
   }
 
   public static async bestTradeExactIn3<TInput extends Currency, TOutput extends Currency>(
@@ -725,14 +727,19 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       serializeArray.push(optionsBuffer)
     }
     console.log('serialization time', performance.now() - serializationStart)
-    // const deserializationStart = performance.now()
-    // for (const object of serializeArray) {
-    //   const routeDeserialized = Route.deserialize(object.routeSerialized)
-    //   const amountDeserialized = CurrencyAmount.deserialize(object.amountSerialized)
-    // }
-    // console.log('deserialization time', performance.now() - deserializationStart)
+    const deserializationStart = performance.now()
+    let i = 0
+    for (const buffer of serializeArray) {
+      const optionsJSON = msgpack.decode(buffer)
+      const route = Route.fromJSON(optionsJSON.routeJSON)
+      const amount = CurrencyAmount.fromJSON(optionsJSON.amountJSON)
+      const originalRoute = routes[i]
+      console.log(isEqual(originalRoute, route))
+      i++
+    }
+    console.log('deserialization time', performance.now() - deserializationStart)
 
-    //const results = await smartCalculatePool.waitForWorkersAndReturnResult()
+    //const results = await WorkerPool.waitForWorkersAndReturnResult()
 
     // for (const trade of results) {
     //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue

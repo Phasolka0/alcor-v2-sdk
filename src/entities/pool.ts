@@ -490,19 +490,18 @@ export class Pool {
     return pool.json
   }
 
-  static deserialize(data: string): Pool {
-    const parsedData = JSON.parse(data);
+  static fromJSON(json: any): Pool {
     return new Pool({
-      id: parsedData.id,
-      tokenA: Token.deserialize(parsedData.tokenA),
-      tokenB: Token.deserialize(parsedData.tokenB),
-      fee: parsedData.fee,
-      sqrtPriceX64: JSBI.BigInt(parsedData.sqrtPriceX64),
-      liquidity: JSBI.BigInt(parsedData.liquidity),
-      tickCurrent: parsedData.tickCurrent,
-      feeGrowthGlobalAX64: JSBI.BigInt(parsedData.feeGrowthGlobalAX64),
-      feeGrowthGlobalBX64: JSBI.BigInt(parsedData.feeGrowthGlobalBX64),
-      ticks: TickListDataProvider.deserialize(parsedData.tickDataProvider)
+      id: json.id,
+      tokenA: Token.fromJSON(json.tokenA),
+      tokenB: Token.fromJSON(json.tokenB),
+      fee: json.fee,
+      sqrtPriceX64: JSBI.BigInt(json.sqrtPriceX64),
+      liquidity: JSBI.BigInt(json.liquidity),
+      tickCurrent: json.tickCurrent,
+      feeGrowthGlobalAX64: JSBI.BigInt(json.feeGrowthGlobalAX64),
+      feeGrowthGlobalBX64: JSBI.BigInt(json.feeGrowthGlobalBX64),
+      ticks: TickListDataProvider.fromJSON(json.tickDataProvider)
     });
   }
   public equals(other: Pool): boolean {

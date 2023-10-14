@@ -21,5 +21,5 @@ export declare class Tick {
     readonly secondsPerLiquidityOutsideX64: JSBI;
     constructor({ id, liquidityGross, liquidityNet, feeGrowthOutsideAX64, feeGrowthOutsideBX64, tickCumulativeOutside, secondsOutside, secondsPerLiquidityOutsideX64, }: TickConstructorArgs);
     static toJSON(tick: Tick): object;
-    static deserialize(data: string): Tick;
+    static fromJSON(json: any): Tick;
 }

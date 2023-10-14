@@ -99,6 +99,6 @@ export declare class Pool {
     private swap;
     get tickSpacing(): number;
     static toJSON(pool: Pool): object;
-    static deserialize(data: string): Pool;
+    static fromJSON(json: any): Pool;
     equals(other: Pool): boolean;
 }

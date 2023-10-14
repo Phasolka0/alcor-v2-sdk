@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Trade = exports.tradeComparator = void 0;
 const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
 const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
+const lodash_1 = require("lodash");
 const fractions_1 = require("./fractions");
 const utils_1 = require("../utils");
 const internalConstants_1 = require("../internalConstants");
@@ -474,6 +475,7 @@ class Trade {
     static initWorkerPool(threadsCount = 16) {
         return __awaiter(this, void 0, void 0, function* () {
             this.workerPool = yield WorkerPool_1.WorkerPool.create(threadsCount);
+            console.log('Pool started with', threadsCount, 'workers');
         });
     }
     static bestTradeExactIn3(routes, pools, currencyAmountIn, maxNumResults = 3) {
@@ -502,13 +504,18 @@ class Trade {
                 serializeArray.push(optionsBuffer);
             }
             console.log('serialization time', performance.now() - serializationStart);
-            // const deserializationStart = performance.now()
-            // for (const object of serializeArray) {
-            //   const routeDeserialized = Route.deserialize(object.routeSerialized)
-            //   const amountDeserialized = CurrencyAmount.deserialize(object.amountSerialized)
-            // }
-            // console.log('deserialization time', performance.now() - deserializationStart)
-            //const results = await smartCalculatePool.waitForWorkersAndReturnResult()
+            const deserializationStart = performance.now();
+            let i = 0;
+            for (const buffer of serializeArray) {
+                const optionsJSON = msgpack_lite_1.default.decode(buffer);
+                const route = route_1.Route.fromJSON(optionsJSON.routeJSON);
+                const amount = fractions_1.CurrencyAmount.fromJSON(optionsJSON.amountJSON);
+                const originalRoute = routes[i];
+                console.log((0, lodash_1.isEqual)(originalRoute, route));
+                i++;
+            }
+            console.log('deserialization time', performance.now() - deserializationStart);
+            //const results = await WorkerPool.waitForWorkersAndReturnResult()
             // for (const trade of results) {
             //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
             //

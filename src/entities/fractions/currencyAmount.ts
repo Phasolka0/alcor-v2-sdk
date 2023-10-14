@@ -135,11 +135,10 @@ export class CurrencyAmount<T extends Currency> extends Fraction {
     };
   }
 
-  static deserialize(data: string) {
-    const parsedData = JSON.parse(data);
-    const currency = Token.deserialize(parsedData.currency);
-    const numerator = JSBI.BigInt(parsedData.numerator);
-    const denominator = JSBI.BigInt(parsedData.denominator);
+  static fromJSON(json: any) {
+    const currency = Token.fromJSON(json.currency);
+    const numerator = JSBI.BigInt(json.numerator);
+    const denominator = JSBI.BigInt(json.denominator);
     return new CurrencyAmount(currency, numerator, denominator);
   }
 }

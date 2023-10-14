@@ -9,5 +9,5 @@ export declare class TickListDataProvider implements TickDataProvider {
     getTick(tick: number): Tick;
     nextInitializedTickWithinOneWord(tick: number, lte: boolean, tickSpacing: number): [number, boolean];
     static toJSON(ticks: Tick[]): object;
-    static deserialize(ticksString: string): TickListDataProvider;
+    static fromJSON(ticksArray: any): TickListDataProvider;
 }

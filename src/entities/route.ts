@@ -84,19 +84,16 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
 
     static toJSON(route: Route<Currency, Currency>) {
         return {
-            pools: route.pools.map(pool => Pool.toJSON(pool)), // предполагается, что у Pool тоже есть метод serialize
-            //tokenPath: route.tokenPath.map(token => Token.serialize(token)),
+            pools: route.pools.map(pool => Pool.toJSON(pool)),
             input: Token.toJSON(route.input),
             output: Token.toJSON(route.output),
             _midPrice: route._midPrice,
         }
     }
-    static deserialize(jsonStr: string) {
-        const obj = JSON.parse(jsonStr);
-        const pools = obj.pools.map(pool => Pool.deserialize(pool)); // предполагается, что у Pool тоже есть метод deserialize
-        //const tokenPath = obj.tokenPath.map(token => Token.deserialize(token));
-        const input = Token.deserialize(obj.input);
-        const output = Token.deserialize(obj.output);
+    static fromJSON(json: any) {
+        const pools = json.pools.map(pool => Pool.fromJSON(pool));
+        const input = Token.fromJSON(json.input);
+        const output = Token.fromJSON(json.output);
         return new Route(pools, input, output);
     }
     public equals(other: Route<Currency, Currency>): boolean {

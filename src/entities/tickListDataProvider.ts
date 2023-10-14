@@ -42,8 +42,7 @@ export class TickListDataProvider implements TickDataProvider {
     return ticks.map((tick) => Tick.toJSON(tick));
   }
 
-  static deserialize(ticksString: string): TickListDataProvider {
-    const ticks = JSON.parse(ticksString);
-    return ticks.map(Tick.deserialize);
+  static fromJSON(ticksArray: any): TickListDataProvider {
+    return ticksArray.map(Tick.fromJSON);
   }
 }

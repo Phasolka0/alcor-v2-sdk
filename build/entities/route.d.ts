@@ -38,6 +38,6 @@ export declare class Route<TInput extends Currency, TOutput extends Currency> {
         };
         _midPrice: Price<Token, Token> | null;
     };
-    static deserialize(jsonStr: string): Route<Token, Token>;
+    static fromJSON(json: any): Route<Token, Token>;
     equals(other: Route<Currency, Currency>): boolean;
 }

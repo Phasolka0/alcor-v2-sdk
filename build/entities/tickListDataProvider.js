@@ -23,9 +23,8 @@ class TickListDataProvider {
     static toJSON(ticks) {
         return ticks.map((tick) => tick_1.Tick.toJSON(tick));
     }
-    static deserialize(ticksString) {
-        const ticks = JSON.parse(ticksString);
-        return ticks.map(tick_1.Tick.deserialize);
+    static fromJSON(ticksArray) {
+        return ticksArray.map(tick_1.Tick.fromJSON);
     }
 }
 exports.TickListDataProvider = TickListDataProvider;

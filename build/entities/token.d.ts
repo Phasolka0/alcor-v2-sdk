@@ -26,5 +26,5 @@ export declare class Token extends BaseCurrency {
         decimals: number;
         symbol: string;
     };
-    static deserialize(jsonStr: string): Token;
+    static fromJSON(json: any): Token;
 }

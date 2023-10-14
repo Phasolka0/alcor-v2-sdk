@@ -55,9 +55,8 @@ class Token extends baseCurrency_1.BaseCurrency {
             symbol: token.symbol,
         };
     }
-    static deserialize(jsonStr) {
-        const obj = JSON.parse(jsonStr);
-        return new Token(obj.contract, obj.decimals, obj.symbol);
+    static fromJSON(json) {
+        return new Token(json.contract, json.decimals, json.symbol);
     }
 }
 exports.Token = Token;
