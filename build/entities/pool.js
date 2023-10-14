@@ -318,15 +318,30 @@ class Pool {
             return pool.buffer;
         const json = Pool.toJSON(pool);
         pool.buffer = msgpack_lite_1.default.encode(json);
+        pool.bufferHash = Pool.createHash(pool.buffer);
         return pool.buffer;
     }
-    static fromBuffer(buffer) {
-        const bufferHash = Pool.createHash(buffer);
+    static fromBuffer(data) {
+        if (!Buffer.isBuffer(data)) {
+            const { buffer, bufferHash } = data;
+            const newPool = this.fromBuffer(buffer);
+            if (this.idToPoolMap.has(newPool.id)) { // had old version pool, delete him
+                const oldPool = this.idToPoolMap.get(newPool.id);
+                const oldHash = oldPool.bufferHash;
+                if (oldHash) {
+                    this.hashToPoolMap.delete(oldHash);
+                }
+            }
+            this.hashToPoolMap.set(bufferHash, newPool);
+            this.idToPoolMap.set(newPool.id, newPool);
+            return newPool;
+        }
+        const bufferHash = Pool.createHash(data);
         if (this.hashToPoolMap.has(bufferHash)) {
             //console.log('use cache', bufferHash)
             return this.hashToPoolMap.get(bufferHash);
         }
-        const json = msgpack_lite_1.default.decode(buffer);
+        const json = msgpack_lite_1.default.decode(data);
         const pool = new Pool({
             id: json.id,
             tokenA: token_1.Token.fromJSON(json.tokenA),
@@ -340,15 +355,19 @@ class Pool {
             ticks: tickListDataProvider_1.TickListDataProvider.fromJSON(json.tickDataProvider)
         });
         this.hashToPoolMap.set(bufferHash, pool);
+        this.idToPoolMap.set(pool.id, pool);
         return pool;
     }
     static fromId(id) {
-        const pool = Pool.idToPoolsMap.get(id);
+        const pool = Pool.idToPoolMap.get(id);
         if (!pool)
-            throw new Error('pool does not exist in idToPoolsMap');
+            throw new Error('pool does not exist in idToPoolMap');
         return pool;
     }
     static createHash(buffer, pool) {
+        if (pool && pool.bufferHash) {
+            return pool.bufferHash;
+        }
         const hash = crypto_1.default.createHash('sha256');
         hash.update(buffer);
         const hexHash = hash.digest('hex');
@@ -385,4 +404,4 @@ class Pool {
 }
 exports.Pool = Pool;
 Pool.hashToPoolMap = new Map();
-Pool.idToPoolsMap = new Map();
+Pool.idToPoolMap = new Map();

@@ -772,7 +772,12 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
   ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>> {
 
     const workerPool = this.workerPool
-    if (!workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
+
+    if (!workerPool) {
+      console.warn('workerPool is not initialized, single-threaded version is used.' +
+          '\n use "await Trade.initWorkerPool()" for multi-threaded')
+      return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
+    }
 
     invariant(pools.length > 0, 'POOLS')
 
@@ -782,13 +787,14 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     //console.log('routesCount:', routes.length)
     for (const route of routes) {
       const optionsJSON = {
-        route: Route.toBuffer(route, true),
+        route: route,
         amount: amountInBuffer,
         tradeType: tradeTypeBuffer
       }
-      const optionsBuffer = msgpack.encode(optionsJSON);
+      workerPool.addTaskJSON(optionsJSON)
 
-      workerPool.addTask(optionsBuffer)
+      //const optionsBuffer = msgpack.encode(optionsJSON);
+      //workerPool.addTaskBuffer(optionsBuffer)
     }
     console.log('serialization and prepare tasks', performance.now() - serializationStart)
     const workersStart = performance.now()

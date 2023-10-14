@@ -9,6 +9,8 @@ function fromRoute(optionsBuffer: Buffer) {
             const amount = CurrencyAmount.fromBuffer(optionsJSON.amount);
             const tradeType = msgpack.decode(optionsJSON.tradeType);
             //console.log({route, amount, tradeType});
+
+
             const {inputAmount, outputAmount} = Trade.fromRouteForWorkers(route, amount, tradeType);
             const resultJson = {
                   inputAmount: CurrencyAmount.toBuffer(inputAmount),
@@ -22,7 +24,7 @@ function loadPools(poolsBuffer: Buffer) {
       const poolsArray = msgpack.decode(poolsBuffer)
       const pools: Pool[] = poolsArray.map((poolBuffer: Buffer) => Pool.fromBuffer(poolBuffer))
       for (const pool of pools) {
-            Pool.idToPoolsMap.set(pool.id, pool)
+            Pool.idToPoolMap.set(pool.id, pool)
       }
 
 }

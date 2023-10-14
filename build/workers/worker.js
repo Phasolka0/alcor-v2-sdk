@@ -29,7 +29,7 @@ function loadPools(poolsBuffer) {
     const poolsArray = msgpack_lite_1.default.decode(poolsBuffer);
     const pools = poolsArray.map((poolBuffer) => entities_1.Pool.fromBuffer(poolBuffer));
     for (const pool of pools) {
-        entities_1.Pool.idToPoolsMap.set(pool.id, pool);
+        entities_1.Pool.idToPoolMap.set(pool.id, pool);
     }
 }
 exports.WorkerExpose = {

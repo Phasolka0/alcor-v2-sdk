@@ -19,6 +19,8 @@ const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
 const threadsCount = 16;
 class SmartWorker {
     constructor(id, workerInstance) {
+        //hashStorage: Set<string> = new Set()
+        this.idToHash = new Map();
         this.id = id;
         this.workerInstance = workerInstance;
         this.workTimeHistory = [];
@@ -29,6 +31,18 @@ class SmartWorker {
             const workerInstance = yield (0, threads_1.spawn)(new threads_1.Worker(workerScript));
             return new SmartWorker(id, workerInstance);
         });
+    }
+    hasThisPoolCached(pool) {
+        const { bufferHash, id } = pool;
+        if (this.idToHash.has(id)) {
+            const workerBufferHash = this.idToHash.get(id);
+            return workerBufferHash === bufferHash;
+        }
+        return false;
+    }
+    addBufferHash(bufferHash, poolId) {
+        //this.hashStorage.add(bufferHash)
+        this.idToHash.set(poolId, bufferHash);
     }
 }
 exports.SmartWorker = SmartWorker;
@@ -48,7 +62,10 @@ class WorkerPool {
             return instance;
         });
     }
-    addTask(taskOptions) {
+    addTaskBuffer(taskOptions) {
+        this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
+    }
+    addTaskJSON(taskOptions) {
         this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
     }
     updatePools(pools) {
@@ -79,7 +96,25 @@ class WorkerPool {
                     break;
                 this.tokenToTasks.delete(token);
                 //console.log(taskOptions)
-                const result = yield worker.workerInstance.fromRoute(taskOptions);
+                let result;
+                if (Buffer.isBuffer(taskOptions)) {
+                    result = yield worker.workerInstance.fromRoute(taskOptions);
+                }
+                else {
+                    for (let pool of taskOptions.route.pools) {
+                        if (worker.hasThisPoolCached(pool)) {
+                            pool = pool.id;
+                        }
+                        else {
+                            const buffer = entities_1.Pool.toBuffer(pool);
+                            const bufferHash = pool.bufferHash;
+                            worker.addBufferHash(bufferHash, pool.id);
+                            pool = { buffer, bufferHash };
+                        }
+                    }
+                    const taskBuffer = msgpack_lite_1.default.encode(taskOptions);
+                    result = yield worker.workerInstance.fromRoute(taskBuffer);
+                }
                 const { inputAmount, outputAmount } = msgpack_lite_1.default.decode(result);
                 if (result) {
                     this.tokenToResults.set(token, {

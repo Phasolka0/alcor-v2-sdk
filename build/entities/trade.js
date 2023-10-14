@@ -516,8 +516,11 @@ class Trade {
     static bestTradeExactIn3(routes, pools, currencyAmountIn) {
         return __awaiter(this, void 0, void 0, function* () {
             const workerPool = this.workerPool;
-            if (!workerPool)
+            if (!workerPool) {
+                console.warn('workerPool is not initialized, single-threaded version is used.' +
+                    '\n use "await Trade.initWorkerPool()" for multi-threaded');
                 return this.bestTradeExactIn2(routes, pools, currencyAmountIn);
+            }
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             const serializationStart = performance.now();
             const amountInBuffer = fractions_1.CurrencyAmount.toBuffer(currencyAmountIn);
@@ -525,12 +528,13 @@ class Trade {
             //console.log('routesCount:', routes.length)
             for (const route of routes) {
                 const optionsJSON = {
-                    route: route_1.Route.toBuffer(route, true),
+                    route: route,
                     amount: amountInBuffer,
                     tradeType: tradeTypeBuffer
                 };
-                const optionsBuffer = msgpack_lite_1.default.encode(optionsJSON);
-                workerPool.addTask(optionsBuffer);
+                workerPool.addTaskJSON(optionsJSON);
+                //const optionsBuffer = msgpack.encode(optionsJSON);
+                //workerPool.addTaskBuffer(optionsBuffer)
             }
             console.log('serialization and prepare tasks', performance.now() - serializationStart);
             const workersStart = performance.now();

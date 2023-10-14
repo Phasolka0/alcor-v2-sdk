@@ -9,6 +9,9 @@ export class SmartWorker {
 
     workTimeHistory: Array<number>
     endWorkTime: number
+    
+    //hashStorage: Set<string> = new Set()
+    idToHash: Map<number, string> = new Map()
     constructor(id: number, workerInstance: any, ) {
         this.id = id;
         this.workerInstance = workerInstance;
@@ -19,6 +22,18 @@ export class SmartWorker {
     static async create(id: number, workerScript: string) {
         const workerInstance = await spawn(new Worker(workerScript));
         return new SmartWorker(id, workerInstance);
+    }
+    hasThisPoolCached(pool: Pool) {
+        const {bufferHash, id} = pool
+        if (this.idToHash.has(id)) {
+            const workerBufferHash = this.idToHash.get(id)
+            return workerBufferHash === bufferHash
+        }
+        return false
+    }
+    addBufferHash(bufferHash: string, poolId: number) {
+        //this.hashStorage.add(bufferHash)
+        this.idToHash.set(poolId, bufferHash)
     }
 
 
@@ -66,7 +81,10 @@ export class WorkerPool {
         return instance;
     }
 
-    addTask(taskOptions: any) {
+    addTaskBuffer(taskOptions: Buffer) {
+        this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
+    }
+    addTaskJSON(taskOptions: any) {
         this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
     }
     async updatePools(pools: Pool[]) {
@@ -93,7 +111,24 @@ export class WorkerPool {
             if (!taskOptions) break
             this.tokenToTasks.delete(token)
             //console.log(taskOptions)
-            const result = await worker.workerInstance.fromRoute(taskOptions)
+            let result
+            if (Buffer.isBuffer(taskOptions)) {
+                result = await worker.workerInstance.fromRoute(taskOptions)
+            } else {
+                for (let pool of taskOptions.route.pools) {
+                    if (worker.hasThisPoolCached(pool)) {
+                        pool = pool.id
+                    } else {
+                        const buffer = Pool.toBuffer(pool)
+                        const bufferHash = pool.bufferHash
+                        worker.addBufferHash(bufferHash, pool.id)
+                        pool = {buffer, bufferHash}
+                    }
+                }
+                const taskBuffer= msgpack.encode(taskOptions)
+                result = await worker.workerInstance.fromRoute(taskBuffer)
+            }
+            
             const {inputAmount, outputAmount} = msgpack.decode(result)
             if (result) {
                 this.tokenToResults.set(token, {
