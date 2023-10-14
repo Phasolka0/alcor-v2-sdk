@@ -1,5 +1,5 @@
 import {spawn, Worker} from 'threads';
-import {CurrencyAmount, Pool} from "../entities";
+import {CurrencyAmount, Pool, Route} from "../entities";
 import msgpack from "msgpack-lite";
 const threadsCount = 16
 
@@ -125,6 +125,7 @@ export class WorkerPool {
                         pool = {buffer, bufferHash}
                     }
                 }
+                taskOptions.route = Route.toBuffer(taskOptions.route)
                 const taskBuffer= msgpack.encode(taskOptions)
                 result = await worker.workerInstance.fromRoute(taskBuffer)
             }

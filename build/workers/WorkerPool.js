@@ -112,6 +112,7 @@ class WorkerPool {
                             pool = { buffer, bufferHash };
                         }
                     }
+                    taskOptions.route = entities_1.Route.toBuffer(taskOptions.route);
                     const taskBuffer = msgpack_lite_1.default.encode(taskOptions);
                     result = yield worker.workerInstance.fromRoute(taskBuffer);
                 }
