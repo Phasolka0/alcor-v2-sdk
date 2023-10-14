@@ -9,7 +9,6 @@ const threads_1 = require("threads");
 const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
 function fromRoute(optionsBuffer) {
     const optionsJSON = msgpack_lite_1.default.decode(optionsBuffer);
-    console.log(optionsJSON);
     const route = entities_1.Route.fromBuffer(optionsJSON.route);
     const amount = entities_1.CurrencyAmount.fromBuffer(optionsJSON.amount);
     const tradeType = msgpack_lite_1.default.decode(optionsJSON.tradeType);

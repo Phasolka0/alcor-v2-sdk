@@ -55,6 +55,8 @@ class WorkerPool {
         return __awaiter(this, void 0, void 0, function* () {
             this.tokenToResults = new Map();
             yield Promise.all(this.workers.map((worker) => __awaiter(this, void 0, void 0, function* () {
+                this.workerLoop(worker);
+                this.workerLoop(worker);
                 yield this.workerLoop(worker);
             })));
             return this.tokenToResults;
