@@ -33,6 +33,7 @@ export declare class Pool {
     readonly tickDataProvider: TickDataProvider;
     json?: any;
     buffer?: Buffer;
+    bufferHash?: string;
     private _tokenAPrice?;
     private _tokenBPrice?;
     /**
@@ -104,5 +105,7 @@ export declare class Pool {
     static fromJSON(json: any): Pool;
     static toBuffer(pool: Pool): Buffer;
     static fromBuffer(buffer: Buffer): Pool;
+    static createHash(buffer: Buffer, pool?: Pool): string;
+    static hashEquals(pool: Pool, hash: string): boolean;
     equals(other: Pool): boolean;
 }

@@ -485,28 +485,34 @@ class Trade {
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             const bestTrades = [];
             const serializationStart = performance.now();
-            const serializeArray = [];
-            console.log(routes.length);
+            const amountInBuffer = fractions_1.CurrencyAmount.toBuffer(currencyAmountIn);
+            const tradeTypeBuffer = msgpack_lite_1.default.encode(internalConstants_1.TradeType.EXACT_INPUT);
+            console.log('routes:', routes.length);
             for (const route of routes) {
                 // const trade = Trade.fromRoute(
                 //     route,
                 //     currencyAmountIn,
                 //     TradeType.EXACT_INPUT
                 // )
-                const optionsJSON = { route: route_1.Route.toBuffer(route), amount: fractions_1.CurrencyAmount.toBuffer(currencyAmountIn) };
+                const optionsJSON = {
+                    route: route_1.Route.toBuffer(route),
+                    amount: amountInBuffer,
+                    tradeType: tradeTypeBuffer
+                };
                 const optionsBuffer = msgpack_lite_1.default.encode(optionsJSON);
-                //workerPool.addTask(optionsBuffer)
-                serializeArray.push(optionsBuffer);
+                workerPool.addTask(optionsBuffer);
+                //serializeArray.push(optionsBuffer)
             }
             console.log('serialization time', performance.now() - serializationStart);
-            const deserializationStart = performance.now();
-            for (const buffer of serializeArray) {
-                const optionsJSON = msgpack_lite_1.default.decode(buffer);
-                const route = route_1.Route.fromBuffer(optionsJSON.route);
-                const amount = fractions_1.CurrencyAmount.fromBuffer(optionsJSON.amount);
-            }
-            console.log('deserialization time', performance.now() - deserializationStart);
-            //const results = await WorkerPool.waitForWorkersAndReturnResult()
+            const workersStart = performance.now();
+            // for (const buffer of serializeArray) {
+            //   const optionsJSON = msgpack.decode(buffer)
+            //   const route = Route.fromBuffer(optionsJSON.route)
+            //   const amount = CurrencyAmount.fromBuffer(optionsJSON.amount)
+            // }
+            const results = yield workerPool.waitForWorkersAndReturnResult();
+            console.log('workers', performance.now() - workersStart);
+            console.log(results[0]);
             // for (const trade of results) {
             //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
             //

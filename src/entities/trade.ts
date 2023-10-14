@@ -706,8 +706,9 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
     const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
     const serializationStart = performance.now()
-    const serializeArray: Buffer[] = []
-    console.log(routes.length)
+    const amountInBuffer = CurrencyAmount.toBuffer(currencyAmountIn)
+    const tradeTypeBuffer = msgpack.encode(TradeType.EXACT_INPUT)
+    console.log('routes:', routes.length)
     for (const route of routes) {
 
 
@@ -718,22 +719,28 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       //     TradeType.EXACT_INPUT
       // )
 
-      const optionsJSON = {route: Route.toBuffer(route), amount: CurrencyAmount.toBuffer(currencyAmountIn)}
+      const optionsJSON = {
+        route: Route.toBuffer(route),
+        amount: amountInBuffer,
+        tradeType: tradeTypeBuffer
+      }
       const optionsBuffer = msgpack.encode(optionsJSON);
 
-      //workerPool.addTask(optionsBuffer)
-      serializeArray.push(optionsBuffer)
+      workerPool.addTask(optionsBuffer)
+      //serializeArray.push(optionsBuffer)
     }
     console.log('serialization time', performance.now() - serializationStart)
-    const deserializationStart = performance.now()
-    for (const buffer of serializeArray) {
-      const optionsJSON = msgpack.decode(buffer)
-      const route = Route.fromBuffer(optionsJSON.route)
-      const amount = CurrencyAmount.fromBuffer(optionsJSON.amount)
-    }
-    console.log('deserialization time', performance.now() - deserializationStart)
+    const workersStart = performance.now()
+    // for (const buffer of serializeArray) {
+    //   const optionsJSON = msgpack.decode(buffer)
+    //   const route = Route.fromBuffer(optionsJSON.route)
+    //   const amount = CurrencyAmount.fromBuffer(optionsJSON.amount)
+    // }
 
-    //const results = await WorkerPool.waitForWorkersAndReturnResult()
+
+    const results = await workerPool.waitForWorkersAndReturnResult()
+    console.log('workers', performance.now() - workersStart)
+    console.log(results[0])
 
     // for (const trade of results) {
     //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue

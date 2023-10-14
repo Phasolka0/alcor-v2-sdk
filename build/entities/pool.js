@@ -16,6 +16,7 @@ const utils_1 = require("../utils");
 const tickDataProvider_1 = require("./tickDataProvider");
 const tickListDataProvider_1 = require("./tickListDataProvider");
 const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
+const crypto_1 = __importDefault(require("crypto"));
 /**
  * By default, pools will not allow operations that require ticks.
  */
@@ -321,6 +322,7 @@ class Pool {
     }
     static fromBuffer(buffer) {
         const json = msgpack_lite_1.default.decode(buffer);
+        //const bufferHash = Pool.createHash(buffer)
         return new Pool({
             id: json.id,
             tokenA: token_1.Token.fromJSON(json.tokenA),
@@ -333,6 +335,18 @@ class Pool {
             feeGrowthGlobalBX64: jsbi_1.default.BigInt(json.feeGrowthGlobalBX64),
             ticks: tickListDataProvider_1.TickListDataProvider.fromJSON(json.tickDataProvider)
         });
+    }
+    static createHash(buffer, pool) {
+        const hash = crypto_1.default.createHash('sha256');
+        hash.update(buffer);
+        const hexHash = hash.digest('hex');
+        if (pool) {
+            pool.bufferHash = hexHash;
+        }
+        return hexHash;
+    }
+    static hashEquals(pool, hash) {
+        return pool.bufferHash === hash;
     }
     equals(other) {
         // Сравниваем id пулов

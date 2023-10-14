@@ -11,6 +11,7 @@ import { Tick, TickConstructorArgs } from "./tick";
 import { NoTickDataProvider, TickDataProvider } from "./tickDataProvider";
 import { TickListDataProvider } from "./tickListDataProvider";
 import msgpack from "msgpack-lite";
+import crypto, {createHash} from 'crypto';
 
 export interface PoolConstructorArgs {
   id: number,
@@ -59,6 +60,7 @@ export class Pool {
   public readonly tickDataProvider:  TickDataProvider
   public json?: any
   public buffer?: Buffer
+  public bufferHash?: string
 
   private _tokenAPrice?: Price<Token, Token>;
   private _tokenBPrice?: Price<Token, Token>;
@@ -510,11 +512,13 @@ export class Pool {
     if (pool.buffer) return pool.buffer
     const json = Pool.toJSON(pool)
     pool.buffer = msgpack.encode(json)
+
     return pool.buffer
   }
 
   static fromBuffer(buffer: Buffer): Pool {
     const json = msgpack.decode(buffer)
+    //const bufferHash = Pool.createHash(buffer)
     return new Pool({
       id: json.id,
       tokenA: Token.fromJSON(json.tokenA),
@@ -527,6 +531,19 @@ export class Pool {
       feeGrowthGlobalBX64: JSBI.BigInt(json.feeGrowthGlobalBX64),
       ticks: TickListDataProvider.fromJSON(json.tickDataProvider)
     });
+  }
+
+  static createHash(buffer: Buffer, pool?: Pool) {
+    const hash = crypto.createHash('sha256');
+    hash.update(buffer);
+    const hexHash = hash.digest('hex');
+    if (pool) {
+      pool.bufferHash = hexHash
+    }
+    return hexHash
+  }
+  static hashEquals(pool: Pool, hash: string) {
+    return pool.bufferHash === hash
   }
   public equals(other: Pool): boolean {
     // Сравниваем id пулов
