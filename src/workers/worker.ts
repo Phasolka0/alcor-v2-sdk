@@ -8,7 +8,7 @@ function fromRoute(optionsBuffer: Buffer) {
       const route = Route.fromBuffer(optionsJSON.route)
       const amount = CurrencyAmount.fromBuffer(optionsJSON.amount)
     const tradeType = msgpack.decode(optionsJSON.tradeType)
-    console.log({route, amount, tradeType})
+    //console.log({route, amount, tradeType})
     return Trade.fromRoute(route, amount, tradeType)
 }
 

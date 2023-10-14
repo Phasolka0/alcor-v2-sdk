@@ -741,6 +741,11 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     const results = await workerPool.waitForWorkersAndReturnResult()
     console.log('workers', performance.now() - workersStart)
     console.log(results[0])
+    console.log(Trade.fromRoute(
+        routes[0],
+        currencyAmountIn,
+        TradeType.EXACT_INPUT
+    ))
 
     // for (const trade of results) {
     //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue

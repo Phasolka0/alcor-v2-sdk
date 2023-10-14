@@ -12,7 +12,7 @@ function fromRoute(optionsBuffer) {
     const route = entities_1.Route.fromBuffer(optionsJSON.route);
     const amount = entities_1.CurrencyAmount.fromBuffer(optionsJSON.amount);
     const tradeType = msgpack_lite_1.default.decode(optionsJSON.tradeType);
-    console.log({ route, amount, tradeType });
+    //console.log({route, amount, tradeType})
     return entities_1.Trade.fromRoute(route, amount, tradeType);
 }
 exports.WorkerExpose = {

@@ -513,6 +513,7 @@ class Trade {
             const results = yield workerPool.waitForWorkersAndReturnResult();
             console.log('workers', performance.now() - workersStart);
             console.log(results[0]);
+            console.log(Trade.fromRoute(routes[0], currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT));
             // for (const trade of results) {
             //   if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
             //
