@@ -9,7 +9,7 @@ export declare class SmartWorker {
     constructor(id: number, workerInstance: any);
     static create(id: number, workerScript: string): Promise<SmartWorker>;
     hasThisPoolCached(pool: Pool): boolean;
-    addBufferHash(bufferHash: string, poolId: number): void;
+    addBufferHash(pool: Pool): void;
 }
 export declare class WorkerPool {
     tokenToResults: Map<number, any>;

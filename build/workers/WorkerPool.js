@@ -40,9 +40,15 @@ class SmartWorker {
         }
         return false;
     }
-    addBufferHash(bufferHash, poolId) {
+    addBufferHash(pool) {
+        const { bufferHash, id } = pool;
         //this.hashStorage.add(bufferHash)
-        this.idToHash.set(poolId, bufferHash);
+        if (bufferHash) {
+            this.idToHash.set(id, bufferHash);
+        }
+        else {
+            throw new Error('The pool has no hash!');
+        }
     }
 }
 exports.SmartWorker = SmartWorker;
@@ -103,12 +109,13 @@ class WorkerPool {
                 else {
                     for (let pool of taskOptions.route.pools) {
                         if (worker.hasThisPoolCached(pool)) {
+                            console.log('hasThisPoolCached', pool.id);
                             pool = pool.id;
                         }
                         else {
                             const buffer = entities_1.Pool.toBuffer(pool);
                             const bufferHash = pool.bufferHash;
-                            worker.addBufferHash(bufferHash, pool.id);
+                            worker.addBufferHash(pool);
                             pool = { buffer, bufferHash };
                         }
                     }
