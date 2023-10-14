@@ -531,7 +531,6 @@ class Trade {
                 };
                 const optionsBuffer = msgpack_lite_1.default.encode(optionsJSON);
                 workerPool.addTask(optionsBuffer);
-                //serializeArray.push(optionsBuffer)
             }
             console.log('serialization and prepare tasks', performance.now() - serializationStart);
             const workersStart = performance.now();

@@ -781,11 +781,6 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     const tradeTypeBuffer = msgpack.encode(TradeType.EXACT_INPUT)
     //console.log('routesCount:', routes.length)
     for (const route of routes) {
-
-
-
-
-
       const optionsJSON = {
         route: Route.toBuffer(route),
         amount: amountInBuffer,
@@ -794,7 +789,6 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       const optionsBuffer = msgpack.encode(optionsJSON);
 
       workerPool.addTask(optionsBuffer)
-      //serializeArray.push(optionsBuffer)
     }
     console.log('serialization and prepare tasks', performance.now() - serializationStart)
     const workersStart = performance.now()

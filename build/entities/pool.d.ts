@@ -34,6 +34,7 @@ export declare class Pool {
     json?: any;
     buffer?: Buffer;
     bufferHash?: string;
+    static hashToPoolMap: Map<string, Pool>;
     private _tokenAPrice?;
     private _tokenBPrice?;
     /**

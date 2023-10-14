@@ -321,9 +321,12 @@ class Pool {
         return pool.buffer;
     }
     static fromBuffer(buffer) {
+        const bufferHash = Pool.createHash(buffer);
+        if (this.hashToPoolMap.has(bufferHash)) {
+            return this.hashToPoolMap.get(bufferHash);
+        }
         const json = msgpack_lite_1.default.decode(buffer);
-        //const bufferHash = Pool.createHash(buffer)
-        return new Pool({
+        const pool = new Pool({
             id: json.id,
             tokenA: token_1.Token.fromJSON(json.tokenA),
             tokenB: token_1.Token.fromJSON(json.tokenB),
@@ -335,6 +338,8 @@ class Pool {
             feeGrowthGlobalBX64: jsbi_1.default.BigInt(json.feeGrowthGlobalBX64),
             ticks: tickListDataProvider_1.TickListDataProvider.fromJSON(json.tickDataProvider)
         });
+        this.hashToPoolMap.set(bufferHash, pool);
+        return pool;
     }
     static createHash(buffer, pool) {
         const hash = crypto_1.default.createHash('sha256');
@@ -372,3 +377,4 @@ class Pool {
     }
 }
 exports.Pool = Pool;
+Pool.hashToPoolMap = new Map();
