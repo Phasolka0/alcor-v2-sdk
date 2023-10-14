@@ -540,13 +540,6 @@ class Trade {
             const mainThreadPostWorkStart = performance.now();
             const bestResult = {};
             for (const [index, value] of results) {
-                const route = routes[index];
-                const controlTrade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
-                //console.log(controlTrade)
-                // console.log('mine:')
-                // console.log(value)
-                // console.log('control:')
-                // console.log({inputAmount: controlTrade.inputAmount, outputAmount: controlTrade.outputAmount})
                 if (!bestResult.amounts) {
                     bestResult.amounts = value;
                     bestResult.routeId = index;
@@ -555,15 +548,6 @@ class Trade {
                     bestResult.amounts = value;
                     bestResult.routeId = index;
                 }
-                //if (index > 3) break
-                // if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
-                //
-                // sortedInsert(
-                //     bestTrades,
-                //     trade,
-                //     maxNumResults,
-                //     tradeComparator
-                // )
             }
             bestResult.route = routes[bestResult.routeId];
             console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart);
