@@ -283,7 +283,20 @@ class Pool {
     static toJSON(pool) {
         if (pool.json)
             return pool.json;
-        pool.json = {
+        // pool.json = {
+        //   id: pool.id,
+        //   tokenA: Token.toJSON(pool.tokenA),
+        //   tokenB: Token.toJSON(pool.tokenB),
+        //   fee: pool.fee,
+        //   sqrtPriceX64: pool.sqrtPriceX64.toString(),
+        //   liquidity: pool.liquidity.toString(),
+        //   tickCurrent: pool.tickCurrent,
+        //   feeGrowthGlobalAX64: pool.feeGrowthGlobalAX64.toString(),
+        //   feeGrowthGlobalBX64: pool.feeGrowthGlobalBX64.toString(),
+        //   tickDataProvider: TickListDataProvider.toJSON((pool.tickDataProvider as TickListDataProvider).ticks)
+        // }
+        // return pool.json
+        return {
             id: pool.id,
             tokenA: token_1.Token.toJSON(pool.tokenA),
             tokenB: token_1.Token.toJSON(pool.tokenB),
@@ -295,7 +308,6 @@ class Pool {
             feeGrowthGlobalBX64: pool.feeGrowthGlobalBX64.toString(),
             tickDataProvider: tickListDataProvider_1.TickListDataProvider.toJSON(pool.tickDataProvider.ticks)
         };
-        return pool.json;
     }
     static fromJSON(json) {
         return new Pool({
