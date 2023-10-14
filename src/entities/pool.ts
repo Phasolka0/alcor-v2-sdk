@@ -563,7 +563,7 @@ export class Pool {
     return pool;
   }
   static fromId(id: number): Pool {
-    console.log('fromId', id)
+    //console.log('fromId', id)
     const pool = Pool.idToPoolMap.get(id)
     if (!pool) throw new Error('pool does not exist in idToPoolMap')
     return pool;

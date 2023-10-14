@@ -110,7 +110,7 @@ class WorkerPool {
                     const pools = [];
                     for (let pool of taskOptions.route.pools) {
                         if (worker.hasThisPoolCached(pool)) {
-                            console.log('hasThisPoolCached', pool.id);
+                            //console.log('hasThisPoolCached', pool.id)
                             pool = pool.id;
                         }
                         else {
