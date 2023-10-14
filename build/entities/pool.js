@@ -323,7 +323,7 @@ class Pool {
     static fromBuffer(buffer) {
         const bufferHash = Pool.createHash(buffer);
         if (this.hashToPoolMap.has(bufferHash)) {
-            console.log('use cache', bufferHash);
+            //console.log('use cache', bufferHash)
             return this.hashToPoolMap.get(bufferHash);
         }
         const json = msgpack_lite_1.default.decode(buffer);
