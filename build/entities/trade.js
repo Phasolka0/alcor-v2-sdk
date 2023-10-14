@@ -508,11 +508,16 @@ class Trade {
             let i = 0;
             for (const buffer of serializeArray) {
                 const optionsJSON = msgpack_lite_1.default.decode(buffer);
-                console.log(optionsJSON);
                 const route = route_1.Route.fromJSON(optionsJSON.routeJSON);
                 const amount = fractions_1.CurrencyAmount.fromJSON(optionsJSON.amountJSON);
                 const originalRoute = routes[i];
                 console.log((0, lodash_1.isEqual)(originalRoute, route), (0, lodash_1.isEqual)(currencyAmountIn, amount));
+                if (!(0, lodash_1.isEqual)(originalRoute, route)) {
+                    console.log('original:');
+                    console.log(originalRoute);
+                    console.log('restored:');
+                    console.log(route);
+                }
                 i++;
             }
             console.log('deserialization time', performance.now() - deserializationStart);
