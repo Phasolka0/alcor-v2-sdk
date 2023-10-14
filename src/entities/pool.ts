@@ -521,6 +521,7 @@ export class Pool {
   static fromBuffer(buffer: Buffer): Pool {
     const bufferHash = Pool.createHash(buffer)
     if (this.hashToPoolMap.has(bufferHash)) {
+      console.log('use cache', bufferHash)
       return <Pool>this.hashToPoolMap.get(bufferHash)
     }
 
