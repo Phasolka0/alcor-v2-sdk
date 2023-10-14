@@ -8,10 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WorkerPool = exports.SmartWorker = void 0;
 const threads_1 = require("threads");
 const entities_1 = require("../entities");
+const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
 const threadsCount = 16;
 class SmartWorker {
     constructor(id, workerInstance) {
@@ -65,9 +69,13 @@ class WorkerPool {
                     break;
                 this.tokenToTasks.delete(token);
                 //console.log(taskOptions)
-                const amountOut = yield worker.workerInstance.fromRoute(taskOptions);
-                if (amountOut) {
-                    this.tokenToResults.set(token, entities_1.CurrencyAmount.fromBuffer(amountOut));
+                const result = yield worker.workerInstance.fromRoute(taskOptions);
+                const { inputAmount, outputAmount } = msgpack_lite_1.default.decode(result);
+                if (result) {
+                    this.tokenToResults.set(token, {
+                        inputAmount: entities_1.CurrencyAmount.fromBuffer(inputAmount),
+                        outputAmount: entities_1.CurrencyAmount.fromBuffer(outputAmount)
+                    });
                 }
             }
         });

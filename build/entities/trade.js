@@ -203,7 +203,7 @@ class Trade {
     }
     static fromRouteForWorkers(route, amount, tradeType) {
         const amounts = new Array(route.tokenPath.length);
-        //let inputAmount: CurrencyAmount<TInput>
+        let inputAmount;
         let outputAmount;
         if (tradeType === internalConstants_1.TradeType.EXACT_INPUT) {
             (0, tiny_invariant_1.default)(amount.currency.equals(route.input), 'INPUT');
@@ -212,7 +212,7 @@ class Trade {
                 const pool = route.pools[i];
                 amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i]);
             }
-            //inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator)
+            inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator);
             outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amounts[amounts.length - 1].numerator, amounts[amounts.length - 1].denominator);
         }
         else {
@@ -222,10 +222,10 @@ class Trade {
                 const pool = route.pools[i - 1];
                 amounts[i - 1] = pool.getInputAmountOptimized(amounts[i]);
             }
-            //inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator)
+            inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator);
             outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator);
         }
-        return outputAmount;
+        return { inputAmount, outputAmount };
     }
     // static fromJSON(json: any) {
     //   const route = Route.fromJSON(json.route); // assuming Route has its own fromJSON method
@@ -555,7 +555,12 @@ class Trade {
                 const route = routes[index];
                 const controlTrade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
                 //console.log(controlTrade)
-                console.log(value, controlTrade.outputAmount);
+                console.log('mine:');
+                console.log(value);
+                console.log('control:');
+                console.log({ inputAmount: controlTrade.inputAmount, outputAmount: controlTrade.outputAmount });
+                if (index > 3)
+                    break;
                 // if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
                 //
                 // sortedInsert(

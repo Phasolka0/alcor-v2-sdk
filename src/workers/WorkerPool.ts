@@ -1,5 +1,6 @@
 import {spawn, Worker} from 'threads';
 import {CurrencyAmount} from "../entities";
+import msgpack from "msgpack-lite";
 const threadsCount = 16
 
 export class SmartWorker {
@@ -84,9 +85,13 @@ export class WorkerPool {
             if (!taskOptions) break
             this.tokenToTasks.delete(token)
             //console.log(taskOptions)
-            const amountOut = await worker.workerInstance.fromRoute(taskOptions)
-            if (amountOut) {
-                this.tokenToResults.set(token, CurrencyAmount.fromBuffer(amountOut))
+            const result = await worker.workerInstance.fromRoute(taskOptions)
+            const {inputAmount, outputAmount} = msgpack.decode(result)
+            if (result) {
+                this.tokenToResults.set(token, {
+                    inputAmount: CurrencyAmount.fromBuffer(inputAmount),
+                    outputAmount: CurrencyAmount.fromBuffer(outputAmount)
+                })
             }
         }
     }

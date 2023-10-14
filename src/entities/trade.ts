@@ -48,6 +48,35 @@ export function tradeComparator<TInput extends Currency, TOutput extends Currenc
     }
   }
 }
+// export function tradeComparatorSimplified (
+//     a: CurrencyAmount<Token>,
+//     b: CurrencyAmount<Token>
+// ) {
+//   // must have same input and output token for comparison
+//   invariant(a.inputAmount.currency.equals(b.currency), 'INPUT_CURRENCY')
+//   invariant(a.outputAmount.currency.equals(b.currency), 'OUTPUT_CURRENCY')
+//   if (a.outputAmount.equalTo(b.outputAmount)) {
+//     if (a.inputAmount.equalTo(b.inputAmount)) {
+//       // consider the number of hops since each hop costs gas
+//       const aHops = a.swaps.reduce((total, cur) => total + cur.route.tokenPath.length, 0)
+//       const bHops = b.swaps.reduce((total, cur) => total + cur.route.tokenPath.length, 0)
+//       return aHops - bHops
+//     }
+//     // trade A requires less input than trade B, so A should come first
+//     if (a.inputAmount.lessThan(b.inputAmount)) {
+//       return -1
+//     } else {
+//       return 1
+//     }
+//   } else {
+//     // tradeA has less output than trade B, so should come second
+//     if (a.outputAmount.lessThan(b.outputAmount)) {
+//       return 1
+//     } else {
+//       return -1
+//     }
+//   }
+// }
 
 export interface BestTradeOptions {
   // how many results to return
@@ -274,9 +303,9 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       route: Route<TInput, TOutput>,
       amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>,
       tradeType: TTradeType
-  ): CurrencyAmount<TOutput> {
+  ): any {
     const amounts: CurrencyAmount<Token>[] = new Array(route.tokenPath.length)
-    //let inputAmount: CurrencyAmount<TInput>
+    let inputAmount: CurrencyAmount<TInput>
     let outputAmount: CurrencyAmount<TOutput>
     if (tradeType === TradeType.EXACT_INPUT) {
       invariant(amount.currency.equals(route.input), 'INPUT')
@@ -285,7 +314,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         const pool = route.pools[i]
         amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i])
       }
-      //inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator)
+      inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator)
       outputAmount = CurrencyAmount.fromFractionalAmount(
           route.output,
           amounts[amounts.length - 1].numerator,
@@ -298,11 +327,11 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         const pool = route.pools[i - 1]
         amounts[i - 1] = pool.getInputAmountOptimized(amounts[i])
       }
-      //inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator)
+      inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator)
       outputAmount = CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator)
     }
 
-    return outputAmount
+    return {inputAmount, outputAmount}
   }
   // static fromJSON(json: any) {
   //   const route = Route.fromJSON(json.route); // assuming Route has its own fromJSON method
@@ -795,7 +824,11 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
           TradeType.EXACT_INPUT
       )
       //console.log(controlTrade)
-      console.log(value, controlTrade.outputAmount)
+      console.log('mine:')
+      console.log(value)
+      console.log('control:')
+      console.log({inputAmount: controlTrade.inputAmount, outputAmount: controlTrade.outputAmount})
+      if (index > 3) break
 
       // if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
       //

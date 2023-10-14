@@ -118,7 +118,7 @@ export declare class Trade<TInput extends Currency, TOutput extends Currency, TT
      * @returns The route
      */
     static fromRoute<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(route: Route<TInput, TOutput>, amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>, tradeType: TTradeType): Trade<TInput, TOutput, TTradeType>;
-    static fromRouteForWorkers<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(route: Route<TInput, TOutput>, amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>, tradeType: TTradeType): CurrencyAmount<TOutput>;
+    static fromRouteForWorkers<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(route: Route<TInput, TOutput>, amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>, tradeType: TTradeType): any;
     /**
      * Constructs a trade from routes by simulating swaps
      *
