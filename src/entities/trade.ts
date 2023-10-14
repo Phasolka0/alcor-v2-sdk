@@ -770,6 +770,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       pools: Pool[],
       currencyAmountIn: CurrencyAmount<TInput>,
   ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>> {
+
     const workerPool = this.workerPool
     if (!workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
 
@@ -778,7 +779,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     const serializationStart = performance.now()
     const amountInBuffer = CurrencyAmount.toBuffer(currencyAmountIn)
     const tradeTypeBuffer = msgpack.encode(TradeType.EXACT_INPUT)
-    console.log('routes:', routes.length)
+    //console.log('routesCount:', routes.length)
     for (const route of routes) {
 
 
@@ -795,13 +796,13 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       workerPool.addTask(optionsBuffer)
       //serializeArray.push(optionsBuffer)
     }
-    console.log('serialization time', performance.now() - serializationStart)
+    console.log('serialization and prepare tasks', performance.now() - serializationStart)
     const workersStart = performance.now()
     const results = await workerPool.waitForWorkersAndReturnResult()
-    console.log('workers', performance.now() - workersStart)
+    console.log('workers summary', performance.now() - workersStart)
 
+    const mainThreadPostWorkStart = performance.now()
     const bestResult: any = {}
-
     for (const [index, value] of results) {
       const route = routes[index]
       const controlTrade= Trade.fromRoute(
@@ -834,10 +835,15 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       // )
     }
     bestResult.route = routes[bestResult.routeId]
-    return Trade.fromRoute(
+    console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart)
+
+    const finallyTradeStart = performance.now()
+    const finallyTrade = Trade.fromRoute(
         routes[bestResult.routeId],
         currencyAmountIn,
         TradeType.EXACT_INPUT
     )
+    console.log('finallyTrade', performance.now() - finallyTradeStart)
+    return finallyTrade
   }
 }

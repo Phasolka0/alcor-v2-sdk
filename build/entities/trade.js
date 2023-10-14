@@ -522,7 +522,7 @@ class Trade {
             const serializationStart = performance.now();
             const amountInBuffer = fractions_1.CurrencyAmount.toBuffer(currencyAmountIn);
             const tradeTypeBuffer = msgpack_lite_1.default.encode(internalConstants_1.TradeType.EXACT_INPUT);
-            console.log('routes:', routes.length);
+            //console.log('routesCount:', routes.length)
             for (const route of routes) {
                 const optionsJSON = {
                     route: route_1.Route.toBuffer(route),
@@ -533,10 +533,11 @@ class Trade {
                 workerPool.addTask(optionsBuffer);
                 //serializeArray.push(optionsBuffer)
             }
-            console.log('serialization time', performance.now() - serializationStart);
+            console.log('serialization and prepare tasks', performance.now() - serializationStart);
             const workersStart = performance.now();
             const results = yield workerPool.waitForWorkersAndReturnResult();
-            console.log('workers', performance.now() - workersStart);
+            console.log('workers summary', performance.now() - workersStart);
+            const mainThreadPostWorkStart = performance.now();
             const bestResult = {};
             for (const [index, value] of results) {
                 const route = routes[index];
@@ -565,7 +566,11 @@ class Trade {
                 // )
             }
             bestResult.route = routes[bestResult.routeId];
-            return Trade.fromRoute(routes[bestResult.routeId], currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+            console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart);
+            const finallyTradeStart = performance.now();
+            const finallyTrade = Trade.fromRoute(routes[bestResult.routeId], currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+            console.log('finallyTrade', performance.now() - finallyTradeStart);
+            return finallyTrade;
         });
     }
 }
