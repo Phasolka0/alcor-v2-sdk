@@ -105,6 +105,22 @@ class Route {
         const json = msgpack_lite_1.default.decode(buffer);
         return this.fromJSON(json);
     }
+    static toBufferAdvanced(route, pools) {
+        const json = {
+            pools: pools.map(pool => {
+                if (typeof pool === 'number') {
+                    return pool;
+                }
+                else {
+                    return pool_1.Pool.toBuffer(pool);
+                }
+            }),
+            input: token_1.Token.toJSON(route.input),
+            output: token_1.Token.toJSON(route.output),
+            _midPrice: route._midPrice,
+        };
+        return msgpack_lite_1.default.encode(json);
+    }
     equals(other) {
         if (this.pools.length !== other.pools.length)
             return false;

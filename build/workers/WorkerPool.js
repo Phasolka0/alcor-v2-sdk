@@ -107,20 +107,21 @@ class WorkerPool {
                     result = yield worker.workerInstance.fromRoute(taskOptions);
                 }
                 else {
-                    for (let i = 0; i < taskOptions.route.pools.length; i++) {
-                        const pool = taskOptions.route.pools[i];
+                    const pools = [];
+                    for (let pool of taskOptions.route.pools) {
                         if (worker.hasThisPoolCached(pool)) {
                             console.log('hasThisPoolCached', pool.id);
-                            taskOptions.route.pools[i] = pool.id;
+                            pool = pool.id;
                         }
                         else {
                             const buffer = entities_1.Pool.toBuffer(pool);
                             const bufferHash = pool.bufferHash;
                             worker.addBufferHash(pool);
-                            taskOptions.route.pools[i] = { buffer, bufferHash };
+                            pool = { buffer, bufferHash };
                         }
+                        pools.push(pool);
                     }
-                    taskOptions.route = entities_1.Route.toBuffer(taskOptions.route);
+                    taskOptions.route = entities_1.Route.toBufferAdvanced(taskOptions.route, pools);
                     const taskBuffer = msgpack_lite_1.default.encode(taskOptions);
                     result = yield worker.workerInstance.fromRoute(taskBuffer);
                 }

@@ -42,5 +42,6 @@ export declare class Route<TInput extends Currency, TOutput extends Currency> {
     static fromJSON(json: any): Route<Token, Token>;
     static toBuffer(route: Route<Currency, Currency>, lightWeightVersion?: boolean): Buffer;
     static fromBuffer(buffer: Buffer): Route<Token, Token>;
+    static toBufferAdvanced(route: Route<Currency, Currency>, pools: any[]): Buffer;
     equals(other: Route<Currency, Currency>): boolean;
 }

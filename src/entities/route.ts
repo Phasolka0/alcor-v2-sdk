@@ -119,6 +119,23 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
         const json = msgpack.decode(buffer);
         return this.fromJSON(json);
     }
+    static toBufferAdvanced(route: Route<Currency, Currency>, pools: any[]) {
+        const json = {
+            pools: pools.map(pool => {
+                if (typeof pool === 'number') {
+                    return pool
+                } else {
+                    return Pool.toBuffer(pool)
+                }
+
+            }),
+            input: Token.toJSON(route.input),
+            output: Token.toJSON(route.output),
+            _midPrice: route._midPrice,
+        }
+        return msgpack.encode(json);
+    }
+
 
 
     public equals(other: Route<Currency, Currency>): boolean {
