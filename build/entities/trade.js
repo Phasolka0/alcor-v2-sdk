@@ -496,18 +496,16 @@ class Trade {
         }
         return bestTrades;
     }
-    static bestTradeExactIn2(routes, pools, currencyAmountIn, maxNumResults = 3) {
-        return __awaiter(this, void 0, void 0, function* () {
-            (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
-            const bestTrades = [];
-            for (const route of routes) {
-                const trade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
-                if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
-                    continue;
-                (0, utils_1.sortedInsert)(bestTrades, trade, maxNumResults, tradeComparator);
-            }
-            return bestTrades;
-        });
+    static bestTradeExactIn2(routes, pools, currencyAmountIn) {
+        (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
+        const bestTrades = [];
+        for (const route of routes) {
+            const trade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+            if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
+                continue;
+            (0, utils_1.sortedInsert)(bestTrades, trade, 1, tradeComparator);
+        }
+        return bestTrades[0];
     }
     static initWorkerPool(threadsCount = 16) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -515,13 +513,12 @@ class Trade {
             console.log('Pool started with', threadsCount, 'workers');
         });
     }
-    static bestTradeExactIn3(routes, pools, currencyAmountIn, maxNumResults = 3) {
+    static bestTradeExactIn3(routes, pools, currencyAmountIn) {
         return __awaiter(this, void 0, void 0, function* () {
             const workerPool = this.workerPool;
             if (!workerPool)
                 return this.bestTradeExactIn2(routes, pools, currencyAmountIn);
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
-            const bestTrades = [];
             const serializationStart = performance.now();
             const amountInBuffer = fractions_1.CurrencyAmount.toBuffer(currencyAmountIn);
             const tradeTypeBuffer = msgpack_lite_1.default.encode(internalConstants_1.TradeType.EXACT_INPUT);
@@ -538,19 +535,8 @@ class Trade {
             }
             console.log('serialization time', performance.now() - serializationStart);
             const workersStart = performance.now();
-            // for (const buffer of serializeArray) {
-            //   const optionsJSON = msgpack.decode(buffer)
-            //   const route = Route.fromBuffer(optionsJSON.route)
-            //   const amount = CurrencyAmount.fromBuffer(optionsJSON.amount)
-            // }
             const results = yield workerPool.waitForWorkersAndReturnResult();
             console.log('workers', performance.now() - workersStart);
-            // console.log(results[0])
-            // console.log(Trade.fromRoute(
-            //     routes[0],
-            //     currencyAmountIn,
-            //     TradeType.EXACT_INPUT
-            // ))
             const bestResult = {};
             for (const [index, value] of results) {
                 const route = routes[index];
@@ -579,8 +565,7 @@ class Trade {
                 // )
             }
             bestResult.route = routes[bestResult.routeId];
-            console.log(bestResult);
-            return bestTrades;
+            return Trade.fromRoute(routes[bestResult.routeId], currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
         });
     }
 }

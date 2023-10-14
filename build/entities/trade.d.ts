@@ -222,7 +222,7 @@ export declare class Trade<TInput extends Currency, TOutput extends Currency, TT
      * @returns The exact out trade
      */
     static bestTradeExactOut<TInput extends Currency, TOutput extends Currency>(pools: Pool[], currencyIn: TInput, currencyAmountOut: CurrencyAmount<TOutput>, { maxNumResults, maxHops }?: BestTradeOptions, currentPools?: Pool[], nextAmountOut?: CurrencyAmount<Currency>, bestTrades?: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[]): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[];
-    static bestTradeExactIn2<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>, maxNumResults?: number): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]>;
+    static bestTradeExactIn2<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>): Trade<TInput, TOutput, TradeType.EXACT_INPUT>;
     static initWorkerPool(threadsCount?: number): Promise<void>;
-    static bestTradeExactIn3<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>, maxNumResults?: number): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]>;
+    static bestTradeExactIn3<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>>;
 }

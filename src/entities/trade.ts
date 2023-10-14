@@ -732,12 +732,11 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     return bestTrades
   }
 
-  public static async bestTradeExactIn2<TInput extends Currency, TOutput extends Currency>(
+  public static bestTradeExactIn2<TInput extends Currency, TOutput extends Currency>(
     routes: Route<TInput, TOutput>[],
     pools: Pool[],
-    currencyAmountIn: CurrencyAmount<TInput>,
-    maxNumResults = 3,
-  ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]> {
+    currencyAmountIn: CurrencyAmount<TInput>
+  ): Trade<TInput, TOutput, TradeType.EXACT_INPUT> {
     invariant(pools.length > 0, 'POOLS')
 
     const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
@@ -754,12 +753,12 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       sortedInsert(
         bestTrades,
         trade,
-        maxNumResults,
+        1,
         tradeComparator
       )
     }
 
-    return bestTrades
+    return bestTrades[0]
   }
   public static async initWorkerPool(threadsCount = 16) {
     this.workerPool = await WorkerPool.create(threadsCount)
@@ -770,14 +769,12 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       routes: Route<TInput, TOutput>[],
       pools: Pool[],
       currencyAmountIn: CurrencyAmount<TInput>,
-      maxNumResults = 3,
-  ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>[]> {
+  ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>> {
     const workerPool = this.workerPool
     if (!workerPool) return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
 
     invariant(pools.length > 0, 'POOLS')
 
-    const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
     const serializationStart = performance.now()
     const amountInBuffer = CurrencyAmount.toBuffer(currencyAmountIn)
     const tradeTypeBuffer = msgpack.encode(TradeType.EXACT_INPUT)
@@ -800,21 +797,8 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     }
     console.log('serialization time', performance.now() - serializationStart)
     const workersStart = performance.now()
-    // for (const buffer of serializeArray) {
-    //   const optionsJSON = msgpack.decode(buffer)
-    //   const route = Route.fromBuffer(optionsJSON.route)
-    //   const amount = CurrencyAmount.fromBuffer(optionsJSON.amount)
-    // }
-
-
     const results = await workerPool.waitForWorkersAndReturnResult()
     console.log('workers', performance.now() - workersStart)
-    // console.log(results[0])
-    // console.log(Trade.fromRoute(
-    //     routes[0],
-    //     currencyAmountIn,
-    //     TradeType.EXACT_INPUT
-    // ))
 
     const bestResult: any = {}
 
@@ -850,8 +834,10 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       // )
     }
     bestResult.route = routes[bestResult.routeId]
-    console.log(bestResult)
-
-    return bestTrades
+    return Trade.fromRoute(
+        routes[bestResult.routeId],
+        currencyAmountIn,
+        TradeType.EXACT_INPUT
+    )
   }
 }
