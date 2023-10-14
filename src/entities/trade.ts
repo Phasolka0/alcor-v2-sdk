@@ -830,7 +830,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       // console.log(value)
       // console.log('control:')
       // console.log({inputAmount: controlTrade.inputAmount, outputAmount: controlTrade.outputAmount})
-      if (!bestResult) {
+      if (!bestResult.amounts) {
         bestResult.amounts = value
         bestResult.routeId = index
       }
