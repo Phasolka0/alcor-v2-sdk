@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Trade = exports.tradeComparator = void 0;
 const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
-const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
 const fractions_1 = require("./fractions");
 const utils_1 = require("../utils");
 const internalConstants_1 = require("../internalConstants");
@@ -527,13 +526,12 @@ class Trade {
             (0, tiny_invariant_1.default)(routes.length > 0, 'ROUTES');
             const serializationStart = performance.now();
             const amountInBuffer = fractions_1.CurrencyAmount.toBuffer(currencyAmountIn);
-            const tradeTypeBuffer = msgpack_lite_1.default.encode(tradeType);
             //console.log('routesCount:', routes.length)
             for (const route of routes) {
                 const optionsJSON = {
                     route: route,
                     amount: amountInBuffer,
-                    tradeType: tradeTypeBuffer
+                    tradeType
                 };
                 workerPool.addTaskJSON(optionsJSON);
                 //const optionsBuffer = msgpack.encode(optionsJSON);

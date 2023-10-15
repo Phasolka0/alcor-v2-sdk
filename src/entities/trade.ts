@@ -1,5 +1,4 @@
 import invariant from 'tiny-invariant'
-import msgpack from "msgpack-lite";
 
 import {Currency} from './currency'
 import {CurrencyAmount, Fraction, Percent, Price} from './fractions'
@@ -795,13 +794,12 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
         const serializationStart = performance.now()
         const amountInBuffer = CurrencyAmount.toBuffer(currencyAmountIn)
-        const tradeTypeBuffer = msgpack.encode(tradeType)
         //console.log('routesCount:', routes.length)
         for (const route of routes) {
             const optionsJSON = {
                 route: route,
                 amount: amountInBuffer,
-                tradeType: tradeTypeBuffer
+                tradeType
             }
             workerPool.addTaskJSON(optionsJSON)
 
