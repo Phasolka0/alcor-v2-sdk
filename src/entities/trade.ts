@@ -274,46 +274,6 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
             amounts[0] = amount
             for (let i = 0; i < route.tokenPath.length - 1; i++) {
                 const pool = route.pools[i]
-                const outputAmount = pool.getOutputAmountOptimized(amounts[i])
-                amounts[i + 1] = outputAmount
-            }
-            inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator)
-            outputAmount = CurrencyAmount.fromFractionalAmount(
-                route.output,
-                amounts[amounts.length - 1].numerator,
-                amounts[amounts.length - 1].denominator
-            )
-        } else {
-            invariant(amount.currency.equals(route.output), 'OUTPUT')
-            amounts[amounts.length - 1] = amount
-            for (let i = route.tokenPath.length - 1; i > 0; i--) {
-                const pool = route.pools[i - 1]
-                const inputAmount = pool.getInputAmountOptimized(amounts[i])
-                amounts[i - 1] = inputAmount
-            }
-            inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator)
-            outputAmount = CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator)
-        }
-
-        return new Trade({
-            routes: [{inputAmount, outputAmount, route}],
-            tradeType
-        })
-    }
-
-    public static fromRouteForWorkers<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(
-        route: Route<TInput, TOutput>,
-        amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>,
-        tradeType: TTradeType
-    ): any {
-        const amounts: CurrencyAmount<Token>[] = new Array(route.tokenPath.length)
-        let inputAmount: CurrencyAmount<TInput>
-        let outputAmount: CurrencyAmount<TOutput>
-        if (tradeType === TradeType.EXACT_INPUT) {
-            invariant(amount.currency.equals(route.input), 'INPUT')
-            amounts[0] = amount
-            for (let i = 0; i < route.tokenPath.length - 1; i++) {
-                const pool = route.pools[i]
                 amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i])
             }
             inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator)
@@ -333,8 +293,46 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
             outputAmount = CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator)
         }
 
-        return {inputAmount, outputAmount}
+        return new Trade({
+            routes: [{inputAmount, outputAmount, route}],
+            tradeType
+        })
     }
+
+    // public static fromRouteForWorkers<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(
+    //     route: Route<TInput, TOutput>,
+    //     amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>,
+    //     tradeType: TTradeType
+    // ): any {
+    //     const amounts: CurrencyAmount<Token>[] = new Array(route.tokenPath.length)
+    //     let inputAmount: CurrencyAmount<TInput>
+    //     let outputAmount: CurrencyAmount<TOutput>
+    //     if (tradeType === TradeType.EXACT_INPUT) {
+    //         invariant(amount.currency.equals(route.input), 'INPUT')
+    //         amounts[0] = amount
+    //         for (let i = 0; i < route.tokenPath.length - 1; i++) {
+    //             const pool = route.pools[i]
+    //             amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i])
+    //         }
+    //         inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator)
+    //         outputAmount = CurrencyAmount.fromFractionalAmount(
+    //             route.output,
+    //             amounts[amounts.length - 1].numerator,
+    //             amounts[amounts.length - 1].denominator
+    //         )
+    //     } else {
+    //         invariant(amount.currency.equals(route.output), 'OUTPUT')
+    //         amounts[amounts.length - 1] = amount
+    //         for (let i = route.tokenPath.length - 1; i > 0; i--) {
+    //             const pool = route.pools[i - 1]
+    //             amounts[i - 1] = pool.getInputAmountOptimized(amounts[i])
+    //         }
+    //         inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator)
+    //         outputAmount = CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator)
+    //     }
+    //     //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
+    //         return {inputAmount, outputAmount}
+    // }
 
     // static fromJSON(json: any) {
     //   const route = Route.fromJSON(json.route); // assuming Route has its own fromJSON method
@@ -359,13 +357,13 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
      * @param tradeType whether the trade is an exact input or exact output swap
      * @returns The trade
      */
-    public static async fromRoutes<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(
+    public static fromRoutes<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(
         routes: {
             amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>
             route: Route<TInput, TOutput>
         }[],
         tradeType: TTradeType
-    ): Promise<Trade<TInput, TOutput, TTradeType>> {
+    ): Trade<TInput, TOutput, TTradeType> {
         const populatedRoutes: {
             route: Route<TInput, TOutput>
             inputAmount: CurrencyAmount<TInput>
@@ -384,8 +382,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
                 for (let i = 0; i < route.tokenPath.length - 1; i++) {
                     const pool = route.pools[i]
-                    const [outputAmount] = await pool.getOutputAmount(amounts[i])
-                    amounts[i + 1] = outputAmount
+                    amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i])
                 }
 
                 outputAmount = CurrencyAmount.fromFractionalAmount(
@@ -404,8 +401,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
                 for (let i = route.tokenPath.length - 1; i > 0; i--) {
                     const pool = route.pools[i - 1]
-                    const [inputAmount] = await pool.getInputAmount(amounts[i])
-                    amounts[i - 1] = inputAmount
+                    amounts[i - 1] = pool.getInputAmountOptimized(amounts[i])
                 }
 
                 inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator)

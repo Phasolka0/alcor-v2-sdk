@@ -178,37 +178,6 @@ class Trade {
             amounts[0] = amount;
             for (let i = 0; i < route.tokenPath.length - 1; i++) {
                 const pool = route.pools[i];
-                const outputAmount = pool.getOutputAmountOptimized(amounts[i]);
-                amounts[i + 1] = outputAmount;
-            }
-            inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator);
-            outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amounts[amounts.length - 1].numerator, amounts[amounts.length - 1].denominator);
-        }
-        else {
-            (0, tiny_invariant_1.default)(amount.currency.equals(route.output), 'OUTPUT');
-            amounts[amounts.length - 1] = amount;
-            for (let i = route.tokenPath.length - 1; i > 0; i--) {
-                const pool = route.pools[i - 1];
-                const inputAmount = pool.getInputAmountOptimized(amounts[i]);
-                amounts[i - 1] = inputAmount;
-            }
-            inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator);
-            outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator);
-        }
-        return new Trade({
-            routes: [{ inputAmount, outputAmount, route }],
-            tradeType
-        });
-    }
-    static fromRouteForWorkers(route, amount, tradeType) {
-        const amounts = new Array(route.tokenPath.length);
-        let inputAmount;
-        let outputAmount;
-        if (tradeType === internalConstants_1.TradeType.EXACT_INPUT) {
-            (0, tiny_invariant_1.default)(amount.currency.equals(route.input), 'INPUT');
-            amounts[0] = amount;
-            for (let i = 0; i < route.tokenPath.length - 1; i++) {
-                const pool = route.pools[i];
                 amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i]);
             }
             inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator);
@@ -224,8 +193,45 @@ class Trade {
             inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator);
             outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator);
         }
-        return { inputAmount, outputAmount };
+        return new Trade({
+            routes: [{ inputAmount, outputAmount, route }],
+            tradeType
+        });
     }
+    // public static fromRouteForWorkers<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(
+    //     route: Route<TInput, TOutput>,
+    //     amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>,
+    //     tradeType: TTradeType
+    // ): any {
+    //     const amounts: CurrencyAmount<Token>[] = new Array(route.tokenPath.length)
+    //     let inputAmount: CurrencyAmount<TInput>
+    //     let outputAmount: CurrencyAmount<TOutput>
+    //     if (tradeType === TradeType.EXACT_INPUT) {
+    //         invariant(amount.currency.equals(route.input), 'INPUT')
+    //         amounts[0] = amount
+    //         for (let i = 0; i < route.tokenPath.length - 1; i++) {
+    //             const pool = route.pools[i]
+    //             amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i])
+    //         }
+    //         inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator)
+    //         outputAmount = CurrencyAmount.fromFractionalAmount(
+    //             route.output,
+    //             amounts[amounts.length - 1].numerator,
+    //             amounts[amounts.length - 1].denominator
+    //         )
+    //     } else {
+    //         invariant(amount.currency.equals(route.output), 'OUTPUT')
+    //         amounts[amounts.length - 1] = amount
+    //         for (let i = route.tokenPath.length - 1; i > 0; i--) {
+    //             const pool = route.pools[i - 1]
+    //             amounts[i - 1] = pool.getInputAmountOptimized(amounts[i])
+    //         }
+    //         inputAmount = CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator)
+    //         outputAmount = CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator)
+    //     }
+    //     //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
+    //         return {inputAmount, outputAmount}
+    // }
     // static fromJSON(json: any) {
     //   const route = Route.fromJSON(json.route); // assuming Route has its own fromJSON method
     //   const inputAmount = CurrencyAmount.fromJSON(json.inputAmount); // same for CurrencyAmount
@@ -249,40 +255,36 @@ class Trade {
      * @returns The trade
      */
     static fromRoutes(routes, tradeType) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const populatedRoutes = [];
-            for (const { route, amount } of routes) {
-                const amounts = new Array(route.tokenPath.length);
-                let inputAmount;
-                let outputAmount;
-                if (tradeType === internalConstants_1.TradeType.EXACT_INPUT) {
-                    (0, tiny_invariant_1.default)(amount.currency.equals(route.input), 'INPUT');
-                    inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator);
-                    amounts[0] = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator);
-                    for (let i = 0; i < route.tokenPath.length - 1; i++) {
-                        const pool = route.pools[i];
-                        const [outputAmount] = yield pool.getOutputAmount(amounts[i]);
-                        amounts[i + 1] = outputAmount;
-                    }
-                    outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amounts[amounts.length - 1].numerator, amounts[amounts.length - 1].denominator);
+        const populatedRoutes = [];
+        for (const { route, amount } of routes) {
+            const amounts = new Array(route.tokenPath.length);
+            let inputAmount;
+            let outputAmount;
+            if (tradeType === internalConstants_1.TradeType.EXACT_INPUT) {
+                (0, tiny_invariant_1.default)(amount.currency.equals(route.input), 'INPUT');
+                inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator);
+                amounts[0] = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amount.numerator, amount.denominator);
+                for (let i = 0; i < route.tokenPath.length - 1; i++) {
+                    const pool = route.pools[i];
+                    amounts[i + 1] = pool.getOutputAmountOptimized(amounts[i]);
                 }
-                else {
-                    (0, tiny_invariant_1.default)(amount.currency.equals(route.output), 'OUTPUT');
-                    outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator);
-                    amounts[amounts.length - 1] = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator);
-                    for (let i = route.tokenPath.length - 1; i > 0; i--) {
-                        const pool = route.pools[i - 1];
-                        const [inputAmount] = yield pool.getInputAmount(amounts[i]);
-                        amounts[i - 1] = inputAmount;
-                    }
-                    inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator);
-                }
-                populatedRoutes.push({ route, inputAmount, outputAmount });
+                outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amounts[amounts.length - 1].numerator, amounts[amounts.length - 1].denominator);
             }
-            return new Trade({
-                routes: populatedRoutes,
-                tradeType
-            });
+            else {
+                (0, tiny_invariant_1.default)(amount.currency.equals(route.output), 'OUTPUT');
+                outputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator);
+                amounts[amounts.length - 1] = fractions_1.CurrencyAmount.fromFractionalAmount(route.output, amount.numerator, amount.denominator);
+                for (let i = route.tokenPath.length - 1; i > 0; i--) {
+                    const pool = route.pools[i - 1];
+                    amounts[i - 1] = pool.getInputAmountOptimized(amounts[i]);
+                }
+                inputAmount = fractions_1.CurrencyAmount.fromFractionalAmount(route.input, amounts[0].numerator, amounts[0].denominator);
+            }
+            populatedRoutes.push({ route, inputAmount, outputAmount });
+        }
+        return new Trade({
+            routes: populatedRoutes,
+            tradeType
         });
     }
     /**

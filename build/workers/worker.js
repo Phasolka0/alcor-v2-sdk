@@ -12,9 +12,10 @@ function fromRoute(optionsBuffer) {
         const optionsJSON = msgpack_lite_1.default.decode(optionsBuffer);
         const route = entities_1.Route.fromBuffer(optionsJSON.route);
         const amount = entities_1.CurrencyAmount.fromBuffer(optionsJSON.amount);
-        const { inputAmount, outputAmount } = entities_1.Trade.fromRouteForWorkers(route, amount, optionsJSON.tradeType);
-        if (!inputAmount.greaterThan(0))
+        const trade = entities_1.Trade.fromRoute(route, amount, optionsJSON.tradeType);
+        if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
             return null;
+        const { inputAmount, outputAmount } = trade;
         const resultJson = {
             inputAmount: entities_1.CurrencyAmount.toBuffer(inputAmount),
             outputAmount: entities_1.CurrencyAmount.toBuffer(outputAmount)

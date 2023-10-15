@@ -9,8 +9,9 @@ function fromRoute(optionsBuffer: Buffer) {
         const amount = CurrencyAmount.fromBuffer(optionsJSON.amount);
 
 
-        const {inputAmount, outputAmount} = Trade.fromRouteForWorkers(route, amount, optionsJSON.tradeType);
-        if (!inputAmount.greaterThan(0)) return null
+        const trade = Trade.fromRoute(route, amount, optionsJSON.tradeType);
+        if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) return null
+        const {inputAmount, outputAmount} = trade
         const resultJson = {
             inputAmount: CurrencyAmount.toBuffer(inputAmount),
             outputAmount: CurrencyAmount.toBuffer(outputAmount)

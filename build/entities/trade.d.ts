@@ -118,7 +118,6 @@ export declare class Trade<TInput extends Currency, TOutput extends Currency, TT
      * @returns The route
      */
     static fromRoute<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(route: Route<TInput, TOutput>, amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>, tradeType: TTradeType): Trade<TInput, TOutput, TTradeType>;
-    static fromRouteForWorkers<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(route: Route<TInput, TOutput>, amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>, tradeType: TTradeType): any;
     /**
      * Constructs a trade from routes by simulating swaps
      *
@@ -132,7 +131,7 @@ export declare class Trade<TInput extends Currency, TOutput extends Currency, TT
     static fromRoutes<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(routes: {
         amount: TTradeType extends TradeType.EXACT_INPUT ? CurrencyAmount<TInput> : CurrencyAmount<TOutput>;
         route: Route<TInput, TOutput>;
-    }[], tradeType: TTradeType): Promise<Trade<TInput, TOutput, TTradeType>>;
+    }[], tradeType: TTradeType): Trade<TInput, TOutput, TTradeType>;
     /**
      * Creates a trade without computing the result of swapping through the route. Useful when you have simulated the trade
      * elsewhere and do not have any tick data
