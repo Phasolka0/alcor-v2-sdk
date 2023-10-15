@@ -60,7 +60,6 @@
     "eosjs": "^22.1.0",
     "eosjs-account-name": "2.3.0",
     "jsbi": "^4.3.0",
-    "lodash": "^4.17.21",
     "msgpack-lite": "^0.1.26",
     "node-fetch": "2",
     "threads": "^1.7.0",
