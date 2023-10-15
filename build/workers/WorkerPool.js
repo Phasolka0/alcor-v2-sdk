@@ -131,7 +131,7 @@ class WorkerPool {
                     tasks.push(msgpack_lite_1.default.encode(task));
                 }
                 const results = yield worker.workerInstance.fromRouteBulk(tasks);
-                console.log(results);
+                //console.log(results)
                 const resultsArray = msgpack_lite_1.default.decode(results);
                 let i = 0;
                 for (const result of resultsArray) {

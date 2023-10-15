@@ -157,7 +157,7 @@ export class WorkerPool {
                 tasks.push(msgpack.encode(task))
             }
             const results: Buffer = await worker.workerInstance.fromRouteBulk(tasks)
-            console.log(results)
+            //console.log(results)
             const resultsArray = msgpack.decode(results)
             let i = 0
             for (const result of resultsArray) {
