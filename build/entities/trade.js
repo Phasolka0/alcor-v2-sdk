@@ -536,7 +536,7 @@ class Trade {
                 //const optionsBuffer = msgpack.encode(optionsJSON);
                 //workerPool.addTaskBuffer(optionsBuffer)
             }
-            console.log('serialization and prepare tasks', performance.now() - serializationStart);
+            console.log('prepare tasks', performance.now() - serializationStart);
             const workersStart = performance.now();
             const results = yield workerPool.waitForWorkersAndReturnResult();
             console.log('workers summary', performance.now() - workersStart);
