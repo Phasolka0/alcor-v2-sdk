@@ -736,20 +736,22 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         return bestTrades
     }
 
-    public static bestTradeExactIn2<TInput extends Currency, TOutput extends Currency>(
+    public static bestTradeSingleThread<TInput extends Currency, TOutput extends Currency>(
         routes: Route<TInput, TOutput>[],
         pools: Pool[],
-        currencyAmountIn: CurrencyAmount<TInput>
-    ): Trade<TInput, TOutput, TradeType.EXACT_INPUT> {
+        currencyAmountIn: CurrencyAmount<TInput>,
+        tradeType: TradeType
+    ): Trade<TInput, TOutput, TradeType> {
         invariant(pools.length > 0, 'POOLS')
+        invariant(routes.length > 0, 'ROUTES')
 
-        const bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = []
+        const bestTrades: Trade<TInput, TOutput, TradeType>[] = []
 
         for (const route of routes) {
             const trade = Trade.fromRoute(
                 route,
                 currencyAmountIn,
-                TradeType.EXACT_INPUT
+                tradeType
             )
 
             if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
@@ -782,11 +784,8 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         if (!workerPool) {
             console.warn('workerPool is not initialized, single-threaded version is used.' +
                 '\n use "await Trade.initWorkerPool()" for multi-threaded')
-            //if (tradeType === TradeType.EXACT_INPUT) {
-            return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
-            // } else {
-            //     return this.bestTradeExactOut(pools, currencyAmountIn)
-            // }
+            return this.bestTradeSingleThread(routes, pools, currencyAmountIn, tradeType)
+
 
         }
 

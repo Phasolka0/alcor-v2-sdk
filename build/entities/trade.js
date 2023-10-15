@@ -496,11 +496,12 @@ class Trade {
         }
         return bestTrades;
     }
-    static bestTradeExactIn2(routes, pools, currencyAmountIn) {
+    static bestTradeSingleThread(routes, pools, currencyAmountIn, tradeType) {
         (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
+        (0, tiny_invariant_1.default)(routes.length > 0, 'ROUTES');
         const bestTrades = [];
         for (const route of routes) {
-            const trade = Trade.fromRoute(route, currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+            const trade = Trade.fromRoute(route, currencyAmountIn, tradeType);
             if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
                 continue;
             (0, utils_1.sortedInsert)(bestTrades, trade, 1, tradeComparator);
@@ -519,11 +520,7 @@ class Trade {
             if (!workerPool) {
                 console.warn('workerPool is not initialized, single-threaded version is used.' +
                     '\n use "await Trade.initWorkerPool()" for multi-threaded');
-                //if (tradeType === TradeType.EXACT_INPUT) {
-                return this.bestTradeExactIn2(routes, pools, currencyAmountIn);
-                // } else {
-                //     return this.bestTradeExactOut(pools, currencyAmountIn)
-                // }
+                return this.bestTradeSingleThread(routes, pools, currencyAmountIn, tradeType);
             }
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             (0, tiny_invariant_1.default)(routes.length > 0, 'ROUTES');
