@@ -107,58 +107,42 @@ class WorkerPool {
     }
     workerLoop(worker) {
         return __awaiter(this, void 0, void 0, function* () {
-            while (this.tokenToTasks.size !== 0) {
-                const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 100));
+            while (this.tokenToTasks.size > 0) {
+                const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 50));
                 const tokens = Array.from(this.tokenToTasks.keys()).slice(0, tasksPerWorker);
-                const tasksForThisWorker = [];
-                for (const token of tokens) {
+                const tasksForThisWorker = new Array(tasksPerWorker);
+                for (let i = 0; i < tokens.length; i++) {
+                    const token = tokens[i];
                     const taskOptions = this.tokenToTasks.get(token);
                     if (taskOptions) {
-                        tasksForThisWorker.push(taskOptions);
+                        tasksForThisWorker[i] = taskOptions;
                         this.tokenToTasks.delete(token);
                     }
                 }
-                //console.log(taskOptions)
-                //let result
-                // if (Buffer.isBuffer(taskOptions)) {
-                //     result = await worker.workerInstance.fromRoute(taskOptions)
-                // } else {
-                const tasks = [];
-                for (const task of tasksForThisWorker) {
-                    const pools = [];
-                    for (let pool of task.route.pools) {
+                const tasks = tasksForThisWorker.map(task => {
+                    const pools = task.route.pools.map(pool => {
                         if (worker.hasThisPoolCached(pool)) {
-                            //console.log('hasThisPoolCached', pool.id)
-                            pool = pool.id;
+                            return pool.id;
                         }
                         else {
                             const buffer = entities_1.Pool.toBuffer(pool);
                             worker.addBufferHash(pool);
-                            pool = buffer;
+                            return buffer;
                         }
-                        pools.push(pool);
-                    }
-                    task.route = entities_1.Route.toBufferAdvanced(task.route, pools);
-                    tasks.push(msgpack_lite_1.default.encode(task));
-                }
+                    });
+                    return msgpack_lite_1.default.encode(Object.assign(Object.assign({}, task), { route: entities_1.Route.toBufferAdvanced(task.route, pools) }));
+                });
                 const tasksBuffer = msgpack_lite_1.default.encode(tasks);
-                //let sizeMB = tasksBuffer.length / 1024 / 1024;
-                //console.log(`Send`, sizeMB);
-                const results = yield worker.workerInstance.fromRouteBulk(tasksBuffer);
-                //sizeMB = results.length / 1024 / 1024;
-                //console.log(`Received`, sizeMB);
-                //console.log(results)
-                const resultsArray = msgpack_lite_1.default.decode(results);
-                let i = 0;
-                for (const result of resultsArray) {
-                    const { inputAmount, outputAmount } = msgpack_lite_1.default.decode(result);
-                    if (result) {
+                const resultsBuffer = yield worker.workerInstance.fromRouteBulk(tasksBuffer);
+                const resultsArray = msgpack_lite_1.default.decode(resultsBuffer);
+                for (let i = 0; i < resultsArray.length; i++) {
+                    const { inputAmount, outputAmount } = msgpack_lite_1.default.decode(resultsArray[i]);
+                    if (resultsArray[i]) {
                         this.tokenToResults.set(tokens[i], {
                             inputAmount: entities_1.CurrencyAmount.fromBuffer(inputAmount),
                             outputAmount: entities_1.CurrencyAmount.fromBuffer(outputAmount)
                         });
                     }
-                    i++;
                 }
             }
         });

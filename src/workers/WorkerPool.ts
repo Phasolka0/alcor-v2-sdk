@@ -130,65 +130,50 @@ export class WorkerPool {
         return this.tokenToResults
     }
 
-    async workerLoop(worker: SmartWorker) {
-        while (this.tokenToTasks.size !== 0) {
-            const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 100));
-
+    async workerLoop(worker) {
+        while (this.tokenToTasks.size > 0) {
+            const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 50));
 
             const tokens = Array.from(this.tokenToTasks.keys()).slice(0, tasksPerWorker);
-            const tasksForThisWorker: any = [];
+            const tasksForThisWorker = new Array(tasksPerWorker);
 
-            for (const token of tokens) {
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
                 const taskOptions = this.tokenToTasks.get(token);
                 if (taskOptions) {
-                    tasksForThisWorker.push(taskOptions);
+                    tasksForThisWorker[i] = taskOptions;
                     this.tokenToTasks.delete(token);
                 }
             }
 
-            //console.log(taskOptions)
-            //let result
-            // if (Buffer.isBuffer(taskOptions)) {
-            //     result = await worker.workerInstance.fromRoute(taskOptions)
-            // } else {
-            const tasks: Buffer[] = []
-            for (const task of tasksForThisWorker) {
-                const pools: any[] = []
-                for (let pool of task.route.pools) {
+            const tasks = tasksForThisWorker.map(task => {
+                const pools = task.route.pools.map(pool => {
                     if (worker.hasThisPoolCached(pool)) {
-                        //console.log('hasThisPoolCached', pool.id)
-                        pool = pool.id
+                        return pool.id;
                     } else {
-                        const buffer = Pool.toBuffer(pool)
-                        worker.addBufferHash(pool)
-                        pool = buffer
+                        const buffer = Pool.toBuffer(pool);
+                        worker.addBufferHash(pool);
+                        return buffer;
                     }
-                    pools.push(pool)
-                }
+                });
 
-                task.route = Route.toBufferAdvanced(task.route, pools)
-                tasks.push(msgpack.encode(task))
-            }
-            const tasksBuffer = msgpack.encode(tasks)
-            //let sizeMB = tasksBuffer.length / 1024 / 1024;
-            //console.log(`Send`, sizeMB);
-            const results: Buffer = await worker.workerInstance.fromRouteBulk(tasksBuffer)
-            //sizeMB = results.length / 1024 / 1024;
-            //console.log(`Received`, sizeMB);
-            //console.log(results)
-            const resultsArray = msgpack.decode(results)
-            let i = 0
-            for (const result of resultsArray) {
-                const {inputAmount, outputAmount} = msgpack.decode(result)
-                if (result) {
+                return msgpack.encode({...task, route: Route.toBufferAdvanced(task.route, pools)});
+            });
+
+            const tasksBuffer = msgpack.encode(tasks);
+            const resultsBuffer = await worker.workerInstance.fromRouteBulk(tasksBuffer);
+            const resultsArray = msgpack.decode(resultsBuffer);
+
+            for (let i = 0; i < resultsArray.length; i++) {
+                const {inputAmount, outputAmount} = msgpack.decode(resultsArray[i]);
+                if (resultsArray[i]) {
                     this.tokenToResults.set(tokens[i], {
                         inputAmount: CurrencyAmount.fromBuffer(inputAmount),
                         outputAmount: CurrencyAmount.fromBuffer(outputAmount)
-                    })
+                    });
                 }
-                i++
             }
-
         }
     }
+
 }

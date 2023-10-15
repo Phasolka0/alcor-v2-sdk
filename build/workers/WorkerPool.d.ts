@@ -20,5 +20,5 @@ export declare class WorkerPool {
     addTaskJSON(taskOptions: any): void;
     updatePools(pools: Pool[]): Promise<void>;
     waitForWorkersAndReturnResult(): Promise<Map<number, any>>;
-    workerLoop(worker: SmartWorker): Promise<void>;
+    workerLoop(worker: any): Promise<void>;
 }
