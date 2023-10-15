@@ -97,7 +97,7 @@ class WorkerPool {
     }
     waitForWorkersAndReturnResult() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('tasks:', this.tokenToTasks.size);
+            //console.log('tasks:', this.tokenToTasks.size)
             this.tokenToResults = new Map();
             yield Promise.all(this.workers.map((worker) => __awaiter(this, void 0, void 0, function* () {
                 yield this.workerLoop(worker);

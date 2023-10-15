@@ -797,10 +797,10 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
             //const optionsBuffer = msgpack.encode(optionsJSON);
             //workerPool.addTaskBuffer(optionsBuffer)
         }
-        console.log('prepare tasks', performance.now() - serializationStart)
-        const workersStart = performance.now()
+        //console.log('prepare tasks', performance.now() - serializationStart)
+        //const workersStart = performance.now()
         const results = await workerPool.waitForWorkersAndReturnResult()
-        console.log('workers summary', performance.now() - workersStart)
+        //console.log('workers summary', performance.now() - workersStart)
 
         const mainThreadPostWorkStart = performance.now()
         const bestResult: any = {}
@@ -824,15 +824,15 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
         }
         bestResult.route = routes[bestResult.routeId]
-        console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart)
+        //console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart)
 
-        const finallyTradeStart = performance.now()
+        //const finallyTradeStart = performance.now()
         const finallyTrade = Trade.fromRoute(
             routes[bestResult.routeId],
             currencyAmount,
             tradeType
         )
-        console.log('finallyTrade', performance.now() - finallyTradeStart)
+        //console.log('finallyTrade', performance.now() - finallyTradeStart)
         return finallyTrade
     }
 }

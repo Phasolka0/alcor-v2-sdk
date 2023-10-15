@@ -122,7 +122,7 @@ export class WorkerPool {
     }
 
     async waitForWorkersAndReturnResult() {
-        console.log('tasks:', this.tokenToTasks.size)
+        //console.log('tasks:', this.tokenToTasks.size)
         this.tokenToResults = new Map()
         await Promise.all(this.workers.map(async worker => {
             await this.workerLoop(worker)

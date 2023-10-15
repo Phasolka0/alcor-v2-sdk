@@ -538,10 +538,10 @@ class Trade {
                 //const optionsBuffer = msgpack.encode(optionsJSON);
                 //workerPool.addTaskBuffer(optionsBuffer)
             }
-            console.log('prepare tasks', performance.now() - serializationStart);
-            const workersStart = performance.now();
+            //console.log('prepare tasks', performance.now() - serializationStart)
+            //const workersStart = performance.now()
             const results = yield workerPool.waitForWorkersAndReturnResult();
-            console.log('workers summary', performance.now() - workersStart);
+            //console.log('workers summary', performance.now() - workersStart)
             const mainThreadPostWorkStart = performance.now();
             const bestResult = {};
             const isExactIn = tradeType === internalConstants_1.TradeType.EXACT_INPUT;
@@ -564,10 +564,10 @@ class Trade {
                 }
             }
             bestResult.route = routes[bestResult.routeId];
-            console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart);
-            const finallyTradeStart = performance.now();
+            //console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart)
+            //const finallyTradeStart = performance.now()
             const finallyTrade = Trade.fromRoute(routes[bestResult.routeId], currencyAmount, tradeType);
-            console.log('finallyTrade', performance.now() - finallyTradeStart);
+            //console.log('finallyTrade', performance.now() - finallyTradeStart)
             return finallyTrade;
         });
     }
