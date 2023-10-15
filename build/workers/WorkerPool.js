@@ -89,8 +89,8 @@ class WorkerPool {
                 }
                 const allPoolsBuffer = msgpack_lite_1.default.encode(poolsToWorker);
                 yield worker.workerInstance.loadPools(allPoolsBuffer);
-                const sizeMB = allPoolsBuffer.length / 1024 / 1024;
-                console.log(`Send`, sizeMB);
+                //const sizeMB = allPoolsBuffer.length / 1024 / 1024;
+                //console.log(`Send`, sizeMB);
             })));
             console.log('Workers pools updated for', Date.now() - startTime);
         });
@@ -142,11 +142,11 @@ class WorkerPool {
                     tasks.push(msgpack_lite_1.default.encode(task));
                 }
                 const tasksBuffer = msgpack_lite_1.default.encode(tasks);
-                let sizeMB = tasksBuffer.length / 1024 / 1024;
-                console.log(`Send`, sizeMB);
+                //let sizeMB = tasksBuffer.length / 1024 / 1024;
+                //console.log(`Send`, sizeMB);
                 const results = yield worker.workerInstance.fromRouteBulk(tasksBuffer);
-                sizeMB = results.length / 1024 / 1024;
-                console.log(`Received`, sizeMB);
+                //sizeMB = results.length / 1024 / 1024;
+                //console.log(`Received`, sizeMB);
                 //console.log(results)
                 const resultsArray = msgpack_lite_1.default.decode(results);
                 let i = 0;

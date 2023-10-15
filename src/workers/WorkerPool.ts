@@ -114,8 +114,8 @@ export class WorkerPool {
             const allPoolsBuffer = msgpack.encode(poolsToWorker)
             await worker.workerInstance.loadPools(allPoolsBuffer)
 
-            const sizeMB = allPoolsBuffer.length / 1024 / 1024;
-            console.log(`Send`, sizeMB);
+            //const sizeMB = allPoolsBuffer.length / 1024 / 1024;
+            //console.log(`Send`, sizeMB);
 
         }))
         console.log('Workers pools updated for', Date.now() - startTime)
@@ -170,11 +170,11 @@ export class WorkerPool {
                 tasks.push(msgpack.encode(task))
             }
             const tasksBuffer = msgpack.encode(tasks)
-            let sizeMB = tasksBuffer.length / 1024 / 1024;
-            console.log(`Send`, sizeMB);
+            //let sizeMB = tasksBuffer.length / 1024 / 1024;
+            //console.log(`Send`, sizeMB);
             const results: Buffer = await worker.workerInstance.fromRouteBulk(tasksBuffer)
-            sizeMB = results.length / 1024 / 1024;
-            console.log(`Received`, sizeMB);
+            //sizeMB = results.length / 1024 / 1024;
+            //console.log(`Received`, sizeMB);
             //console.log(results)
             const resultsArray = msgpack.decode(results)
             let i = 0
