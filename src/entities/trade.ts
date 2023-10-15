@@ -785,8 +785,6 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
             console.warn('workerPool is not initialized, single-threaded version is used.' +
                 '\n use "await Trade.initWorkerPool()" for multi-threaded')
             return this.bestTradeSingleThread(routes, pools, currencyAmountIn, tradeType)
-
-
         }
 
         invariant(pools.length > 0, 'POOLS')
@@ -802,7 +800,6 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
                 tradeType
             }
             workerPool.addTaskJSON(optionsJSON)
-
             //const optionsBuffer = msgpack.encode(optionsJSON);
             //workerPool.addTaskBuffer(optionsBuffer)
         }
@@ -813,15 +810,24 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
         const mainThreadPostWorkStart = performance.now()
         const bestResult: any = {}
+        const isExactIn = tradeType === TradeType.EXACT_INPUT
         for (const [index, value] of results) {
             if (!bestResult.amounts) {
                 bestResult.amounts = value
                 bestResult.routeId = index
             }
-            if (bestResult.amounts.outputAmount.lessThan(value.outputAmount)) {
-                bestResult.amounts = value
-                bestResult.routeId = index
+            if (isExactIn) {
+                if (bestResult.amounts.outputAmount.lessThan(value.outputAmount)) {
+                    bestResult.amounts = value
+                    bestResult.routeId = index
+                }
+            } else {
+                if (value.outputAmount.lessThan(bestResult.amounts.outputAmount)) {
+                    bestResult.amounts = value
+                    bestResult.routeId = index
+                }
             }
+
         }
         bestResult.route = routes[bestResult.routeId]
         console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart)

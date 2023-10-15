@@ -543,14 +543,23 @@ class Trade {
             console.log('workers summary', performance.now() - workersStart);
             const mainThreadPostWorkStart = performance.now();
             const bestResult = {};
+            const isExactIn = tradeType === internalConstants_1.TradeType.EXACT_INPUT;
             for (const [index, value] of results) {
                 if (!bestResult.amounts) {
                     bestResult.amounts = value;
                     bestResult.routeId = index;
                 }
-                if (bestResult.amounts.outputAmount.lessThan(value.outputAmount)) {
-                    bestResult.amounts = value;
-                    bestResult.routeId = index;
+                if (isExactIn) {
+                    if (bestResult.amounts.outputAmount.lessThan(value.outputAmount)) {
+                        bestResult.amounts = value;
+                        bestResult.routeId = index;
+                    }
+                }
+                else {
+                    if (value.outputAmount.lessThan(bestResult.amounts.outputAmount)) {
+                        bestResult.amounts = value;
+                        bestResult.routeId = index;
+                    }
                 }
             }
             bestResult.route = routes[bestResult.routeId];
