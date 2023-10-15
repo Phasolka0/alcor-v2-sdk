@@ -2,8 +2,6 @@ import {spawn, Worker} from 'threads';
 import {CurrencyAmount, Pool, Route} from "../entities";
 import msgpack from "msgpack-lite";
 
-const threadsCount = 16
-
 export class SmartWorker {
     id: number
     workerInstance: any

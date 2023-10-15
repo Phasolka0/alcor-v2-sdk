@@ -16,7 +16,6 @@ exports.WorkerPool = exports.SmartWorker = void 0;
 const threads_1 = require("threads");
 const entities_1 = require("../entities");
 const msgpack_lite_1 = __importDefault(require("msgpack-lite"));
-const threadsCount = 16;
 class SmartWorker {
     constructor(id, workerInstance) {
         //hashStorage: Set<string> = new Set()

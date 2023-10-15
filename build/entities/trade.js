@@ -509,7 +509,7 @@ class Trade {
         }
         return bestTrades[0];
     }
-    static initWorkerPool(threadsCount = 8) {
+    static initWorkerPool(threadsCount = 7) {
         return __awaiter(this, void 0, void 0, function* () {
             this.workerPool = yield WorkerPool_1.WorkerPool.create(threadsCount);
             console.log('Pool started with', threadsCount, 'workers');

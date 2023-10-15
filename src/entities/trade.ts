@@ -761,7 +761,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         return bestTrades[0]
     }
 
-    public static async initWorkerPool(threadsCount = 8) {
+    public static async initWorkerPool(threadsCount = 7) {
         this.workerPool = await WorkerPool.create(threadsCount)
         console.log('Pool started with', threadsCount, 'workers')
     }
