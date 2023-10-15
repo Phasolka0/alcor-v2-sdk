@@ -501,8 +501,7 @@ class Trade {
         const bestTrades = [];
         for (const route of routes) {
             const trade = Trade.fromRoute(route, currencyAmountIn, tradeType);
-            if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
-                continue;
+            //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
             (0, utils_1.sortedInsert)(bestTrades, trade, 1, tradeComparator);
         }
         return bestTrades[0];
@@ -513,18 +512,18 @@ class Trade {
             console.log('Pool started with', threadsCount, 'workers');
         });
     }
-    static bestTradeMultiThreads(routes, pools, currencyAmountIn, tradeType) {
+    static bestTradeMultiThreads(routes, pools, currencyAmount, tradeType) {
         return __awaiter(this, void 0, void 0, function* () {
             const workerPool = this.workerPool;
             if (!workerPool) {
                 console.warn('workerPool is not initialized, single-threaded version is used.' +
                     '\n use "await Trade.initWorkerPool()" for multi-threaded');
-                return this.bestTradeSingleThread(routes, pools, currencyAmountIn, tradeType);
+                return this.bestTradeSingleThread(routes, pools, currencyAmount, tradeType);
             }
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             (0, tiny_invariant_1.default)(routes.length > 0, 'ROUTES');
             const serializationStart = performance.now();
-            const amountInBuffer = fractions_1.CurrencyAmount.toBuffer(currencyAmountIn);
+            const amountInBuffer = fractions_1.CurrencyAmount.toBuffer(currencyAmount);
             //console.log('routesCount:', routes.length)
             for (const route of routes) {
                 const optionsJSON = {
@@ -564,7 +563,7 @@ class Trade {
             bestResult.route = routes[bestResult.routeId];
             console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart);
             const finallyTradeStart = performance.now();
-            const finallyTrade = Trade.fromRoute(routes[bestResult.routeId], currencyAmountIn, tradeType);
+            const finallyTrade = Trade.fromRoute(routes[bestResult.routeId], currencyAmount, tradeType);
             console.log('finallyTrade', performance.now() - finallyTradeStart);
             return finallyTrade;
         });

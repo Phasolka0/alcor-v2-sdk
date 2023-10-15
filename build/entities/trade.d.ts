@@ -224,5 +224,5 @@ export declare class Trade<TInput extends Currency, TOutput extends Currency, TT
     static bestTradeExactOut<TInput extends Currency, TOutput extends Currency>(pools: Pool[], currencyIn: TInput, currencyAmountOut: CurrencyAmount<TOutput>, { maxNumResults, maxHops }?: BestTradeOptions, currentPools?: Pool[], nextAmountOut?: CurrencyAmount<Currency>, bestTrades?: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[]): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[];
     static bestTradeSingleThread<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>, tradeType: TradeType): Trade<TInput, TOutput, TradeType>;
     static initWorkerPool(threadsCount?: number): Promise<void>;
-    static bestTradeMultiThreads<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>, tradeType: TradeType): Promise<Trade<TInput, TOutput, TradeType>>;
+    static bestTradeMultiThreads<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmount: CurrencyAmount<TInput>, tradeType: TradeType): Promise<Trade<TInput, TOutput, TradeType>>;
 }

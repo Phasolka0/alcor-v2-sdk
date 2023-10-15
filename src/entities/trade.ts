@@ -753,7 +753,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
                 tradeType
             )
 
-            if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+            //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
 
             sortedInsert(
                 bestTrades,
@@ -774,7 +774,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     public static async bestTradeMultiThreads<TInput extends Currency, TOutput extends Currency>(
         routes: Route<TInput, TOutput>[],
         pools: Pool[],
-        currencyAmountIn: CurrencyAmount<TInput>,
+        currencyAmount: CurrencyAmount<TInput>,
         tradeType: TradeType
     ): Promise<Trade<TInput, TOutput, TradeType>> {
 
@@ -783,14 +783,14 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         if (!workerPool) {
             console.warn('workerPool is not initialized, single-threaded version is used.' +
                 '\n use "await Trade.initWorkerPool()" for multi-threaded')
-            return this.bestTradeSingleThread(routes, pools, currencyAmountIn, tradeType)
+            return this.bestTradeSingleThread(routes, pools, currencyAmount, tradeType)
         }
 
         invariant(pools.length > 0, 'POOLS')
         invariant(routes.length > 0, 'ROUTES')
 
         const serializationStart = performance.now()
-        const amountInBuffer = CurrencyAmount.toBuffer(currencyAmountIn)
+        const amountInBuffer = CurrencyAmount.toBuffer(currencyAmount)
         //console.log('routesCount:', routes.length)
         for (const route of routes) {
             const optionsJSON = {
@@ -834,7 +834,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         const finallyTradeStart = performance.now()
         const finallyTrade = Trade.fromRoute(
             routes[bestResult.routeId],
-            currencyAmountIn,
+            currencyAmount,
             tradeType
         )
         console.log('finallyTrade', performance.now() - finallyTradeStart)
