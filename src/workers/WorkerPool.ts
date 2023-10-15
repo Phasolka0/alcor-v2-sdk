@@ -128,7 +128,7 @@ export class WorkerPool {
         return this.tokenToResults
     }
 
-    async workerLoop(worker) {
+    async workerLoop(worker: SmartWorker) {
         while (this.tokenToTasks.size > 0) {
             const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 50));
 
@@ -158,8 +158,8 @@ export class WorkerPool {
                 return msgpack.encode({...task, route: Route.toBufferAdvanced(task.route, pools)});
             });
 
-            //const tasksBuffer = msgpack.encode(tasks);
-            const resultsBuffer = await worker.workerInstance.fromRouteBulk(tasks);
+            const tasksBuffer = msgpack.encode(tasks);
+            const resultsBuffer = await worker.workerInstance.fromRouteBulk(tasksBuffer);
             const resultsArray = msgpack.decode(resultsBuffer);
 
             for (let i = 0; i < resultsArray.length; i++) {
