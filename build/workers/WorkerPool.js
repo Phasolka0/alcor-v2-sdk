@@ -97,6 +97,7 @@ class WorkerPool {
     }
     waitForWorkersAndReturnResult() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('tasks:', this.tokenToTasks.size);
             this.tokenToResults = new Map();
             yield Promise.all(this.workers.map((worker) => __awaiter(this, void 0, void 0, function* () {
                 yield this.workerLoop(worker);
@@ -107,7 +108,7 @@ class WorkerPool {
     workerLoop(worker) {
         return __awaiter(this, void 0, void 0, function* () {
             while (this.tokenToTasks.size !== 0) {
-                const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 50));
+                const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 100));
                 const tokens = Array.from(this.tokenToTasks.keys()).slice(0, tasksPerWorker);
                 const tasksForThisWorker = [];
                 for (const token of tokens) {

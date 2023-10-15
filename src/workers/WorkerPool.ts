@@ -122,6 +122,7 @@ export class WorkerPool {
     }
 
     async waitForWorkersAndReturnResult() {
+        console.log('tasks:', this.tokenToTasks.size)
         this.tokenToResults = new Map()
         await Promise.all(this.workers.map(async worker => {
             await this.workerLoop(worker)
@@ -131,7 +132,7 @@ export class WorkerPool {
 
     async workerLoop(worker: SmartWorker) {
         while (this.tokenToTasks.size !== 0) {
-            const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 50));
+            const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 100));
 
 
             const tokens = Array.from(this.tokenToTasks.keys()).slice(0, tasksPerWorker);
