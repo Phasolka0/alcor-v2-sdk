@@ -25,9 +25,10 @@ function fromRoute(optionsBuffer) {
         console.log(e);
     }
 }
-function fromRouteBulk(optinsBulk) {
+function fromRouteBulk(buffer) {
+    const tasksArray = msgpack_lite_1.default.decode(buffer);
     const results = [];
-    for (const optionsBuffer of optinsBulk) {
+    for (const optionsBuffer of tasksArray) {
         results.push(fromRoute(optionsBuffer));
     }
     const resultsBuffer = msgpack_lite_1.default.encode(results);

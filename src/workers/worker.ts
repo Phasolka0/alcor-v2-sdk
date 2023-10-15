@@ -22,9 +22,10 @@ function fromRoute(optionsBuffer: Buffer) {
     }
 }
 
-function fromRouteBulk(optinsBulk: Buffer[]) {
+function fromRouteBulk(buffer: Buffer) {
+    const tasksArray = msgpack.decode(buffer)
     const results: any = []
-    for (const optionsBuffer of optinsBulk) {
+    for (const optionsBuffer of tasksArray) {
         results.push(fromRoute(optionsBuffer))
     }
     const resultsBuffer = msgpack.encode(results)
