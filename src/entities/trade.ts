@@ -822,7 +822,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
                     bestResult.routeId = index
                 }
             } else {
-                if (value.outputAmount.lessThan(bestResult.amounts.outputAmount)) {
+                if (value.inputAmount.lessThan(bestResult.amounts.inputAmount)) {
                     bestResult.amounts = value
                     bestResult.routeId = index
                 }

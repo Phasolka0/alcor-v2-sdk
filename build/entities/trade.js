@@ -556,7 +556,7 @@ class Trade {
                     }
                 }
                 else {
-                    if (value.outputAmount.lessThan(bestResult.amounts.outputAmount)) {
+                    if (value.inputAmount.lessThan(bestResult.amounts.inputAmount)) {
                         bestResult.amounts = value;
                         bestResult.routeId = index;
                     }

@@ -7,7 +7,6 @@ function fromRoute(optionsBuffer: Buffer) {
         const optionsJSON = msgpack.decode(optionsBuffer);
         const route = Route.fromBuffer(optionsJSON.route);
         const amount = CurrencyAmount.fromBuffer(optionsJSON.amount);
-        //console.log({route, amount, tradeType});
 
 
         const {inputAmount, outputAmount} = Trade.fromRouteForWorkers(route, amount, optionsJSON.tradeType);
