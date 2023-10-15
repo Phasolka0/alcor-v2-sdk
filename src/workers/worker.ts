@@ -33,11 +33,13 @@ function fromRouteBulk(optinsBulk: Buffer[]) {
 
 function loadPools(poolsBuffer: Buffer) {
     const poolsArray = msgpack.decode(poolsBuffer)
-    const pools: Pool[] = poolsArray.map((poolBuffer: Buffer) => Pool.fromBuffer(poolBuffer))
+    const pools: Pool[] = poolsArray.map((poolBuffer: Buffer) => {
+
+        return Pool.fromBuffer(poolBuffer)
+    })
     for (const pool of pools) {
         Pool.idToPoolMap.set(pool.id, pool)
     }
-
 }
 
 

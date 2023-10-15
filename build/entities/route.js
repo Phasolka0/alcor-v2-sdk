@@ -108,7 +108,7 @@ class Route {
     static toBufferAdvanced(route, pools) {
         const json = {
             pools: pools.map(pool => {
-                if (typeof pool === 'number') {
+                if (typeof pool === 'number' || Buffer.isBuffer(pool)) {
                     return pool;
                 }
                 else {

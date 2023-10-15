@@ -101,8 +101,17 @@ export class WorkerPool {
 
     async updatePools(pools: Pool[]) {
         const startTime = Date.now()
-        const allPoolsBuffer = msgpack.encode(pools.map(pool => Pool.toBuffer(pool)))
+        //const allPoolsBuffer = msgpack.encode(pools.map(pool => Pool.toBuffer(pool)))
         await Promise.all(this.workers.map(async worker => {
+            const poolsToWorker: any[] = []
+            for (const pool of pools) {
+                if (!worker.hasThisPoolCached(pool)) {
+                    const buffer = Pool.toBuffer(pool)
+                    worker.addBufferHash(pool)
+                    poolsToWorker.push(buffer)
+                }
+            }
+            const allPoolsBuffer = msgpack.encode(poolsToWorker)
             await worker.workerInstance.loadPools(allPoolsBuffer)
         }))
         console.log('Workers pools updated for', Date.now() - startTime)
@@ -146,9 +155,8 @@ export class WorkerPool {
                         pool = pool.id
                     } else {
                         const buffer = Pool.toBuffer(pool)
-                        const bufferHash = pool.bufferHash
                         worker.addBufferHash(pool)
-                        pool = {buffer, bufferHash}
+                        pool = buffer
                     }
                     pools.push(pool)
                 }

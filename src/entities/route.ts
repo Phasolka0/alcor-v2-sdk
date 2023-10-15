@@ -1,10 +1,10 @@
 import invariant from 'tiny-invariant'
 
-import { Currency } from './currency'
-import { Price } from './fractions'
-import { Token } from './token'
+import {Currency} from './currency'
+import {Price} from './fractions'
+import {Token} from './token'
 
-import { Pool } from './pool'
+import {Pool} from './pool'
 import msgpack from "msgpack-lite";
 
 /**
@@ -13,75 +13,75 @@ import msgpack from "msgpack-lite";
  * @template TOutput The output token
  */
 export class Route<TInput extends Currency, TOutput extends Currency> {
-  public readonly pools: Pool[]
-  public readonly tokenPath: Token[]
-  public readonly input: TInput
-  public readonly output: TOutput
+    public readonly pools: Pool[]
+    public readonly tokenPath: Token[]
+    public readonly input: TInput
+    public readonly output: TOutput
 
-  private _midPrice: Price<TInput, TOutput> | null = null
-
-  /**
-   * Creates an instance of route.
-   * @param pools An array of `Pool` objects, ordered by the route the swap will take
-   * @param input The input token
-   * @param output The output token
-   */
-  public constructor(pools: Pool[], input: TInput, output: TOutput) {
-    invariant(pools.length > 0, 'POOLS')
-
-    const wrappedInput = input
-    invariant(pools[0].involvesToken(wrappedInput), 'INPUT')
-
-    invariant(pools[pools.length - 1].involvesToken(output), 'OUTPUT')
+    private _midPrice: Price<TInput, TOutput> | null = null
 
     /**
-     * Normalizes tokenA-tokenB order and selects the next token/fee step to add to the path
-     * */
-    const tokenPath: Token[] = [wrappedInput]
-    for (const [i, pool] of pools.entries()) {
-      const currentInputToken = tokenPath[i]
-      invariant(currentInputToken.equals(pool.tokenA) || currentInputToken.equals(pool.tokenB), 'PATH')
-      const nextToken = currentInputToken.equals(pool.tokenA) ? pool.tokenB : pool.tokenA
-      tokenPath.push(nextToken)
+     * Creates an instance of route.
+     * @param pools An array of `Pool` objects, ordered by the route the swap will take
+     * @param input The input token
+     * @param output The output token
+     */
+    public constructor(pools: Pool[], input: TInput, output: TOutput) {
+        invariant(pools.length > 0, 'POOLS')
+
+        const wrappedInput = input
+        invariant(pools[0].involvesToken(wrappedInput), 'INPUT')
+
+        invariant(pools[pools.length - 1].involvesToken(output), 'OUTPUT')
+
+        /**
+         * Normalizes tokenA-tokenB order and selects the next token/fee step to add to the path
+         * */
+        const tokenPath: Token[] = [wrappedInput]
+        for (const [i, pool] of pools.entries()) {
+            const currentInputToken = tokenPath[i]
+            invariant(currentInputToken.equals(pool.tokenA) || currentInputToken.equals(pool.tokenB), 'PATH')
+            const nextToken = currentInputToken.equals(pool.tokenA) ? pool.tokenB : pool.tokenA
+            tokenPath.push(nextToken)
+        }
+
+        this.pools = pools
+        this.tokenPath = tokenPath
+        this.input = input
+        this.output = output ?? tokenPath[tokenPath.length - 1]
     }
 
-    this.pools = pools
-    this.tokenPath = tokenPath
-    this.input = input
-    this.output = output ?? tokenPath[tokenPath.length - 1]
-  }
+    /**
+     * Returns the mid price of the route
+     */
+    public get midPrice(): Price<TInput, TOutput> {
+        if (this._midPrice !== null) return this._midPrice
 
-  /**
-   * Returns the mid price of the route
-   */
-  public get midPrice(): Price<TInput, TOutput> {
-    if (this._midPrice !== null) return this._midPrice
+        const price = this.pools.slice(1).reduce(
+            ({nextInput, price}, pool) => {
+                return nextInput.equals(pool.tokenA)
+                    ? {
+                        nextInput: pool.tokenB,
+                        price: price.multiply(pool.tokenAPrice)
+                    }
+                    : {
+                        nextInput: pool.tokenA,
+                        price: price.multiply(pool.tokenBPrice)
+                    }
+            },
+            this.pools[0].tokenA.equals(this.input)
+                ? {
+                    nextInput: this.pools[0].tokenB,
+                    price: this.pools[0].tokenAPrice
+                }
+                : {
+                    nextInput: this.pools[0].tokenA,
+                    price: this.pools[0].tokenBPrice
+                }
+        ).price
 
-    const price = this.pools.slice(1).reduce(
-      ({ nextInput, price }, pool) => {
-        return nextInput.equals(pool.tokenA)
-          ? {
-              nextInput: pool.tokenB,
-              price: price.multiply(pool.tokenAPrice)
-            }
-          : {
-              nextInput: pool.tokenA,
-              price: price.multiply(pool.tokenBPrice)
-            }
-      },
-      this.pools[0].tokenA.equals(this.input)
-        ? {
-            nextInput: this.pools[0].tokenB,
-            price: this.pools[0].tokenAPrice
-          }
-        : {
-            nextInput: this.pools[0].tokenA,
-            price: this.pools[0].tokenBPrice
-          }
-    ).price
-
-    return (this._midPrice = new Price(this.input, this.output, price.denominator, price.numerator))
-  }
+        return (this._midPrice = new Price(this.input, this.output, price.denominator, price.numerator))
+    }
 
     static toJSON(route: Route<Currency, Currency>, lightWeightVersion = false) {
         return {
@@ -98,6 +98,7 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
             _midPrice: route._midPrice,
         }
     }
+
     static fromJSON(json: any) {
         const pools = json.pools.map(pool => {
             if (typeof pool === 'number') {
@@ -112,17 +113,19 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
     }
 
     static toBuffer(route: Route<Currency, Currency>, lightWeightVersion = false) {
-      const json = this.toJSON(route, lightWeightVersion);
-      return msgpack.encode(json);
+        const json = this.toJSON(route, lightWeightVersion);
+        return msgpack.encode(json);
     }
+
     static fromBuffer(buffer: Buffer) {
         const json = msgpack.decode(buffer);
         return this.fromJSON(json);
     }
+
     static toBufferAdvanced(route: Route<Currency, Currency>, pools: any[]) {
         const json = {
             pools: pools.map(pool => {
-                if (typeof pool === 'number') {
+                if (typeof pool === 'number' || Buffer.isBuffer(pool)) {
                     return pool
                 } else {
                     return Pool.toBuffer(pool)
@@ -135,7 +138,6 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
         }
         return msgpack.encode(json);
     }
-
 
 
     public equals(other: Route<Currency, Currency>): boolean {

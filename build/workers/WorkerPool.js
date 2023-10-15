@@ -77,8 +77,17 @@ class WorkerPool {
     updatePools(pools) {
         return __awaiter(this, void 0, void 0, function* () {
             const startTime = Date.now();
-            const allPoolsBuffer = msgpack_lite_1.default.encode(pools.map(pool => entities_1.Pool.toBuffer(pool)));
+            //const allPoolsBuffer = msgpack.encode(pools.map(pool => Pool.toBuffer(pool)))
             yield Promise.all(this.workers.map((worker) => __awaiter(this, void 0, void 0, function* () {
+                const poolsToWorker = [];
+                for (const pool of pools) {
+                    if (!worker.hasThisPoolCached(pool)) {
+                        const buffer = entities_1.Pool.toBuffer(pool);
+                        worker.addBufferHash(pool);
+                        poolsToWorker.push(buffer);
+                    }
+                }
+                const allPoolsBuffer = msgpack_lite_1.default.encode(poolsToWorker);
                 yield worker.workerInstance.loadPools(allPoolsBuffer);
             })));
             console.log('Workers pools updated for', Date.now() - startTime);
@@ -121,9 +130,8 @@ class WorkerPool {
                         }
                         else {
                             const buffer = entities_1.Pool.toBuffer(pool);
-                            const bufferHash = pool.bufferHash;
                             worker.addBufferHash(pool);
-                            pool = { buffer, bufferHash };
+                            pool = buffer;
                         }
                         pools.push(pool);
                     }
