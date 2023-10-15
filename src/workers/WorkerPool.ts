@@ -1,6 +1,7 @@
 import {spawn, Worker} from 'threads';
 import {CurrencyAmount, Pool, Route} from "../entities";
 import msgpack from "msgpack-lite";
+
 const threadsCount = 16
 
 export class SmartWorker {
@@ -9,10 +10,11 @@ export class SmartWorker {
 
     workTimeHistory: Array<number>
     endWorkTime: number
-    
+
     //hashStorage: Set<string> = new Set()
     idToHash: Map<number, string> = new Map()
-    constructor(id: number, workerInstance: any, ) {
+
+    constructor(id: number, workerInstance: any,) {
         this.id = id;
         this.workerInstance = workerInstance;
         this.workTimeHistory = []
@@ -23,6 +25,7 @@ export class SmartWorker {
         const workerInstance = await spawn(new Worker(workerScript));
         return new SmartWorker(id, workerInstance);
     }
+
     hasThisPoolCached(pool: Pool) {
         const {bufferHash, id} = pool
         if (this.idToHash.has(id)) {
@@ -31,6 +34,7 @@ export class SmartWorker {
         }
         return false
     }
+
     addBufferHash(pool: Pool) {
         const {bufferHash, id} = pool
         //this.hashStorage.add(bufferHash)
@@ -75,6 +79,7 @@ export class WorkerPool {
     tokenToTasks: Map<number, any> = new Map()
     initializedTokens = false
     workers: Array<SmartWorker> = []
+
     constructor() {
         this.initializedTokens = false
     }
@@ -87,12 +92,13 @@ export class WorkerPool {
         return instance;
     }
 
-    addTaskBuffer(taskOptions: Buffer) {
-        this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
-    }
+    // addTaskBuffer(taskOptions: Buffer) {
+    //     this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
+    // }
     addTaskJSON(taskOptions: any) {
         this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
     }
+
     async updatePools(pools: Pool[]) {
         const startTime = Date.now()
         const allPoolsBuffer = msgpack.encode(pools.map(pool => Pool.toBuffer(pool)))
@@ -112,17 +118,29 @@ export class WorkerPool {
 
     async workerLoop(worker: SmartWorker) {
         while (this.tokenToTasks.size !== 0) {
-            const token = this.tokenToTasks.keys().next().value;
-            const taskOptions = this.tokenToTasks.get(token)
-            if (!taskOptions) break
-            this.tokenToTasks.delete(token)
+            const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 50));
+
+
+            const tokens = Array.from(this.tokenToTasks.keys()).slice(0, tasksPerWorker);
+            const tasksForThisWorker: any = [];
+
+            for (const token of tokens) {
+                const taskOptions = this.tokenToTasks.get(token);
+                if (taskOptions) {
+                    tasksForThisWorker.push(taskOptions);
+                    this.tokenToTasks.delete(token);
+                }
+            }
+
             //console.log(taskOptions)
-            let result
-            if (Buffer.isBuffer(taskOptions)) {
-                result = await worker.workerInstance.fromRoute(taskOptions)
-            } else {
+            //let result
+            // if (Buffer.isBuffer(taskOptions)) {
+            //     result = await worker.workerInstance.fromRoute(taskOptions)
+            // } else {
+            const tasks: Buffer[] = []
+            for (const task of tasksForThisWorker) {
                 const pools: any[] = []
-                for (let pool of taskOptions.route.pools) {
+                for (let pool of task.route.pools) {
                     if (worker.hasThisPoolCached(pool)) {
                         //console.log('hasThisPoolCached', pool.id)
                         pool = pool.id
@@ -135,18 +153,24 @@ export class WorkerPool {
                     pools.push(pool)
                 }
 
-                taskOptions.route = Route.toBufferAdvanced(taskOptions.route, pools)
-                const taskBuffer= msgpack.encode(taskOptions)
-                result = await worker.workerInstance.fromRoute(taskBuffer)
+                task.route = Route.toBufferAdvanced(task.route, pools)
+                tasks.push(msgpack.encode(task))
             }
-            
-            const {inputAmount, outputAmount} = msgpack.decode(result)
-            if (result) {
-                this.tokenToResults.set(token, {
-                    inputAmount: CurrencyAmount.fromBuffer(inputAmount),
-                    outputAmount: CurrencyAmount.fromBuffer(outputAmount)
-                })
+            const results: Buffer = await worker.workerInstance.fromRouteBulk(tasks)
+            console.log(results)
+            const resultsArray = msgpack.decode(results)
+            let i = 0
+            for (const result of resultsArray) {
+                const {inputAmount, outputAmount} = msgpack.decode(result)
+                if (result) {
+                    this.tokenToResults.set(tokens[i], {
+                        inputAmount: CurrencyAmount.fromBuffer(inputAmount),
+                        outputAmount: CurrencyAmount.fromBuffer(outputAmount)
+                    })
+                }
+                i++
             }
+
         }
     }
 }

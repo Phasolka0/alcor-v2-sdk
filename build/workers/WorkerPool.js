@@ -68,9 +68,9 @@ class WorkerPool {
             return instance;
         });
     }
-    addTaskBuffer(taskOptions) {
-        this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
-    }
+    // addTaskBuffer(taskOptions: Buffer) {
+    //     this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
+    // }
     addTaskJSON(taskOptions) {
         this.tokenToTasks.set(this.tokenToTasks.size, taskOptions);
     }
@@ -96,19 +96,25 @@ class WorkerPool {
     workerLoop(worker) {
         return __awaiter(this, void 0, void 0, function* () {
             while (this.tokenToTasks.size !== 0) {
-                const token = this.tokenToTasks.keys().next().value;
-                const taskOptions = this.tokenToTasks.get(token);
-                if (!taskOptions)
-                    break;
-                this.tokenToTasks.delete(token);
-                //console.log(taskOptions)
-                let result;
-                if (Buffer.isBuffer(taskOptions)) {
-                    result = yield worker.workerInstance.fromRoute(taskOptions);
+                const tasksPerWorker = Math.max(1, Math.min(Math.floor(this.tokenToTasks.size / this.workers.length), 50));
+                const tokens = Array.from(this.tokenToTasks.keys()).slice(0, tasksPerWorker);
+                const tasksForThisWorker = [];
+                for (const token of tokens) {
+                    const taskOptions = this.tokenToTasks.get(token);
+                    if (taskOptions) {
+                        tasksForThisWorker.push(taskOptions);
+                        this.tokenToTasks.delete(token);
+                    }
                 }
-                else {
+                //console.log(taskOptions)
+                //let result
+                // if (Buffer.isBuffer(taskOptions)) {
+                //     result = await worker.workerInstance.fromRoute(taskOptions)
+                // } else {
+                const tasks = [];
+                for (const task of tasksForThisWorker) {
                     const pools = [];
-                    for (let pool of taskOptions.route.pools) {
+                    for (let pool of task.route.pools) {
                         if (worker.hasThisPoolCached(pool)) {
                             //console.log('hasThisPoolCached', pool.id)
                             pool = pool.id;
@@ -121,16 +127,22 @@ class WorkerPool {
                         }
                         pools.push(pool);
                     }
-                    taskOptions.route = entities_1.Route.toBufferAdvanced(taskOptions.route, pools);
-                    const taskBuffer = msgpack_lite_1.default.encode(taskOptions);
-                    result = yield worker.workerInstance.fromRoute(taskBuffer);
+                    task.route = entities_1.Route.toBufferAdvanced(task.route, pools);
+                    tasks.push(msgpack_lite_1.default.encode(task));
                 }
-                const { inputAmount, outputAmount } = msgpack_lite_1.default.decode(result);
-                if (result) {
-                    this.tokenToResults.set(token, {
-                        inputAmount: entities_1.CurrencyAmount.fromBuffer(inputAmount),
-                        outputAmount: entities_1.CurrencyAmount.fromBuffer(outputAmount)
-                    });
+                const results = yield worker.workerInstance.fromRouteBulk(tasks);
+                console.log(results);
+                const resultsArray = msgpack_lite_1.default.decode(results);
+                let i = 0;
+                for (const result of resultsArray) {
+                    const { inputAmount, outputAmount } = msgpack_lite_1.default.decode(result);
+                    if (result) {
+                        this.tokenToResults.set(tokens[i], {
+                            inputAmount: entities_1.CurrencyAmount.fromBuffer(inputAmount),
+                            outputAmount: entities_1.CurrencyAmount.fromBuffer(outputAmount)
+                        });
+                    }
+                    i++;
                 }
             }
         });

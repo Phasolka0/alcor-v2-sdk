@@ -25,6 +25,14 @@ function fromRoute(optionsBuffer) {
         console.log(e);
     }
 }
+function fromRouteBulk(optinsBulk) {
+    const results = [];
+    for (const optionsBuffer of optinsBulk) {
+        results.push(fromRoute(optionsBuffer));
+    }
+    const resultsBuffer = msgpack_lite_1.default.encode(results);
+    return resultsBuffer;
+}
 function loadPools(poolsBuffer) {
     const poolsArray = msgpack_lite_1.default.decode(poolsBuffer);
     const pools = poolsArray.map((poolBuffer) => entities_1.Pool.fromBuffer(poolBuffer));
@@ -34,6 +42,7 @@ function loadPools(poolsBuffer) {
 }
 exports.WorkerExpose = {
     fromRoute,
+    fromRouteBulk,
     loadPools
 };
 (0, threads_1.expose)(exports.WorkerExpose);

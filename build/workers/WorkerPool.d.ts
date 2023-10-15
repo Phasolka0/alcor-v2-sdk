@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Pool } from "../entities";
 export declare class SmartWorker {
     id: number;
@@ -18,7 +17,6 @@ export declare class WorkerPool {
     workers: Array<SmartWorker>;
     constructor();
     static create(threadsCount: number): Promise<WorkerPool>;
-    addTaskBuffer(taskOptions: Buffer): void;
     addTaskJSON(taskOptions: any): void;
     updatePools(pools: Pool[]): Promise<void>;
     waitForWorkersAndReturnResult(): Promise<Map<number, any>>;
