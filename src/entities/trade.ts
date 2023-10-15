@@ -765,7 +765,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         return bestTrades[0]
     }
 
-    public static async initWorkerPool(threadsCount = 16) {
+    public static async initWorkerPool(threadsCount = 8) {
         this.workerPool = await WorkerPool.create(threadsCount)
         console.log('Pool started with', threadsCount, 'workers')
     }
@@ -785,6 +785,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         }
 
         invariant(pools.length > 0, 'POOLS')
+        invariant(routes.length > 0, 'ROUTES')
 
         const serializationStart = performance.now()
         const amountInBuffer = CurrencyAmount.toBuffer(currencyAmountIn)
