@@ -205,6 +205,7 @@ class Trade {
         const amounts = new Array(route.tokenPath.length);
         let inputAmount;
         let outputAmount;
+        console.log(tradeType === internalConstants_1.TradeType.EXACT_INPUT);
         if (tradeType === internalConstants_1.TradeType.EXACT_INPUT) {
             (0, tiny_invariant_1.default)(amount.currency.equals(route.input), 'INPUT');
             amounts[0] = amount;
