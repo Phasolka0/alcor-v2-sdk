@@ -309,7 +309,6 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         const amounts: CurrencyAmount<Token>[] = new Array(route.tokenPath.length)
         let inputAmount: CurrencyAmount<TInput>
         let outputAmount: CurrencyAmount<TOutput>
-        console.log(tradeType === TradeType.EXACT_INPUT)
         if (tradeType === TradeType.EXACT_INPUT) {
             invariant(amount.currency.equals(route.input), 'INPUT')
             amounts[0] = amount
