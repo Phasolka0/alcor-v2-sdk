@@ -770,18 +770,24 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         console.log('Pool started with', threadsCount, 'workers')
     }
 
-    public static async bestTradeExactIn3<TInput extends Currency, TOutput extends Currency>(
+    public static async bestTradeMultiThreads<TInput extends Currency, TOutput extends Currency>(
         routes: Route<TInput, TOutput>[],
         pools: Pool[],
         currencyAmountIn: CurrencyAmount<TInput>,
-    ): Promise<Trade<TInput, TOutput, TradeType.EXACT_INPUT>> {
+        tradeType: TradeType
+    ): Promise<Trade<TInput, TOutput, TradeType>> {
 
         const workerPool = this.workerPool
 
         if (!workerPool) {
             console.warn('workerPool is not initialized, single-threaded version is used.' +
                 '\n use "await Trade.initWorkerPool()" for multi-threaded')
+            //if (tradeType === TradeType.EXACT_INPUT) {
             return this.bestTradeExactIn2(routes, pools, currencyAmountIn)
+            // } else {
+            //     return this.bestTradeExactOut(pools, currencyAmountIn)
+            // }
+
         }
 
         invariant(pools.length > 0, 'POOLS')
@@ -789,7 +795,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
 
         const serializationStart = performance.now()
         const amountInBuffer = CurrencyAmount.toBuffer(currencyAmountIn)
-        const tradeTypeBuffer = msgpack.encode(TradeType.EXACT_INPUT)
+        const tradeTypeBuffer = msgpack.encode(tradeType)
         //console.log('routesCount:', routes.length)
         for (const route of routes) {
             const optionsJSON = {
@@ -826,7 +832,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
         const finallyTrade = Trade.fromRoute(
             routes[bestResult.routeId],
             currencyAmountIn,
-            TradeType.EXACT_INPUT
+            tradeType
         )
         console.log('finallyTrade', performance.now() - finallyTradeStart)
         return finallyTrade

@@ -513,19 +513,23 @@ class Trade {
             console.log('Pool started with', threadsCount, 'workers');
         });
     }
-    static bestTradeExactIn3(routes, pools, currencyAmountIn) {
+    static bestTradeMultiThreads(routes, pools, currencyAmountIn, tradeType) {
         return __awaiter(this, void 0, void 0, function* () {
             const workerPool = this.workerPool;
             if (!workerPool) {
                 console.warn('workerPool is not initialized, single-threaded version is used.' +
                     '\n use "await Trade.initWorkerPool()" for multi-threaded');
+                //if (tradeType === TradeType.EXACT_INPUT) {
                 return this.bestTradeExactIn2(routes, pools, currencyAmountIn);
+                // } else {
+                //     return this.bestTradeExactOut(pools, currencyAmountIn)
+                // }
             }
             (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             (0, tiny_invariant_1.default)(routes.length > 0, 'ROUTES');
             const serializationStart = performance.now();
             const amountInBuffer = fractions_1.CurrencyAmount.toBuffer(currencyAmountIn);
-            const tradeTypeBuffer = msgpack_lite_1.default.encode(internalConstants_1.TradeType.EXACT_INPUT);
+            const tradeTypeBuffer = msgpack_lite_1.default.encode(tradeType);
             //console.log('routesCount:', routes.length)
             for (const route of routes) {
                 const optionsJSON = {
@@ -556,7 +560,7 @@ class Trade {
             bestResult.route = routes[bestResult.routeId];
             console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart);
             const finallyTradeStart = performance.now();
-            const finallyTrade = Trade.fromRoute(routes[bestResult.routeId], currencyAmountIn, internalConstants_1.TradeType.EXACT_INPUT);
+            const finallyTrade = Trade.fromRoute(routes[bestResult.routeId], currencyAmountIn, tradeType);
             console.log('finallyTrade', performance.now() - finallyTradeStart);
             return finallyTrade;
         });
