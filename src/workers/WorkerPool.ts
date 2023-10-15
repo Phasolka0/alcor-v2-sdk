@@ -158,8 +158,8 @@ export class WorkerPool {
                 return msgpack.encode({...task, route: Route.toBufferAdvanced(task.route, pools)});
             });
 
-            const tasksBuffer = msgpack.encode(tasks);
-            const resultsBuffer = await worker.workerInstance.fromRouteBulk(tasksBuffer);
+            //const tasksBuffer = msgpack.encode(tasks);
+            const resultsBuffer = await worker.workerInstance.fromRouteBulk(tasks);
             const resultsArray = msgpack.decode(resultsBuffer);
 
             for (let i = 0; i < resultsArray.length; i++) {
