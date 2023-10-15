@@ -165,6 +165,7 @@ export class WorkerPool {
             const resultsArray = msgpack.decode(resultsBuffer);
 
             for (let i = 0; i < resultsArray.length; i++) {
+                if (!resultsArray[i]) continue
                 const {inputAmount, outputAmount} = msgpack.decode(resultsArray[i]);
                 if (resultsArray[i]) {
                     this.tokenToResults.set(tokens[i], {

@@ -752,8 +752,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
                 currencyAmountIn,
                 tradeType
             )
-
-            //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+            if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
 
             sortedInsert(
                 bestTrades,

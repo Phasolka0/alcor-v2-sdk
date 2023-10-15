@@ -136,6 +136,8 @@ class WorkerPool {
                 const resultsBuffer = yield worker.workerInstance.fromRouteBulk(tasksBuffer);
                 const resultsArray = msgpack_lite_1.default.decode(resultsBuffer);
                 for (let i = 0; i < resultsArray.length; i++) {
+                    if (!resultsArray[i])
+                        continue;
                     const { inputAmount, outputAmount } = msgpack_lite_1.default.decode(resultsArray[i]);
                     if (resultsArray[i]) {
                         this.tokenToResults.set(tokens[i], {

@@ -501,7 +501,8 @@ class Trade {
         const bestTrades = [];
         for (const route of routes) {
             const trade = Trade.fromRoute(route, currencyAmountIn, tradeType);
-            //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0)) continue
+            if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
+                continue;
             (0, utils_1.sortedInsert)(bestTrades, trade, 1, tradeComparator);
         }
         return bestTrades[0];
