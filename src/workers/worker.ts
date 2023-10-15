@@ -5,6 +5,7 @@ import msgpack from "msgpack-lite";
 function fromRoute(optionsBuffer: Buffer) {
     try {
         const optionsJSON = msgpack.decode(optionsBuffer);
+        console.log(optionsJSON)
         const route = Route.fromBuffer(optionsJSON.route);
         const amount = CurrencyAmount.fromBuffer(optionsJSON.amount);
         //console.log({route, amount, tradeType});
