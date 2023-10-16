@@ -232,18 +232,6 @@ class Trade {
     //     //if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
     //         return {inputAmount, outputAmount}
     // }
-    // static fromJSON(json: any) {
-    //   const route = Route.fromJSON(json.route); // assuming Route has its own fromJSON method
-    //   const inputAmount = CurrencyAmount.fromJSON(json.inputAmount); // same for CurrencyAmount
-    //   const outputAmount = CurrencyAmount.fromJSON(json.outputAmount); // same for CurrencyAmount
-    //
-    //   return new Trade({
-    //     route,
-    //     inputAmount,
-    //     outputAmount,
-    //     tradeType: parsed.tradeType
-    //   });
-    // }
     /**
      * Constructs a trade from routes by simulating swaps
      *
@@ -497,35 +485,57 @@ class Trade {
         }
         return bestTrades;
     }
-    static bestTradeSingleThread(routes, pools, currencyAmountIn, tradeType) {
-        (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
+    /**
+     * Given a list of routes, and a fixed amount in, returns the best trade that go from an input token to output token.
+     * @param routes from input to output.
+     * @param currencyAmount the exact amount that will be spent if type "EXACT_INPUT" or that will be received if "EXACT_OUTPUT".
+     * @param tradeType the type of trade, exact input or exact output.
+     * @returns trade if at least one is found. Otherwise, undefined.
+     */
+    static bestTradeSingleThread(routes, currencyAmount, tradeType) {
         (0, tiny_invariant_1.default)(routes.length > 0, 'ROUTES');
         const bestTrades = [];
         for (const route of routes) {
-            const trade = Trade.fromRoute(route, currencyAmountIn, tradeType);
+            const trade = Trade.fromRoute(route, currencyAmount, tradeType);
             if (!trade.inputAmount.greaterThan(0) || !trade.priceImpact.greaterThan(0))
                 continue;
             (0, utils_1.sortedInsert)(bestTrades, trade, 1, tradeComparator);
         }
-        return bestTrades[0];
+        const bestTrade = bestTrades[0];
+        if (!bestTrade.inputAmount.greaterThan(0) || !bestTrade.priceImpact.greaterThan(0))
+            return;
+        return bestTrade;
     }
+    /**
+     * Creates a pool of workers for future use in bestTradeMultiThreads method.
+     * @param threadsCount number of created threads.
+     * It makes sense to create from 4 threads depending on your device,
+     * otherwise it is better to use a single thread solution.
+     */
     static initWorkerPool(threadsCount = 7) {
         return __awaiter(this, void 0, void 0, function* () {
             this.workerPool = yield WorkerPool_1.WorkerPool.create(threadsCount);
             console.log('Pool started with', threadsCount, 'workers');
         });
     }
-    static bestTradeMultiThreads(routes, pools, currencyAmount, tradeType) {
+    /**
+     * Similar to the above method but uses multithreading, in case you initiated the workers in advance.
+     * Otherwise, uses a single-threaded solution.
+     * @param routes from input to output.
+     * @param currencyAmount the exact amount that will be spent if type "EXACT_INPUT" or that will be received if "EXACT_OUTPUT".
+     * @param tradeType the type of trade, exact input or exact output.
+     * @returns trade if at least one is found. Otherwise, undefined.
+     */
+    static bestTradeMultiThreads(routes, currencyAmount, tradeType) {
         return __awaiter(this, void 0, void 0, function* () {
             const workerPool = this.workerPool;
             if (!workerPool) {
                 console.warn('workerPool is not initialized, single-threaded version is used.' +
                     '\n use "await Trade.initWorkerPool()" for multi-threaded');
-                return this.bestTradeSingleThread(routes, pools, currencyAmount, tradeType);
+                return this.bestTradeSingleThread(routes, currencyAmount, tradeType);
             }
-            (0, tiny_invariant_1.default)(pools.length > 0, 'POOLS');
             (0, tiny_invariant_1.default)(routes.length > 0, 'ROUTES');
-            const serializationStart = performance.now();
+            //const serializationStart = performance.now()
             const amountInBuffer = fractions_1.CurrencyAmount.toBuffer(currencyAmount);
             //console.log('routesCount:', routes.length)
             for (const route of routes) {
@@ -542,7 +552,7 @@ class Trade {
             //const workersStart = performance.now()
             const results = yield workerPool.waitForWorkersAndReturnResult();
             //console.log('workers summary', performance.now() - workersStart)
-            const mainThreadPostWorkStart = performance.now();
+            //const mainThreadPostWorkStart = performance.now()
             const bestResult = {};
             const isExactIn = tradeType === internalConstants_1.TradeType.EXACT_INPUT;
             for (const [index, value] of results) {
@@ -567,6 +577,8 @@ class Trade {
             //console.log('mainThreadPostWork', performance.now() - mainThreadPostWorkStart)
             //const finallyTradeStart = performance.now()
             const finallyTrade = Trade.fromRoute(routes[bestResult.routeId], currencyAmount, tradeType);
+            if (!finallyTrade.inputAmount.greaterThan(0) || !finallyTrade.priceImpact.greaterThan(0))
+                return;
             //console.log('finallyTrade', performance.now() - finallyTradeStart)
             return finallyTrade;
         });

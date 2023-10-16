@@ -221,7 +221,28 @@ export declare class Trade<TInput extends Currency, TOutput extends Currency, TT
      * @returns The exact out trade
      */
     static bestTradeExactOut<TInput extends Currency, TOutput extends Currency>(pools: Pool[], currencyIn: TInput, currencyAmountOut: CurrencyAmount<TOutput>, { maxNumResults, maxHops }?: BestTradeOptions, currentPools?: Pool[], nextAmountOut?: CurrencyAmount<Currency>, bestTrades?: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[]): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[];
-    static bestTradeSingleThread<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmountIn: CurrencyAmount<TInput>, tradeType: TradeType): Trade<TInput, TOutput, TradeType>;
+    /**
+     * Given a list of routes, and a fixed amount in, returns the best trade that go from an input token to output token.
+     * @param routes from input to output.
+     * @param currencyAmount the exact amount that will be spent if type "EXACT_INPUT" or that will be received if "EXACT_OUTPUT".
+     * @param tradeType the type of trade, exact input or exact output.
+     * @returns trade if at least one is found. Otherwise, undefined.
+     */
+    static bestTradeSingleThread<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], currencyAmount: CurrencyAmount<TInput>, tradeType: TradeType): Trade<TInput, TOutput, TradeType> | undefined;
+    /**
+     * Creates a pool of workers for future use in bestTradeMultiThreads method.
+     * @param threadsCount number of created threads.
+     * It makes sense to create from 4 threads depending on your device,
+     * otherwise it is better to use a single thread solution.
+     */
     static initWorkerPool(threadsCount?: number): Promise<void>;
-    static bestTradeMultiThreads<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], pools: Pool[], currencyAmount: CurrencyAmount<TInput>, tradeType: TradeType): Promise<Trade<TInput, TOutput, TradeType>>;
+    /**
+     * Similar to the above method but uses multithreading, in case you initiated the workers in advance.
+     * Otherwise, uses a single-threaded solution.
+     * @param routes from input to output.
+     * @param currencyAmount the exact amount that will be spent if type "EXACT_INPUT" or that will be received if "EXACT_OUTPUT".
+     * @param tradeType the type of trade, exact input or exact output.
+     * @returns trade if at least one is found. Otherwise, undefined.
+     */
+    static bestTradeMultiThreads<TInput extends Currency, TOutput extends Currency>(routes: Route<TInput, TOutput>[], currencyAmount: CurrencyAmount<TInput>, tradeType: TradeType): Promise<Trade<TInput, TOutput, TradeType> | undefined>;
 }
