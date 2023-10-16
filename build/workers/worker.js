@@ -26,7 +26,8 @@ function fromRoute(optionsBuffer) {
         console.log(e);
     }
 }
-function fromRouteBulk(buffer) {
+function fromRouteBulk(arrayBuffer) {
+    const buffer = Buffer.from(arrayBuffer);
     const tasksArray = msgpack_lite_1.default.decode(buffer);
     const results = [];
     for (const optionsBuffer of tasksArray) {
