@@ -132,8 +132,7 @@ class WorkerPool {
                     return msgpack_lite_1.default.encode(Object.assign(Object.assign({}, task), { route: entities_1.Route.toBufferAdvanced(task.route, pools) }));
                 });
                 const tasksBuffer = msgpack_lite_1.default.encode(tasks);
-                const arrayBuffer = tasksBuffer.buffer.slice(tasksBuffer.byteOffset, tasksBuffer.byteOffset + tasksBuffer.length);
-                const resultsBuffer = yield worker.workerInstance.fromRouteBulk((0, threads_1.Transfer)(arrayBuffer));
+                const resultsBuffer = yield worker.workerInstance.fromRouteBulk(tasksBuffer);
                 const resultsArray = msgpack_lite_1.default.decode(resultsBuffer);
                 for (let i = 0; i < resultsArray.length; i++) {
                     if (!resultsArray[i])

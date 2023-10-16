@@ -1,4 +1,4 @@
-import {spawn, Transfer, Worker} from 'threads';
+import {spawn, Worker} from 'threads';
 import {CurrencyAmount, Pool, Route} from "../entities";
 import msgpack from "msgpack-lite";
 
@@ -159,10 +159,7 @@ export class WorkerPool {
             });
 
             const tasksBuffer = msgpack.encode(tasks);
-
-            const arrayBuffer = tasksBuffer.buffer.slice(tasksBuffer.byteOffset, tasksBuffer.byteOffset + tasksBuffer.length);
-
-            const resultsBuffer = await worker.workerInstance.fromRouteBulk(Transfer(arrayBuffer));
+            const resultsBuffer = await worker.workerInstance.fromRouteBulk(tasksBuffer);
             const resultsArray = msgpack.decode(resultsBuffer);
 
             for (let i = 0; i < resultsArray.length; i++) {
