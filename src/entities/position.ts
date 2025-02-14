@@ -234,6 +234,7 @@ export class Position {
     // construct counterfactual pools
     const poolLower = new Pool({
       id: this.pool.id,
+      active: this.pool.active,
       tokenA: this.pool.tokenA,
       tokenB: this.pool.tokenB,
       fee: this.pool.fee,
@@ -246,6 +247,7 @@ export class Position {
     });
     const poolUpper = new Pool({
       id: this.pool.id,
+      active: this.pool.active,
       tokenA: this.pool.tokenA,
       tokenB: this.pool.tokenB,
       fee: this.pool.fee,
@@ -319,6 +321,7 @@ export class Position {
     // construct counterfactual pools
     const poolLower = new Pool({
       id: this.pool.id,
+      active: this.pool.active,
       tokenA: this.pool.tokenA,
       tokenB: this.pool.tokenB,
       fee: this.pool.fee,
@@ -331,6 +334,7 @@ export class Position {
     });
     const poolUpper = new Pool({
       id: this.pool.id,
+      active: this.pool.active,
       tokenA: this.pool.tokenA,
       tokenB: this.pool.tokenB,
       fee: this.pool.fee,
@@ -586,9 +590,20 @@ export class Position {
    */
   public async getFees(): Promise<Fees> {
     const { liquidity, tickLower, tickUpper, feeGrowthInsideALastX64, feeGrowthInsideBLastX64, pool } = this
+
+    if (
+      JSBI.equal(liquidity, ZERO) &&
+      JSBI.equal(this.feesA, ZERO) &&
+      JSBI.equal(this.feesB, ZERO)
+    ) {
+      return {
+        feesA: CurrencyAmount.fromRawAmount(this.pool.tokenA, ZERO),
+        feesB: CurrencyAmount.fromRawAmount(this.pool.tokenB, ZERO)
+      }
+    }
     
-    const lower = await this.pool.tickDataProvider.getTick(tickLower)
-    const upper = await this.pool.tickDataProvider.getTick(tickUpper)
+    const lower = this.pool.tickDataProvider.getTick(tickLower)
+    const upper = this.pool.tickDataProvider.getTick(tickUpper)
 
     const { feeGrowthGlobalAX64, feeGrowthGlobalBX64 } = pool
 

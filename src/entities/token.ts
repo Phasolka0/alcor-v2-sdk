@@ -59,6 +59,7 @@ export class Token extends BaseCurrency {
       symbol: token.symbol,
     }
   }
+
   static fromJSON(json: any) {
     return new Token(json.contract, json.decimals, json.symbol);
   }

@@ -1,4 +1,4 @@
-import { TickList } from "../utils";
+import { TickList } from "../utils/tickList";
 import { Tick, TickConstructorArgs } from "./tick";
 import { TickDataProvider } from "./tickDataProvider";
 
@@ -6,16 +6,13 @@ import { TickDataProvider } from "./tickDataProvider";
  * A data provider for ticks that is backed by an in-memory array of ticks.
  */
 export class TickListDataProvider implements TickDataProvider {
-  public ticks: Tick[];
+  public ticks: readonly Tick[];
 
-  constructor(ticks: (Tick | TickConstructorArgs)[], tickSpacing?: number) {
+  constructor(ticks: (Tick | TickConstructorArgs)[], tickSpacing: number) {
     const ticksMapped: Tick[] = ticks.map((t) =>
       t instanceof Tick ? t : new Tick(t)
     );
-    if (tickSpacing) {
-      TickList.validateList(ticksMapped, tickSpacing);
-    }
-
+    TickList.validateList(ticksMapped, tickSpacing);
     this.ticks = ticksMapped;
   }
 

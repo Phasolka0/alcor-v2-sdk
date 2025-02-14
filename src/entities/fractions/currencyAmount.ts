@@ -1,3 +1,5 @@
+import msgpack from "msgpack-lite"
+
 import invariant from "tiny-invariant";
 import JSBI from "jsbi";
 import { Currency } from "../currency";
@@ -6,7 +8,6 @@ import { Fraction } from "./fraction";
 import _Big from "big.js";
 import toFormat from "toformat";
 import { BigintIsh, Rounding, MaxUint256 } from "../../internalConstants";
-import msgpack from "msgpack-lite";
 
 const Big = toFormat(_Big);
 
@@ -126,6 +127,10 @@ export class CurrencyAmount<T extends Currency> extends Fraction {
 
   public toExtendedAsset(...args): string {
     return `${this.toFixed(...args)} ${this.currency.symbol}@${this.currency.contract}`
+  }
+
+  public toExtendedAssetObject(...args): object {
+    return { quantity: `${this.toFixed(...args)} ${this.currency.symbol}`, contract: this.currency.contract }
   }
 
   static toJSON<T extends Currency>(amount: CurrencyAmount<T>): object {

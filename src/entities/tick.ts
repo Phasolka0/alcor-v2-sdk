@@ -59,7 +59,6 @@ export class Tick {
     }
   }
 
-
   static fromJSON(json: any): Tick {
     return new Tick({
       id: json.id,
