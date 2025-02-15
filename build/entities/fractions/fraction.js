@@ -1,117 +1,159 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.Fraction = void 0;
-const jsbi_1 = __importDefault(require("jsbi"));
-const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
-const toformat_1 = __importDefault(require("toformat"));
-const decimal_js_light_1 = __importDefault(require("decimal.js-light"));
-const big_js_1 = __importDefault(require("big.js"));
-const internalConstants_1 = require("../../internalConstants");
-const Decimal = (0, toformat_1.default)(decimal_js_light_1.default);
-const Big = (0, toformat_1.default)(big_js_1.default);
+var _tinyInvariant = _interopRequireDefault(require("tiny-invariant"));
+var _toformat = _interopRequireDefault(require("toformat"));
+var _decimal = _interopRequireDefault(require("decimal.js-light"));
+var _big = _interopRequireDefault(require("big.js"));
+var _internalConstants = require("../../internalConstants");
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+const Decimal = (0, _toformat.default)(_decimal.default);
+const Big = (0, _toformat.default)(_big.default);
 const toSignificantRounding = {
-    [internalConstants_1.Rounding.ROUND_DOWN]: Decimal.ROUND_DOWN,
-    [internalConstants_1.Rounding.ROUND_HALF_UP]: Decimal.ROUND_HALF_UP,
-    [internalConstants_1.Rounding.ROUND_UP]: Decimal.ROUND_UP,
+  [_internalConstants.Rounding.ROUND_DOWN]: Decimal.ROUND_DOWN,
+  [_internalConstants.Rounding.ROUND_HALF_UP]: Decimal.ROUND_HALF_UP,
+  [_internalConstants.Rounding.ROUND_UP]: Decimal.ROUND_UP
 };
+
 // const toFixedRounding = {
 //   [Rounding.ROUND_DOWN]: RoundingMode.RoundDown,
 //   [Rounding.ROUND_HALF_UP]: RoundingMode.RoundHalfUp,
 //   [Rounding.ROUND_UP]: RoundingMode.RoundUp
 // }
 const toFixedRounding = {
-    [internalConstants_1.Rounding.ROUND_DOWN]: 0,
-    [internalConstants_1.Rounding.ROUND_HALF_UP]: 1,
-    [internalConstants_1.Rounding.ROUND_UP]: 3,
+  [_internalConstants.Rounding.ROUND_DOWN]: 0,
+  [_internalConstants.Rounding.ROUND_HALF_UP]: 1,
+  [_internalConstants.Rounding.ROUND_UP]: 3
 };
-class Fraction {
-    constructor(numerator, denominator = jsbi_1.default.BigInt(1)) {
-        this.numerator = jsbi_1.default.BigInt(numerator);
-        this.denominator = jsbi_1.default.BigInt(denominator);
-    }
-    static tryParseFraction(fractionish) {
-        if (fractionish instanceof jsbi_1.default ||
-            typeof fractionish === "number" ||
-            typeof fractionish === "string")
-            return new Fraction(fractionish);
-        if ("numerator" in fractionish && "denominator" in fractionish)
-            return fractionish;
-        throw new Error("Could not parse fraction");
-    }
+let Fraction = exports.Fraction = /*#__PURE__*/function () {
+  function Fraction(numerator) {
+    let denominator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1n;
+    _classCallCheck(this, Fraction);
+    _defineProperty(this, "numerator", void 0);
+    _defineProperty(this, "denominator", void 0);
+    this.numerator = BigInt(numerator);
+    this.denominator = BigInt(denominator);
+  }
+  return _createClass(Fraction, [{
+    key: "quotient",
+    get:
     // performs floor division
-    get quotient() {
-        return jsbi_1.default.divide(this.numerator, this.denominator);
+    function () {
+      return this.numerator / this.denominator;
     }
+
     // remainder after floor division
-    get remainder() {
-        return new Fraction(jsbi_1.default.remainder(this.numerator, this.denominator), this.denominator);
+  }, {
+    key: "remainder",
+    get: function () {
+      return new Fraction(this.numerator % this.denominator, this.denominator);
     }
-    invert() {
-        return new Fraction(this.denominator, this.numerator);
+  }, {
+    key: "invert",
+    value: function invert() {
+      return new Fraction(this.denominator, this.numerator);
     }
-    add(other) {
-        const otherParsed = Fraction.tryParseFraction(other);
-        if (jsbi_1.default.equal(this.denominator, otherParsed.denominator)) {
-            return new Fraction(jsbi_1.default.add(this.numerator, otherParsed.numerator), this.denominator);
-        }
-        return new Fraction(jsbi_1.default.add(jsbi_1.default.multiply(this.numerator, otherParsed.denominator), jsbi_1.default.multiply(otherParsed.numerator, this.denominator)), jsbi_1.default.multiply(this.denominator, otherParsed.denominator));
+  }, {
+    key: "add",
+    value: function add(other) {
+      const otherParsed = Fraction.tryParseFraction(other);
+      if (this.denominator === otherParsed.denominator) {
+        return new Fraction(this.numerator + otherParsed.numerator, this.denominator);
+      }
+      return new Fraction(this.numerator * otherParsed.denominator + otherParsed.numerator * this.denominator, this.denominator * otherParsed.denominator);
     }
-    subtract(other) {
-        const otherParsed = Fraction.tryParseFraction(other);
-        if (jsbi_1.default.equal(this.denominator, otherParsed.denominator)) {
-            return new Fraction(jsbi_1.default.subtract(this.numerator, otherParsed.numerator), this.denominator);
-        }
-        return new Fraction(jsbi_1.default.subtract(jsbi_1.default.multiply(this.numerator, otherParsed.denominator), jsbi_1.default.multiply(otherParsed.numerator, this.denominator)), jsbi_1.default.multiply(this.denominator, otherParsed.denominator));
+  }, {
+    key: "subtract",
+    value: function subtract(other) {
+      const otherParsed = Fraction.tryParseFraction(other);
+      if (this.denominator === otherParsed.denominator) {
+        return new Fraction(this.numerator - otherParsed.numerator, this.denominator);
+      }
+      return new Fraction(this.numerator * otherParsed.denominator - otherParsed.numerator * this.denominator, this.denominator * otherParsed.denominator);
     }
-    lessThan(other) {
-        const otherParsed = Fraction.tryParseFraction(other);
-        return jsbi_1.default.lessThan(jsbi_1.default.multiply(this.numerator, otherParsed.denominator), jsbi_1.default.multiply(otherParsed.numerator, this.denominator));
+  }, {
+    key: "lessThan",
+    value: function lessThan(other) {
+      const otherParsed = Fraction.tryParseFraction(other);
+      return this.numerator * otherParsed.denominator < otherParsed.numerator * this.denominator;
     }
-    equalTo(other) {
-        const otherParsed = Fraction.tryParseFraction(other);
-        return jsbi_1.default.equal(jsbi_1.default.multiply(this.numerator, otherParsed.denominator), jsbi_1.default.multiply(otherParsed.numerator, this.denominator));
+  }, {
+    key: "equalTo",
+    value: function equalTo(other) {
+      const otherParsed = Fraction.tryParseFraction(other);
+      return this.numerator * otherParsed.denominator === otherParsed.numerator * this.denominator;
     }
-    greaterThan(other) {
-        const otherParsed = Fraction.tryParseFraction(other);
-        return jsbi_1.default.greaterThan(jsbi_1.default.multiply(this.numerator, otherParsed.denominator), jsbi_1.default.multiply(otherParsed.numerator, this.denominator));
+  }, {
+    key: "greaterThan",
+    value: function greaterThan(other) {
+      const otherParsed = Fraction.tryParseFraction(other);
+      return this.numerator * otherParsed.denominator > otherParsed.numerator * this.denominator;
     }
-    multiply(other) {
-        const otherParsed = Fraction.tryParseFraction(other);
-        return new Fraction(jsbi_1.default.multiply(this.numerator, otherParsed.numerator), jsbi_1.default.multiply(this.denominator, otherParsed.denominator));
+  }, {
+    key: "multiply",
+    value: function multiply(other) {
+      const otherParsed = Fraction.tryParseFraction(other);
+      return new Fraction(this.numerator * otherParsed.numerator, this.denominator * otherParsed.denominator);
     }
-    divide(other) {
-        const otherParsed = Fraction.tryParseFraction(other);
-        return new Fraction(jsbi_1.default.multiply(this.numerator, otherParsed.denominator), jsbi_1.default.multiply(this.denominator, otherParsed.numerator));
+  }, {
+    key: "divide",
+    value: function divide(other) {
+      const otherParsed = Fraction.tryParseFraction(other);
+      return new Fraction(this.numerator * otherParsed.denominator, this.denominator * otherParsed.numerator);
     }
-    toSignificant(significantDigits, format = { groupSeparator: "" }, rounding = internalConstants_1.Rounding.ROUND_HALF_UP) {
-        (0, tiny_invariant_1.default)(Number.isInteger(significantDigits), `${significantDigits} is not an integer.`);
-        (0, tiny_invariant_1.default)(significantDigits > 0, `${significantDigits} is not positive.`);
-        Decimal.set({
-            precision: significantDigits + 1,
-            rounding: toSignificantRounding[rounding],
-        });
-        const quotient = new Decimal(this.numerator.toString())
-            .div(this.denominator.toString())
-            .toSignificantDigits(significantDigits);
-        return quotient.toFormat(quotient.decimalPlaces(), format);
+  }, {
+    key: "toSignificant",
+    value: function toSignificant(significantDigits) {
+      let format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+        groupSeparator: ""
+      };
+      let rounding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _internalConstants.Rounding.ROUND_HALF_UP;
+      (0, _tinyInvariant.default)(Number.isInteger(significantDigits), `${significantDigits} is not an integer.`);
+      (0, _tinyInvariant.default)(significantDigits > 0, `${significantDigits} is not positive.`);
+      Decimal.set({
+        precision: significantDigits + 1,
+        rounding: toSignificantRounding[rounding]
+      });
+      const quotient = new Decimal(this.numerator.toString()).div(this.denominator.toString()).toSignificantDigits(significantDigits);
+      return quotient.toFormat(quotient.decimalPlaces(), format);
     }
-    toFixed(decimalPlaces, format = { groupSeparator: "" }, rounding = internalConstants_1.Rounding.ROUND_HALF_UP) {
-        (0, tiny_invariant_1.default)(Number.isInteger(decimalPlaces), `${decimalPlaces} is not an integer.`);
-        (0, tiny_invariant_1.default)(decimalPlaces >= 0, `${decimalPlaces} is negative.`);
-        Big.DP = decimalPlaces;
-        Big.RM = toFixedRounding[rounding];
-        return new Big(this.numerator.toString())
-            .div(this.denominator.toString())
-            .toFormat(decimalPlaces, format);
+  }, {
+    key: "toFixed",
+    value: function toFixed(decimalPlaces) {
+      let format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+        groupSeparator: ""
+      };
+      let rounding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _internalConstants.Rounding.ROUND_HALF_UP;
+      (0, _tinyInvariant.default)(Number.isInteger(decimalPlaces), `${decimalPlaces} is not an integer.`);
+      (0, _tinyInvariant.default)(decimalPlaces >= 0, `${decimalPlaces} is negative.`);
+      Big.DP = decimalPlaces;
+      Big.RM = toFixedRounding[rounding];
+      return new Big(this.numerator.toString()).div(this.denominator.toString()).toFormat(decimalPlaces, format);
     }
+
     /**
      * Helper method for converting any super class back to a fraction
      */
-    get asFraction() {
-        return new Fraction(this.numerator, this.denominator);
+  }, {
+    key: "asFraction",
+    get: function () {
+      return new Fraction(this.numerator, this.denominator);
     }
-}
-exports.Fraction = Fraction;
+  }], [{
+    key: "tryParseFraction",
+    value: function tryParseFraction(fractionish) {
+      if (typeof fractionish === "bigint" || typeof fractionish === "number" || typeof fractionish === "string") return new Fraction(fractionish);
+      if ("numerator" in fractionish && "denominator" in fractionish) return fractionish;
+      throw new Error("Could not parse fraction");
+    }
+  }]);
+}();

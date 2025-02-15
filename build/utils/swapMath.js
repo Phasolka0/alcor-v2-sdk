@@ -1,86 +1,65 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.SwapMath = void 0;
-const jsbi_1 = __importDefault(require("jsbi"));
-const internalConstants_1 = require("../internalConstants");
-const fullMath_1 = require("./fullMath");
-const sqrtPriceMath_1 = require("./sqrtPriceMath");
-const MAX_FEE = jsbi_1.default.exponentiate(jsbi_1.default.BigInt(10), jsbi_1.default.BigInt(6));
-class SwapMath {
-    /**
-     * Cannot be constructed.
-     */
-    constructor() { }
-    static computeSwapStep(sqrtRatioCurrentX64, sqrtRatioTargetX64, liquidity, amountRemaining, feePips) {
-        const returnValues = {};
-        const zeroForOne = jsbi_1.default.greaterThanOrEqual(sqrtRatioCurrentX64, sqrtRatioTargetX64);
-        const exactIn = jsbi_1.default.greaterThanOrEqual(amountRemaining, internalConstants_1.ZERO);
-        if (exactIn) {
-            const amountRemainingLessFee = jsbi_1.default.divide(jsbi_1.default.multiply(amountRemaining, jsbi_1.default.subtract(MAX_FEE, jsbi_1.default.BigInt(feePips))), MAX_FEE);
-            returnValues.amountIn = zeroForOne
-                ? sqrtPriceMath_1.SqrtPriceMath.getAmountADelta(sqrtRatioTargetX64, sqrtRatioCurrentX64, liquidity, true)
-                : sqrtPriceMath_1.SqrtPriceMath.getAmountBDelta(sqrtRatioCurrentX64, sqrtRatioTargetX64, liquidity, true);
-            if (jsbi_1.default.greaterThanOrEqual(amountRemainingLessFee, returnValues.amountIn)) {
-                returnValues.sqrtRatioNextX64 = sqrtRatioTargetX64;
-            }
-            else {
-                returnValues.sqrtRatioNextX64 = sqrtPriceMath_1.SqrtPriceMath.getNextSqrtPriceFromInput(sqrtRatioCurrentX64, liquidity, amountRemainingLessFee, zeroForOne);
-            }
+var _internalConstants = require("../internalConstants");
+var _fullMath = require("./fullMath");
+var _sqrtPriceMath = require("./sqrtPriceMath");
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+const MAX_FEE = 10n ** 6n;
+let SwapMath = exports.SwapMath = /*#__PURE__*/function () {
+  /**
+   * Cannot be constructed.
+   */
+  function SwapMath() {
+    _classCallCheck(this, SwapMath);
+  }
+  return _createClass(SwapMath, null, [{
+    key: "computeSwapStep",
+    value: function computeSwapStep(sqrtRatioCurrentX64, sqrtRatioTargetX64, liquidity, amountRemaining, feePips) {
+      const returnValues = {};
+      const zeroForOne = sqrtRatioCurrentX64 >= sqrtRatioTargetX64;
+      const exactIn = amountRemaining >= _internalConstants.ZERO;
+      if (exactIn) {
+        const amountRemainingLessFee = amountRemaining * (MAX_FEE - BigInt(feePips)) / MAX_FEE;
+        returnValues.amountIn = zeroForOne ? _sqrtPriceMath.SqrtPriceMath.getAmountADelta(sqrtRatioTargetX64, sqrtRatioCurrentX64, liquidity, true) : _sqrtPriceMath.SqrtPriceMath.getAmountBDelta(sqrtRatioCurrentX64, sqrtRatioTargetX64, liquidity, true);
+        if (amountRemainingLessFee >= returnValues.amountIn) {
+          returnValues.sqrtRatioNextX64 = sqrtRatioTargetX64;
+        } else {
+          returnValues.sqrtRatioNextX64 = _sqrtPriceMath.SqrtPriceMath.getNextSqrtPriceFromInput(sqrtRatioCurrentX64, liquidity, amountRemainingLessFee, zeroForOne);
         }
-        else {
-            returnValues.amountOut = zeroForOne
-                ? sqrtPriceMath_1.SqrtPriceMath.getAmountBDelta(sqrtRatioTargetX64, sqrtRatioCurrentX64, liquidity, false)
-                : sqrtPriceMath_1.SqrtPriceMath.getAmountADelta(sqrtRatioCurrentX64, sqrtRatioTargetX64, liquidity, false);
-            if (jsbi_1.default.greaterThanOrEqual(jsbi_1.default.multiply(amountRemaining, internalConstants_1.NEGATIVE_ONE), returnValues.amountOut)) {
-                returnValues.sqrtRatioNextX64 = sqrtRatioTargetX64;
-            }
-            else {
-                returnValues.sqrtRatioNextX64 =
-                    sqrtPriceMath_1.SqrtPriceMath.getNextSqrtPriceFromOutput(sqrtRatioCurrentX64, liquidity, jsbi_1.default.multiply(amountRemaining, internalConstants_1.NEGATIVE_ONE), zeroForOne);
-            }
+      } else {
+        returnValues.amountOut = zeroForOne ? _sqrtPriceMath.SqrtPriceMath.getAmountBDelta(sqrtRatioTargetX64, sqrtRatioCurrentX64, liquidity, false) : _sqrtPriceMath.SqrtPriceMath.getAmountADelta(sqrtRatioCurrentX64, sqrtRatioTargetX64, liquidity, false);
+        if (amountRemaining * _internalConstants.NEGATIVE_ONE >= returnValues.amountOut) {
+          returnValues.sqrtRatioNextX64 = sqrtRatioTargetX64;
+        } else {
+          returnValues.sqrtRatioNextX64 = _sqrtPriceMath.SqrtPriceMath.getNextSqrtPriceFromOutput(sqrtRatioCurrentX64, liquidity, amountRemaining * _internalConstants.NEGATIVE_ONE, zeroForOne);
         }
-        const max = jsbi_1.default.equal(sqrtRatioTargetX64, returnValues.sqrtRatioNextX64);
-        if (zeroForOne) {
-            returnValues.amountIn =
-                max && exactIn
-                    ? returnValues.amountIn
-                    : sqrtPriceMath_1.SqrtPriceMath.getAmountADelta(returnValues.sqrtRatioNextX64, sqrtRatioCurrentX64, liquidity, true);
-            returnValues.amountOut =
-                max && !exactIn
-                    ? returnValues.amountOut
-                    : sqrtPriceMath_1.SqrtPriceMath.getAmountBDelta(returnValues.sqrtRatioNextX64, sqrtRatioCurrentX64, liquidity, false);
-        }
-        else {
-            returnValues.amountIn =
-                max && exactIn
-                    ? returnValues.amountIn
-                    : sqrtPriceMath_1.SqrtPriceMath.getAmountBDelta(sqrtRatioCurrentX64, returnValues.sqrtRatioNextX64, liquidity, true);
-            returnValues.amountOut =
-                max && !exactIn
-                    ? returnValues.amountOut
-                    : sqrtPriceMath_1.SqrtPriceMath.getAmountADelta(sqrtRatioCurrentX64, returnValues.sqrtRatioNextX64, liquidity, false);
-        }
-        if (!exactIn &&
-            jsbi_1.default.greaterThan(returnValues.amountOut, jsbi_1.default.multiply(amountRemaining, internalConstants_1.NEGATIVE_ONE))) {
-            returnValues.amountOut = jsbi_1.default.multiply(amountRemaining, internalConstants_1.NEGATIVE_ONE);
-        }
-        if (exactIn &&
-            jsbi_1.default.notEqual(returnValues.sqrtRatioNextX64, sqrtRatioTargetX64)) {
-            // we didn't reach the target, so take the remainder of the maximum input as fee
-            returnValues.feeAmount = jsbi_1.default.subtract(amountRemaining, returnValues.amountIn);
-        }
-        else {
-            returnValues.feeAmount = fullMath_1.FullMath.mulDivRoundingUp(returnValues.amountIn, jsbi_1.default.BigInt(feePips), jsbi_1.default.subtract(MAX_FEE, jsbi_1.default.BigInt(feePips)));
-        }
-        return [
-            returnValues.sqrtRatioNextX64,
-            returnValues.amountIn,
-            returnValues.amountOut,
-            returnValues.feeAmount,
-        ];
+      }
+      const max = sqrtRatioTargetX64 === returnValues.sqrtRatioNextX64;
+      if (zeroForOne) {
+        returnValues.amountIn = max && exactIn ? returnValues.amountIn : _sqrtPriceMath.SqrtPriceMath.getAmountADelta(returnValues.sqrtRatioNextX64, sqrtRatioCurrentX64, liquidity, true);
+        returnValues.amountOut = max && !exactIn ? returnValues.amountOut : _sqrtPriceMath.SqrtPriceMath.getAmountBDelta(returnValues.sqrtRatioNextX64, sqrtRatioCurrentX64, liquidity, false);
+      } else {
+        returnValues.amountIn = max && exactIn ? returnValues.amountIn : _sqrtPriceMath.SqrtPriceMath.getAmountBDelta(sqrtRatioCurrentX64, returnValues.sqrtRatioNextX64, liquidity, true);
+        returnValues.amountOut = max && !exactIn ? returnValues.amountOut : _sqrtPriceMath.SqrtPriceMath.getAmountADelta(sqrtRatioCurrentX64, returnValues.sqrtRatioNextX64, liquidity, false);
+      }
+      if (!exactIn && returnValues.amountOut > amountRemaining * _internalConstants.NEGATIVE_ONE) {
+        returnValues.amountOut = amountRemaining * _internalConstants.NEGATIVE_ONE;
+      }
+      if (exactIn && returnValues.sqrtRatioNextX64 !== sqrtRatioTargetX64) {
+        // we didn't reach the target, so take the remainder of the maximum input as fee
+        returnValues.feeAmount = amountRemaining - returnValues.amountIn;
+      } else {
+        returnValues.feeAmount = _fullMath.FullMath.mulDivRoundingUp(returnValues.amountIn, BigInt(feePips), MAX_FEE - BigInt(feePips));
+      }
+      return [returnValues.sqrtRatioNextX64, returnValues.amountIn, returnValues.amountOut, returnValues.feeAmount];
     }
-}
-exports.SwapMath = SwapMath;
+  }]);
+}();

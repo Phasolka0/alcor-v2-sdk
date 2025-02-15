@@ -1,26 +1,115 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _fractions = require("./fractions");
+Object.keys(_fractions).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _fractions[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _fractions[key];
     }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(require("./fractions"), exports);
-__exportStar(require("./tick"), exports);
-__exportStar(require("./tickDataProvider"), exports);
-__exportStar(require("./tickListDataProvider"), exports);
-__exportStar(require("./currency"), exports);
-__exportStar(require("./token"), exports);
-__exportStar(require("./pool"), exports);
-__exportStar(require("./position"), exports);
-__exportStar(require("./route"), exports);
-__exportStar(require("./trade"), exports);
+  });
+});
+var _tick = require("./tick");
+Object.keys(_tick).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _tick[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _tick[key];
+    }
+  });
+});
+var _tickDataProvider = require("./tickDataProvider");
+Object.keys(_tickDataProvider).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _tickDataProvider[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _tickDataProvider[key];
+    }
+  });
+});
+var _tickListDataProvider = require("./tickListDataProvider");
+Object.keys(_tickListDataProvider).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _tickListDataProvider[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _tickListDataProvider[key];
+    }
+  });
+});
+var _currency = require("./currency");
+Object.keys(_currency).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _currency[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _currency[key];
+    }
+  });
+});
+var _token = require("./token");
+Object.keys(_token).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _token[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _token[key];
+    }
+  });
+});
+var _pool = require("./pool");
+Object.keys(_pool).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _pool[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _pool[key];
+    }
+  });
+});
+var _position = require("./position");
+Object.keys(_position).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _position[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _position[key];
+    }
+  });
+});
+var _route = require("./route");
+Object.keys(_route).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _route[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _route[key];
+    }
+  });
+});
+var _trade = require("./trade");
+Object.keys(_trade).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _trade[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _trade[key];
+    }
+  });
+});

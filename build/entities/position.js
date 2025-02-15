@@ -1,283 +1,362 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.Position = void 0;
-const fractions_1 = require("./fractions");
-const internalConstants_1 = require("../internalConstants");
-const jsbi_1 = __importDefault(require("jsbi"));
-const tiny_invariant_1 = __importDefault(require("tiny-invariant"));
-const internalConstants_2 = require("../internalConstants");
-const maxLiquidityForAmounts_1 = require("../utils/maxLiquidityForAmounts");
-const priceTickConversions_1 = require("../utils/priceTickConversions");
-const sqrtPriceMath_1 = require("../utils/sqrtPriceMath");
-const tickMath_1 = require("../utils/tickMath");
-const encodeSqrtRatioX64_1 = require("../utils/encodeSqrtRatioX64");
-const pool_1 = require("./pool");
-const utils_1 = require("../utils");
-class Position {
-    /**
-     * Constructs a position for a given pool with the given liquidity
-     * @param pool For which pool the liquidity is assigned
-     * @param liquidity The amount of liquidity that is in the position
-     * @param lower The lower tick of the position
-     * @param upper The upper tick of the position
-     */
-    constructor({ id, owner, pool, liquidity, tickLower, tickUpper, feeGrowthInsideALastX64 = 0, feeGrowthInsideBLastX64 = 0, feesA = 0, feesB = 0, }) {
-        // cached resuts for the getters
-        this._tokenAAmount = null;
-        this._tokenBAmount = null;
-        this._mintAmounts = null;
-        (0, tiny_invariant_1.default)(tickLower < tickUpper, "TICK_ORDER");
-        (0, tiny_invariant_1.default)(tickLower >= tickMath_1.TickMath.MIN_TICK && tickLower % pool.tickSpacing === 0, "TICK_LOWER");
-        (0, tiny_invariant_1.default)(tickUpper <= tickMath_1.TickMath.MAX_TICK && tickUpper % pool.tickSpacing === 0, "TICK_UPPER");
-        this.id = id;
-        this.owner = owner;
-        this.pool = pool;
-        this.tickLower = tickLower;
-        this.tickUpper = tickUpper;
-        this.liquidity = jsbi_1.default.BigInt(liquidity);
-        this.feeGrowthInsideALastX64 = jsbi_1.default.BigInt(feeGrowthInsideALastX64);
-        this.feeGrowthInsideBLastX64 = jsbi_1.default.BigInt(feeGrowthInsideBLastX64);
-        this.feesA = jsbi_1.default.BigInt(feesA);
-        this.feesB = jsbi_1.default.BigInt(feesB);
+var _fractions = require("./fractions");
+var _internalConstants = require("../internalConstants");
+var _tinyInvariant = _interopRequireDefault(require("tiny-invariant"));
+var _maxLiquidityForAmounts = require("../utils/maxLiquidityForAmounts");
+var _priceTickConversions = require("../utils/priceTickConversions");
+var _sqrtPriceMath = require("../utils/sqrtPriceMath");
+var _tickMath = require("../utils/tickMath");
+var _encodeSqrtRatioX = require("../utils/encodeSqrtRatioX64");
+var _pool = require("./pool");
+var _utils = require("../utils");
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+let Position = exports.Position = /*#__PURE__*/function () {
+  /**
+   * Constructs a position for a given pool with the given liquidity
+   * @param pool For which pool the liquidity is assigned
+   * @param liquidity The amount of liquidity that is in the position
+   * @param lower The lower tick of the position
+   * @param upper The upper tick of the position
+   */
+  function Position(_ref) {
+    let {
+      id,
+      owner,
+      pool,
+      liquidity,
+      tickLower,
+      tickUpper,
+      feeGrowthInsideALastX64 = 0,
+      feeGrowthInsideBLastX64 = 0,
+      feesA = 0,
+      feesB = 0
+    } = _ref;
+    _classCallCheck(this, Position);
+    _defineProperty(this, "id", void 0);
+    _defineProperty(this, "owner", void 0);
+    _defineProperty(this, "pool", void 0);
+    _defineProperty(this, "tickLower", void 0);
+    _defineProperty(this, "tickUpper", void 0);
+    _defineProperty(this, "liquidity", void 0);
+    _defineProperty(this, "feesA", void 0);
+    _defineProperty(this, "feesB", void 0);
+    _defineProperty(this, "feeGrowthInsideALastX64", void 0);
+    _defineProperty(this, "feeGrowthInsideBLastX64", void 0);
+    // cached resuts for the getters
+    _defineProperty(this, "_tokenAAmount", null);
+    _defineProperty(this, "_tokenBAmount", null);
+    _defineProperty(this, "_mintAmounts", null);
+    (0, _tinyInvariant.default)(tickLower < tickUpper, "TICK_ORDER");
+    (0, _tinyInvariant.default)(tickLower >= _tickMath.TickMath.MIN_TICK && tickLower % pool.tickSpacing === 0, "TICK_LOWER");
+    (0, _tinyInvariant.default)(tickUpper <= _tickMath.TickMath.MAX_TICK && tickUpper % pool.tickSpacing === 0, "TICK_UPPER");
+    this.id = id;
+    this.owner = owner;
+    this.pool = pool;
+    this.tickLower = tickLower;
+    this.tickUpper = tickUpper;
+    this.liquidity = BigInt(liquidity);
+    this.feeGrowthInsideALastX64 = BigInt(feeGrowthInsideALastX64);
+    this.feeGrowthInsideBLastX64 = BigInt(feeGrowthInsideBLastX64);
+    this.feesA = BigInt(feesA);
+    this.feesB = BigInt(feesB);
+  }
+  return _createClass(Position, [{
+    key: "inRange",
+    get: function () {
+      return this.tickLower < this.pool.tickCurrent && this.pool.tickCurrent < this.tickUpper;
     }
-    get inRange() {
-        return (this.tickLower < this.pool.tickCurrent &&
-            this.pool.tickCurrent < this.tickUpper);
-    }
+
     /**
      * Returns the price of tokenA at the lower tick
      */
-    get tokenAPriceLower() {
-        return (0, priceTickConversions_1.tickToPrice)(this.pool.tokenA, this.pool.tokenB, this.tickLower);
+  }, {
+    key: "tokenAPriceLower",
+    get: function () {
+      return (0, _priceTickConversions.tickToPrice)(this.pool.tokenA, this.pool.tokenB, this.tickLower);
     }
+
     /**
      * Returns the price of tokenA at the upper tick
      */
-    get tokenAPriceUpper() {
-        return (0, priceTickConversions_1.tickToPrice)(this.pool.tokenA, this.pool.tokenB, this.tickUpper);
+  }, {
+    key: "tokenAPriceUpper",
+    get: function () {
+      return (0, _priceTickConversions.tickToPrice)(this.pool.tokenA, this.pool.tokenB, this.tickUpper);
     }
+
     /**
      * Returns the amount of tokenA that this position's liquidity could be burned for at the current pool price
      */
-    get amountA() {
-        if (this._tokenAAmount === null) {
-            if (this.pool.tickCurrent < this.tickLower) {
-                this._tokenAAmount = fractions_1.CurrencyAmount.fromRawAmount(this.pool.tokenA, sqrtPriceMath_1.SqrtPriceMath.getAmountADelta(tickMath_1.TickMath.getSqrtRatioAtTick(this.tickLower), tickMath_1.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false));
-            }
-            else if (this.pool.tickCurrent < this.tickUpper) {
-                this._tokenAAmount = fractions_1.CurrencyAmount.fromRawAmount(this.pool.tokenA, sqrtPriceMath_1.SqrtPriceMath.getAmountADelta(this.pool.sqrtPriceX64, tickMath_1.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false));
-            }
-            else {
-                this._tokenAAmount = fractions_1.CurrencyAmount.fromRawAmount(this.pool.tokenA, internalConstants_2.ZERO);
-            }
+  }, {
+    key: "amountA",
+    get: function () {
+      if (this._tokenAAmount === null) {
+        if (this.pool.tickCurrent < this.tickLower) {
+          this._tokenAAmount = _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenA, _sqrtPriceMath.SqrtPriceMath.getAmountADelta(_tickMath.TickMath.getSqrtRatioAtTick(this.tickLower), _tickMath.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false));
+        } else if (this.pool.tickCurrent < this.tickUpper) {
+          this._tokenAAmount = _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenA, _sqrtPriceMath.SqrtPriceMath.getAmountADelta(this.pool.sqrtPriceX64, _tickMath.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false));
+        } else {
+          this._tokenAAmount = _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenA, _internalConstants.ZERO);
         }
-        return this._tokenAAmount;
+      }
+      return this._tokenAAmount;
     }
+
     /**
      * Returns the amount of tokenB that this position's liquidity could be burned for at the current pool price
      */
-    get amountB() {
-        if (this._tokenBAmount === null) {
-            if (this.pool.tickCurrent < this.tickLower) {
-                this._tokenBAmount = fractions_1.CurrencyAmount.fromRawAmount(this.pool.tokenB, internalConstants_2.ZERO);
-            }
-            else if (this.pool.tickCurrent < this.tickUpper) {
-                this._tokenBAmount = fractions_1.CurrencyAmount.fromRawAmount(this.pool.tokenB, sqrtPriceMath_1.SqrtPriceMath.getAmountBDelta(tickMath_1.TickMath.getSqrtRatioAtTick(this.tickLower), this.pool.sqrtPriceX64, this.liquidity, false));
-            }
-            else {
-                this._tokenBAmount = fractions_1.CurrencyAmount.fromRawAmount(this.pool.tokenB, sqrtPriceMath_1.SqrtPriceMath.getAmountBDelta(tickMath_1.TickMath.getSqrtRatioAtTick(this.tickLower), tickMath_1.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false));
-            }
+  }, {
+    key: "amountB",
+    get: function () {
+      if (this._tokenBAmount === null) {
+        if (this.pool.tickCurrent < this.tickLower) {
+          this._tokenBAmount = _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenB, _internalConstants.ZERO);
+        } else if (this.pool.tickCurrent < this.tickUpper) {
+          this._tokenBAmount = _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenB, _sqrtPriceMath.SqrtPriceMath.getAmountBDelta(_tickMath.TickMath.getSqrtRatioAtTick(this.tickLower), this.pool.sqrtPriceX64, this.liquidity, false));
+        } else {
+          this._tokenBAmount = _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenB, _sqrtPriceMath.SqrtPriceMath.getAmountBDelta(_tickMath.TickMath.getSqrtRatioAtTick(this.tickLower), _tickMath.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, false));
         }
-        return this._tokenBAmount;
+      }
+      return this._tokenBAmount;
     }
+
     /**
      * Returns the lower and upper sqrt ratios if the price 'slips' up to slippage tolerance percentage
      * @param slippageTolerance The amount by which the price can 'slip' before the transaction will revert
      * @returns The sqrt ratios after slippage
      */
-    ratiosAfterSlippage(slippageTolerance) {
-        const priceLower = this.pool.tokenAPrice.asFraction.multiply(new fractions_1.Percent(1).subtract(slippageTolerance));
-        const priceUpper = this.pool.tokenAPrice.asFraction.multiply(slippageTolerance.add(1));
-        let sqrtPriceX64Lower = (0, encodeSqrtRatioX64_1.encodeSqrtRatioX64)(priceLower.numerator, priceLower.denominator);
-        if (jsbi_1.default.lessThanOrEqual(sqrtPriceX64Lower, tickMath_1.TickMath.MIN_SQRT_RATIO)) {
-            sqrtPriceX64Lower = jsbi_1.default.add(tickMath_1.TickMath.MIN_SQRT_RATIO, jsbi_1.default.BigInt(1));
-        }
-        let sqrtPriceX64Upper = (0, encodeSqrtRatioX64_1.encodeSqrtRatioX64)(priceUpper.numerator, priceUpper.denominator);
-        if (jsbi_1.default.greaterThanOrEqual(sqrtPriceX64Upper, tickMath_1.TickMath.MAX_SQRT_RATIO)) {
-            sqrtPriceX64Upper = jsbi_1.default.subtract(tickMath_1.TickMath.MAX_SQRT_RATIO, jsbi_1.default.BigInt(1));
-        }
-        return {
-            sqrtPriceX64Lower,
-            sqrtPriceX64Upper,
-        };
+  }, {
+    key: "ratiosAfterSlippage",
+    value: function ratiosAfterSlippage(slippageTolerance) {
+      const priceLower = this.pool.tokenAPrice.asFraction.multiply(new _fractions.Percent(1).subtract(slippageTolerance));
+      const priceUpper = this.pool.tokenAPrice.asFraction.multiply(slippageTolerance.add(1));
+      let sqrtPriceX64Lower = (0, _encodeSqrtRatioX.encodeSqrtRatioX64)(priceLower.numerator, priceLower.denominator);
+      if (sqrtPriceX64Lower <= _tickMath.TickMath.MIN_SQRT_RATIO) {
+        sqrtPriceX64Lower = _tickMath.TickMath.MIN_SQRT_RATIO + 1n;
+      }
+      let sqrtPriceX64Upper = (0, _encodeSqrtRatioX.encodeSqrtRatioX64)(priceUpper.numerator, priceUpper.denominator);
+      if (sqrtPriceX64Upper >= _tickMath.TickMath.MAX_SQRT_RATIO) {
+        sqrtPriceX64Upper = _tickMath.TickMath.MAX_SQRT_RATIO - 1n;
+      }
+      return {
+        sqrtPriceX64Lower,
+        sqrtPriceX64Upper
+      };
     }
+
     /**
      * Returns the minimum amounts that must be sent in order to safely mint the amount of liquidity held by the position
      * with the given slippage tolerance
      * @param slippageTolerance Tolerance of unfavorable slippage from the current price
      * @returns The amounts, with slippage
      */
-    mintAmountsWithSlippage(slippageTolerance) {
-        // get lower/upper prices
-        const { sqrtPriceX64Upper, sqrtPriceX64Lower } = this.ratiosAfterSlippage(slippageTolerance);
-        // construct counterfactual pools
-        const poolLower = new pool_1.Pool({
-            id: this.pool.id,
-            tokenA: this.pool.tokenA,
-            tokenB: this.pool.tokenB,
-            fee: this.pool.fee,
-            sqrtPriceX64: sqrtPriceX64Lower,
-            liquidity: 0 /* liquidity doesn't matter */,
-            tickCurrent: tickMath_1.TickMath.getTickAtSqrtRatio(sqrtPriceX64Lower),
-            feeGrowthGlobalAX64: this.feeGrowthInsideALastX64,
-            feeGrowthGlobalBX64: this.feeGrowthInsideBLastX64,
-            ticks: this.pool.tickDataProvider
-        });
-        const poolUpper = new pool_1.Pool({
-            id: this.pool.id,
-            tokenA: this.pool.tokenA,
-            tokenB: this.pool.tokenB,
-            fee: this.pool.fee,
-            sqrtPriceX64: sqrtPriceX64Upper,
-            liquidity: 0 /* liquidity doesn't matter */,
-            tickCurrent: tickMath_1.TickMath.getTickAtSqrtRatio(sqrtPriceX64Upper),
-            feeGrowthGlobalAX64: this.feeGrowthInsideALastX64,
-            feeGrowthGlobalBX64: this.feeGrowthInsideBLastX64,
-            ticks: this.pool.tickDataProvider
-        });
-        // because the router is imprecise, we need to calculate the position that will be created (assuming no slippage)
-        const positionThatWillBeCreated = Position.fromAmounts(Object.assign(Object.assign({ id: this.id, owner: this.owner, pool: this.pool, tickLower: this.tickLower, tickUpper: this.tickUpper }, this.mintAmounts), { useFullPrecision: false, feeGrowthInsideALastX64: this.feeGrowthInsideALastX64, feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64, feesA: this.feesA, feesB: this.feesB }));
-        // we want the smaller amounts...
-        // ...which occurs at the upper price for amountA...
-        const { amountA } = new Position({
-            id: this.id,
-            owner: this.owner,
-            pool: poolUpper,
-            liquidity: positionThatWillBeCreated.liquidity,
-            tickLower: this.tickLower,
-            tickUpper: this.tickUpper,
-            feeGrowthInsideALastX64: this.feeGrowthInsideALastX64,
-            feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64,
-            feesA: this.feesA,
-            feesB: this.feesB,
-        }).mintAmounts;
-        // ...and the lower for amountB
-        const { amountB } = new Position({
-            id: this.id,
-            owner: this.owner,
-            pool: poolLower,
-            liquidity: positionThatWillBeCreated.liquidity,
-            tickLower: this.tickLower,
-            tickUpper: this.tickUpper,
-            feeGrowthInsideALastX64: this.feeGrowthInsideALastX64,
-            feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64,
-            feesA: this.feesA,
-            feesB: this.feesB,
-        }).mintAmounts;
-        return { amountA, amountB };
+  }, {
+    key: "mintAmountsWithSlippage",
+    value: function mintAmountsWithSlippage(slippageTolerance) {
+      // get lower/upper prices
+      const {
+        sqrtPriceX64Upper,
+        sqrtPriceX64Lower
+      } = this.ratiosAfterSlippage(slippageTolerance);
+
+      // construct counterfactual pools
+      const poolLower = new _pool.Pool({
+        id: this.pool.id,
+        active: this.pool.active,
+        tokenA: this.pool.tokenA,
+        tokenB: this.pool.tokenB,
+        fee: this.pool.fee,
+        sqrtPriceX64: sqrtPriceX64Lower,
+        liquidity: 0 /* liquidity doesn't matter */,
+        tickCurrent: _tickMath.TickMath.getTickAtSqrtRatio(sqrtPriceX64Lower),
+        feeGrowthGlobalAX64: this.feeGrowthInsideALastX64,
+        feeGrowthGlobalBX64: this.feeGrowthInsideBLastX64,
+        ticks: this.pool.tickDataProvider
+      });
+      const poolUpper = new _pool.Pool({
+        id: this.pool.id,
+        active: this.pool.active,
+        tokenA: this.pool.tokenA,
+        tokenB: this.pool.tokenB,
+        fee: this.pool.fee,
+        sqrtPriceX64: sqrtPriceX64Upper,
+        liquidity: 0 /* liquidity doesn't matter */,
+        tickCurrent: _tickMath.TickMath.getTickAtSqrtRatio(sqrtPriceX64Upper),
+        feeGrowthGlobalAX64: this.feeGrowthInsideALastX64,
+        feeGrowthGlobalBX64: this.feeGrowthInsideBLastX64,
+        ticks: this.pool.tickDataProvider
+      });
+
+      // because the router is imprecise, we need to calculate the position that will be created (assuming no slippage)
+      const positionThatWillBeCreated = Position.fromAmounts(_objectSpread(_objectSpread({
+        id: this.id,
+        owner: this.owner,
+        pool: this.pool,
+        tickLower: this.tickLower,
+        tickUpper: this.tickUpper
+      }, this.mintAmounts), {}, {
+        // the mint amounts are what will be passed as calldata
+        useFullPrecision: false,
+        feeGrowthInsideALastX64: this.feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64,
+        feesA: this.feesA,
+        feesB: this.feesB
+      }));
+
+      // we want the smaller amounts...
+      // ...which occurs at the upper price for amountA...
+      const {
+        amountA
+      } = new Position({
+        id: this.id,
+        owner: this.owner,
+        pool: poolUpper,
+        liquidity: positionThatWillBeCreated.liquidity,
+        tickLower: this.tickLower,
+        tickUpper: this.tickUpper,
+        feeGrowthInsideALastX64: this.feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64,
+        feesA: this.feesA,
+        feesB: this.feesB
+      }).mintAmounts;
+      // ...and the lower for amountB
+      const {
+        amountB
+      } = new Position({
+        id: this.id,
+        owner: this.owner,
+        pool: poolLower,
+        liquidity: positionThatWillBeCreated.liquidity,
+        tickLower: this.tickLower,
+        tickUpper: this.tickUpper,
+        feeGrowthInsideALastX64: this.feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64,
+        feesA: this.feesA,
+        feesB: this.feesB
+      }).mintAmounts;
+      return {
+        amountA,
+        amountB
+      };
     }
+
     /**
      * Returns the minimum amounts that should be requested in order to safely burn the amount of liquidity held by the
      * position with the given slippage tolerance
      * @param slippageTolerance tolerance of unfavorable slippage from the current price
      * @returns The amounts, with slippage
      */
-    burnAmountsWithSlippage(slippageTolerance) {
-        // get lower/upper prices
-        const { sqrtPriceX64Upper, sqrtPriceX64Lower } = this.ratiosAfterSlippage(slippageTolerance);
-        // construct counterfactual pools
-        const poolLower = new pool_1.Pool({
-            id: this.pool.id,
-            tokenA: this.pool.tokenA,
-            tokenB: this.pool.tokenB,
-            fee: this.pool.fee,
-            sqrtPriceX64: sqrtPriceX64Lower,
-            liquidity: 0 /* liquidity doesn't matter */,
-            tickCurrent: tickMath_1.TickMath.getTickAtSqrtRatio(sqrtPriceX64Lower),
-            feeGrowthGlobalAX64: this.feeGrowthInsideALastX64,
-            feeGrowthGlobalBX64: this.feeGrowthInsideBLastX64,
-            ticks: this.pool.tickDataProvider
-        });
-        const poolUpper = new pool_1.Pool({
-            id: this.pool.id,
-            tokenA: this.pool.tokenA,
-            tokenB: this.pool.tokenB,
-            fee: this.pool.fee,
-            sqrtPriceX64: sqrtPriceX64Upper,
-            liquidity: 0 /* liquidity doesn't matter */,
-            tickCurrent: tickMath_1.TickMath.getTickAtSqrtRatio(sqrtPriceX64Upper),
-            feeGrowthGlobalAX64: this.feeGrowthInsideALastX64,
-            feeGrowthGlobalBX64: this.feeGrowthInsideBLastX64,
-            ticks: this.pool.tickDataProvider
-        });
-        // we want the smaller amounts...
-        // ...which occurs at the upper price for amountA...
-        const amountA = new Position({
-            id: this.id,
-            owner: this.owner,
-            pool: poolUpper,
-            liquidity: this.liquidity,
-            tickLower: this.tickLower,
-            tickUpper: this.tickUpper,
-            feeGrowthInsideALastX64: this.feeGrowthInsideALastX64,
-            feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64,
-            feesA: this.feesA,
-            feesB: this.feesB,
-        }).amountA;
-        // ...and the lower for amountB
-        const amountB = new Position({
-            id: this.id,
-            owner: this.owner,
-            pool: poolLower,
-            liquidity: this.liquidity,
-            tickLower: this.tickLower,
-            tickUpper: this.tickUpper,
-            feeGrowthInsideALastX64: this.feeGrowthInsideALastX64,
-            feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64,
-            feesA: this.feesA,
-            feesB: this.feesB,
-        }).amountB;
-        return { amountA: amountA, amountB: amountB };
+  }, {
+    key: "burnAmountsWithSlippage",
+    value: function burnAmountsWithSlippage(slippageTolerance) {
+      // get lower/upper prices
+      const {
+        sqrtPriceX64Upper,
+        sqrtPriceX64Lower
+      } = this.ratiosAfterSlippage(slippageTolerance);
+
+      // construct counterfactual pools
+      const poolLower = new _pool.Pool({
+        id: this.pool.id,
+        active: this.pool.active,
+        tokenA: this.pool.tokenA,
+        tokenB: this.pool.tokenB,
+        fee: this.pool.fee,
+        sqrtPriceX64: sqrtPriceX64Lower,
+        liquidity: 0 /* liquidity doesn't matter */,
+        tickCurrent: _tickMath.TickMath.getTickAtSqrtRatio(sqrtPriceX64Lower),
+        feeGrowthGlobalAX64: this.feeGrowthInsideALastX64,
+        feeGrowthGlobalBX64: this.feeGrowthInsideBLastX64,
+        ticks: this.pool.tickDataProvider
+      });
+      const poolUpper = new _pool.Pool({
+        id: this.pool.id,
+        active: this.pool.active,
+        tokenA: this.pool.tokenA,
+        tokenB: this.pool.tokenB,
+        fee: this.pool.fee,
+        sqrtPriceX64: sqrtPriceX64Upper,
+        liquidity: 0 /* liquidity doesn't matter */,
+        tickCurrent: _tickMath.TickMath.getTickAtSqrtRatio(sqrtPriceX64Upper),
+        feeGrowthGlobalAX64: this.feeGrowthInsideALastX64,
+        feeGrowthGlobalBX64: this.feeGrowthInsideBLastX64,
+        ticks: this.pool.tickDataProvider
+      });
+
+      // we want the smaller amounts...
+      // ...which occurs at the upper price for amountA...
+      const amountA = new Position({
+        id: this.id,
+        owner: this.owner,
+        pool: poolUpper,
+        liquidity: this.liquidity,
+        tickLower: this.tickLower,
+        tickUpper: this.tickUpper,
+        feeGrowthInsideALastX64: this.feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64,
+        feesA: this.feesA,
+        feesB: this.feesB
+      }).amountA;
+      // ...and the lower for amountB
+      const amountB = new Position({
+        id: this.id,
+        owner: this.owner,
+        pool: poolLower,
+        liquidity: this.liquidity,
+        tickLower: this.tickLower,
+        tickUpper: this.tickUpper,
+        feeGrowthInsideALastX64: this.feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64: this.feeGrowthInsideBLastX64,
+        feesA: this.feesA,
+        feesB: this.feesB
+      }).amountB;
+      return {
+        amountA: amountA,
+        amountB: amountB
+      };
     }
+
     /**
      * Returns the minimum amounts that must be sent in order to mint the amount of liquidity held by the position at
      * the current price for the pool
      */
-    get mintAmounts() {
-        if (this._mintAmounts === null) {
-            if (this.pool.tickCurrent < this.tickLower) {
-                return {
-                    amountA: sqrtPriceMath_1.SqrtPriceMath.getAmountADelta(tickMath_1.TickMath.getSqrtRatioAtTick(this.tickLower), tickMath_1.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, true),
-                    amountB: internalConstants_2.ZERO,
-                };
-            }
-            else if (this.pool.tickCurrent < this.tickUpper) {
-                return {
-                    amountA: sqrtPriceMath_1.SqrtPriceMath.getAmountADelta(this.pool.sqrtPriceX64, tickMath_1.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, true),
-                    amountB: sqrtPriceMath_1.SqrtPriceMath.getAmountBDelta(tickMath_1.TickMath.getSqrtRatioAtTick(this.tickLower), this.pool.sqrtPriceX64, this.liquidity, true),
-                };
-            }
-            else {
-                return {
-                    amountA: internalConstants_2.ZERO,
-                    amountB: sqrtPriceMath_1.SqrtPriceMath.getAmountBDelta(tickMath_1.TickMath.getSqrtRatioAtTick(this.tickLower), tickMath_1.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, true),
-                };
-            }
+  }, {
+    key: "mintAmounts",
+    get: function () {
+      if (this._mintAmounts === null) {
+        if (this.pool.tickCurrent < this.tickLower) {
+          return {
+            amountA: _sqrtPriceMath.SqrtPriceMath.getAmountADelta(_tickMath.TickMath.getSqrtRatioAtTick(this.tickLower), _tickMath.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, true),
+            amountB: _internalConstants.ZERO
+          };
+        } else if (this.pool.tickCurrent < this.tickUpper) {
+          return {
+            amountA: _sqrtPriceMath.SqrtPriceMath.getAmountADelta(this.pool.sqrtPriceX64, _tickMath.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, true),
+            amountB: _sqrtPriceMath.SqrtPriceMath.getAmountBDelta(_tickMath.TickMath.getSqrtRatioAtTick(this.tickLower), this.pool.sqrtPriceX64, this.liquidity, true)
+          };
+        } else {
+          return {
+            amountA: _internalConstants.ZERO,
+            amountB: _sqrtPriceMath.SqrtPriceMath.getAmountBDelta(_tickMath.TickMath.getSqrtRatioAtTick(this.tickLower), _tickMath.TickMath.getSqrtRatioAtTick(this.tickUpper), this.liquidity, true)
+          };
         }
-        return this._mintAmounts;
+      }
+      return this._mintAmounts;
     }
+
     /**
      * Computes the maximum amount of liquidity received for a given amount of tokenA, tokenB,
      * and the prices at the tick boundaries.
@@ -290,22 +369,75 @@ class Position {
      * not what core can theoretically support
      * @returns The amount of liquidity for the position
      */
-    static fromAmounts({ id, owner, pool, tickLower, tickUpper, amountA, amountB, useFullPrecision, feeGrowthInsideALastX64, feeGrowthInsideBLastX64, feesA, feesB }) {
-        const sqrtRatioLX64 = tickMath_1.TickMath.getSqrtRatioAtTick(tickLower);
-        const sqrtRatioUX64 = tickMath_1.TickMath.getSqrtRatioAtTick(tickUpper);
-        return new Position({
-            id,
-            owner,
-            pool,
-            tickLower,
-            tickUpper,
-            liquidity: (0, maxLiquidityForAmounts_1.maxLiquidityForAmounts)(pool.sqrtPriceX64, sqrtRatioLX64, sqrtRatioUX64, amountA, amountB, useFullPrecision),
-            feeGrowthInsideALastX64,
-            feeGrowthInsideBLastX64,
-            feesA,
-            feesB
-        });
+  }, {
+    key: "getFees",
+    value:
+    /**
+     * Computes a position fees
+     * @returns The position
+     */
+    async function getFees() {
+      const {
+        liquidity,
+        tickLower,
+        tickUpper,
+        feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64,
+        pool
+      } = this;
+      if (liquidity === _internalConstants.ZERO && this.feesA === _internalConstants.ZERO && this.feesB === _internalConstants.ZERO) {
+        return {
+          feesA: _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenA, _internalConstants.ZERO),
+          feesB: _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenB, _internalConstants.ZERO)
+        };
+      }
+      const lower = this.pool.tickDataProvider.getTick(tickLower);
+      const upper = this.pool.tickDataProvider.getTick(tickUpper);
+      const {
+        feeGrowthGlobalAX64,
+        feeGrowthGlobalBX64
+      } = pool;
+      const [feeGrowthInsideAX64, feeGrowthInsideBX64] = _utils.TickLibrary.getFeeGrowthInside(lower, upper, tickLower, tickUpper, pool.tickCurrent, feeGrowthGlobalAX64, feeGrowthGlobalBX64);
+      const tokensOwedA = (0, _utils.subIn128)(feeGrowthInsideAX64, feeGrowthInsideALastX64) * liquidity / _internalConstants.Q64;
+      const tokensOwedB = (0, _utils.subIn128)(feeGrowthInsideBX64, feeGrowthInsideBLastX64) * liquidity / _internalConstants.Q64;
+      return {
+        feesA: _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenA, tokensOwedA + this.feesA),
+        feesB: _fractions.CurrencyAmount.fromRawAmount(this.pool.tokenB, tokensOwedB + this.feesB)
+      };
     }
+  }], [{
+    key: "fromAmounts",
+    value: function fromAmounts(_ref2) {
+      let {
+        id,
+        owner,
+        pool,
+        tickLower,
+        tickUpper,
+        amountA,
+        amountB,
+        useFullPrecision,
+        feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64,
+        feesA,
+        feesB
+      } = _ref2;
+      const sqrtRatioLX64 = _tickMath.TickMath.getSqrtRatioAtTick(tickLower);
+      const sqrtRatioUX64 = _tickMath.TickMath.getSqrtRatioAtTick(tickUpper);
+      return new Position({
+        id,
+        owner,
+        pool,
+        tickLower,
+        tickUpper,
+        liquidity: (0, _maxLiquidityForAmounts.maxLiquidityForAmounts)(pool.sqrtPriceX64, sqrtRatioLX64, sqrtRatioUX64, amountA, amountB, useFullPrecision),
+        feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64,
+        feesA,
+        feesB
+      });
+    }
+
     /**
      * Computes a position with the maximum amount of liquidity received for a given amount of tokenA, assuming an unlimited amount of tokenB
      * @param pool The pool for which the position is created
@@ -316,22 +448,38 @@ class Position {
      * not what core can theoretically support
      * @returns The position
      */
-    static fromAmountA({ id, owner, pool, tickLower, tickUpper, amountA, useFullPrecision, feeGrowthInsideALastX64, feeGrowthInsideBLastX64, feesA, feesB }) {
-        return Position.fromAmounts({
-            id,
-            owner,
-            pool,
-            tickLower,
-            tickUpper,
-            amountA,
-            amountB: internalConstants_1.MaxUint64,
-            useFullPrecision,
-            feeGrowthInsideALastX64,
-            feeGrowthInsideBLastX64,
-            feesA,
-            feesB
-        });
+  }, {
+    key: "fromAmountA",
+    value: function fromAmountA(_ref3) {
+      let {
+        id,
+        owner,
+        pool,
+        tickLower,
+        tickUpper,
+        amountA,
+        useFullPrecision,
+        feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64,
+        feesA,
+        feesB
+      } = _ref3;
+      return Position.fromAmounts({
+        id,
+        owner,
+        pool,
+        tickLower,
+        tickUpper,
+        amountA,
+        amountB: _internalConstants.MaxUint64,
+        useFullPrecision,
+        feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64,
+        feesA,
+        feesB
+      });
     }
+
     /**
      * Computes a position with the maximum amount of liquidity received for a given amount of tokenB, assuming an unlimited amount of tokenA
      * @param pool The pool for which the position is created
@@ -340,41 +488,36 @@ class Position {
      * @param amountB The desired amount of tokenB
      * @returns The position
      */
-    static fromAmountB({ id, owner, pool, tickLower, tickUpper, amountB, feeGrowthInsideALastX64, feeGrowthInsideBLastX64, feesA, feesB }) {
-        // this function always uses full precision,
-        return Position.fromAmounts({
-            id,
-            owner,
-            pool,
-            tickLower,
-            tickUpper,
-            amountA: internalConstants_1.MaxUint64,
-            amountB,
-            useFullPrecision: true,
-            feeGrowthInsideALastX64,
-            feeGrowthInsideBLastX64,
-            feesA,
-            feesB
-        });
+  }, {
+    key: "fromAmountB",
+    value: function fromAmountB(_ref4) {
+      let {
+        id,
+        owner,
+        pool,
+        tickLower,
+        tickUpper,
+        amountB,
+        feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64,
+        feesA,
+        feesB
+      } = _ref4;
+      // this function always uses full precision,
+      return Position.fromAmounts({
+        id,
+        owner,
+        pool,
+        tickLower,
+        tickUpper,
+        amountA: _internalConstants.MaxUint64,
+        amountB,
+        useFullPrecision: true,
+        feeGrowthInsideALastX64,
+        feeGrowthInsideBLastX64,
+        feesA,
+        feesB
+      });
     }
-    /**
-     * Computes a position fees
-     * @returns The position
-     */
-    getFees() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { liquidity, tickLower, tickUpper, feeGrowthInsideALastX64, feeGrowthInsideBLastX64, pool } = this;
-            const lower = yield this.pool.tickDataProvider.getTick(tickLower);
-            const upper = yield this.pool.tickDataProvider.getTick(tickUpper);
-            const { feeGrowthGlobalAX64, feeGrowthGlobalBX64 } = pool;
-            const [feeGrowthInsideAX64, feeGrowthInsideBX64] = utils_1.TickLibrary.getFeeGrowthInside(lower, upper, tickLower, tickUpper, pool.tickCurrent, feeGrowthGlobalAX64, feeGrowthGlobalBX64);
-            const tokensOwedA = jsbi_1.default.divide(jsbi_1.default.multiply((0, utils_1.subIn128)(feeGrowthInsideAX64, feeGrowthInsideALastX64), liquidity), internalConstants_1.Q64);
-            const tokensOwedB = jsbi_1.default.divide(jsbi_1.default.multiply((0, utils_1.subIn128)(feeGrowthInsideBX64, feeGrowthInsideBLastX64), liquidity), internalConstants_1.Q64);
-            return {
-                feesA: fractions_1.CurrencyAmount.fromRawAmount(this.pool.tokenA, jsbi_1.default.add(tokensOwedA, this.feesA)),
-                feesB: fractions_1.CurrencyAmount.fromRawAmount(this.pool.tokenB, jsbi_1.default.add(tokensOwedB, this.feesB))
-            };
-        });
-    }
-}
-exports.Position = Position;
+  }]);
+}();
