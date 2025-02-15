@@ -148,7 +148,10 @@ let Pool = exports.Pool = /*#__PURE__*/function () {
       const zeroForOne = inputAmount.currency.equals(this.tokenA);
       const {
         amountA,
-        amountB
+        amountB,
+        sqrtPriceX64,
+        liquidity,
+        tickCurrent
       } = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
       const outputToken = zeroForOne ? this.tokenB : this.tokenA;
       const outputAmount = zeroForOne ? amountB : amountA;
@@ -159,7 +162,19 @@ let Pool = exports.Pool = /*#__PURE__*/function () {
         //if (!JSBI.equal(amountIn, inputAmount.quotient)) {
         throw new _errors.InsufficientInputAmountError();
       }
-      return _fractions.CurrencyAmount.fromRawAmount(outputToken, outputAmount * _internalConstants.NEGATIVE_ONE);
+      return [_fractions.CurrencyAmount.fromRawAmount(outputToken, outputAmount * _internalConstants.NEGATIVE_ONE), new Pool({
+        id: this.id,
+        tokenA: this.tokenA,
+        tokenB: this.tokenB,
+        fee: this.fee,
+        active: this.active,
+        sqrtPriceX64,
+        liquidity,
+        tickCurrent,
+        ticks: this.tickDataProvider,
+        feeGrowthGlobalAX64: this.feeGrowthGlobalAX64,
+        feeGrowthGlobalBX64: this.feeGrowthGlobalBX64
+      })];
     }
   }, {
     key: "getOutputAmountOptimized",

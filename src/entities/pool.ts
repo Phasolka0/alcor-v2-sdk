@@ -185,12 +185,18 @@ export class Pool {
 	public getOutputAmount(
 		inputAmount: CurrencyAmount<Token>,
 		sqrtPriceLimitX64?: JSBI
-	): CurrencyAmount<Token> {
+	): [CurrencyAmount<Token>, Pool] {
 		invariant(this.involvesToken(inputAmount.currency), "TOKEN");
 
 		const zeroForOne = inputAmount.currency.equals(this.tokenA);
 
-		const {amountA, amountB} = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
+		const {
+			amountA,
+			amountB,
+			sqrtPriceX64,
+			liquidity,
+			tickCurrent
+		} = this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX64);
 
 		const outputToken = zeroForOne ? this.tokenB : this.tokenA;
 		const outputAmount = zeroForOne ? amountB : amountA;
@@ -202,10 +208,23 @@ export class Pool {
 			throw new InsufficientInputAmountError
 		}
 
-		return CurrencyAmount.fromRawAmount(
+		return [CurrencyAmount.fromRawAmount(
 			outputToken,
 			JSBI.multiply(outputAmount, NEGATIVE_ONE)
-		)
+		), new Pool({
+			id: this.id,
+			tokenA: this.tokenA,
+			tokenB: this.tokenB,
+			fee: this.fee,
+			active: this.active,
+			sqrtPriceX64,
+			liquidity,
+			tickCurrent,
+			ticks: this.tickDataProvider,
+			feeGrowthGlobalAX64: this.feeGrowthGlobalAX64,
+			feeGrowthGlobalBX64: this.feeGrowthGlobalBX64,
+		})
+		]
 	}
 
 	public getOutputAmountOptimized(
